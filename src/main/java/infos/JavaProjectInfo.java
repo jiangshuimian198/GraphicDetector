@@ -43,6 +43,7 @@ public class JavaProjectInfo {
     public void parseRels(BatchInserter inserter) {
         methodInfoMap.values().forEach(info -> methodBindingMap.put(info.getMethodBinding(), info));
         classInfoMap.values().forEach(classInfo -> {
+        	findJavaPackageInfo(classInfo.getFullName()).forEach(packageInfo -> inserter.createRelationship(packageInfo.getNodeId(), classInfo.getNodeId(), JavaExtractor.CONTAIN, new HashMap<>()));
             findJavaClassInfo(classInfo.getSuperClassType()).forEach(superClassInfo -> inserter.createRelationship(classInfo.getNodeId(), superClassInfo.getNodeId(), JavaExtractor.EXTEND, new HashMap<>()));
             findJavaClassInfo(classInfo.getSuperInterfaceTypes()).forEach(superInterfaceInfo -> inserter.createRelationship(classInfo.getNodeId(), superInterfaceInfo.getNodeId(), JavaExtractor.IMPLEMENT, new HashMap<>()));
         });
@@ -62,9 +63,6 @@ public class JavaProjectInfo {
             findJavaClassInfo(fieldInfo.getBelongTo()).forEach(owner -> inserter.createRelationship(owner.getNodeId(), fieldInfo.getNodeId(), JavaExtractor.HAVE_FIELD, new HashMap<>()));
             findJavaClassInfo(fieldInfo.getFullType()).forEach(type -> inserter.createRelationship(fieldInfo.getNodeId(), type.getNodeId(), JavaExtractor.FIELD_TYPE, new HashMap<>()));
         });
-        /*packageInfoMap.values().forEach(packageInfo ->{
-        	findJavaPackageInfo(packageInfo.getSuperPackage()).forEach(superPackageInfo -> inserter.createRelationship(packageInfo.getNodeId(), superPackageInfo.getNodeId(), JavaExtractor.CONTAIN, new HashMap<>()));
-        });*/
     }
 
     private Set<JavaClassInfo> findJavaClassInfo(String str) {
@@ -85,12 +83,15 @@ public class JavaProjectInfo {
         return r;
     }
 
-    /*private Set<JavaPackageInfo> findJavaPackageInfo(String str) {
+    private Set<JavaPackageInfo> findJavaPackageInfo(String str) {
         Set<JavaPackageInfo> r = new HashSet<>();
-        String[] tokens = str.split("[^\\w\\.]+");
-        for (String token : tokens)
-            if (packageInfoMap.containsKey(token))
-                r.add(packageInfoMap.get(token));
+        String[] tokens = str.split("\\.");
+        String token="";
+        for(int i = 0 ; i < tokens.length-2 ;i++)
+        	token=token+tokens[i]+".";
+        token+=tokens[tokens.length-2];
+        if (packageInfoMap.containsKey(token))
+            r.add(packageInfoMap.get(token));
         return r;
-    }*/
+    }
 }

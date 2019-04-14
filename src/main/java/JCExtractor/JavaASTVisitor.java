@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.dom.*;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -20,6 +21,7 @@ public class JavaASTVisitor extends ASTVisitor {
     private JavaProjectInfo javaProjectInfo;
     private String sourceContent;
     private BatchInserter inserter;
+    private static ArrayList<String> tempMap= new ArrayList<>();;
 
     public JavaASTVisitor(JavaProjectInfo javaProjectInfo, String sourceContent, BatchInserter inserter) {
         this.javaProjectInfo = javaProjectInfo;
@@ -41,10 +43,14 @@ public class JavaASTVisitor extends ASTVisitor {
     public void endVisit(PackageDeclaration node)
     {
     	String name = node.getName().getFullyQualifiedName();
-    	JavaPackageInfo javaPackageInfo = new JavaPackageInfo(inserter,name);
-    	javaProjectInfo.addPackageInfo(javaPackageInfo);
+    	if(!tempMap.contains(name))
+    	{
+    		JavaPackageInfo javaPackageInfo = new JavaPackageInfo(inserter,name);
+    		tempMap.add(name);
+    		javaProjectInfo.addPackageInfo(javaPackageInfo);
+    	}
     }
-
+    
     @Override
     public boolean visit(TypeDeclaration node) {
         JavaClassInfo javaClassInfo = createJavaClassInfo(node);

@@ -13,8 +13,6 @@ public class JavaPackageInfo {
 	
 	@Getter
     private String name;
-	//@Getter
-    //private String superPackage;
 	@Getter
     private long nodeId;
 	
@@ -23,8 +21,6 @@ public class JavaPackageInfo {
 		// TODO Auto-generated constructor stub
 		Preconditions.checkArgument(name != null);
         this.name = name;
-        //Preconditions.checkArgument(superPackage != null);
-        //this.superPackage = superPackage;
         nodeId = createNode(inserter);
 	}
 
