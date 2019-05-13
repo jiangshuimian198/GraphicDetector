@@ -18,6 +18,7 @@ public class JavaProjectInfo {
     private Map<String, JavaMethodInfo> methodInfoMap = new HashMap<>();
     private Map<String, JavaFieldInfo> fieldInfoMap = new HashMap<>();
     private Map<String, JavaPackageInfo> packageInfoMap = new HashMap<>();
+    private Map<String, JavaStatementInfo> statementInfoMap = new HashMap<>();
 
     private Map<IMethodBinding, JavaMethodInfo> methodBindingMap = new HashMap<>();
     
@@ -38,6 +39,11 @@ public class JavaProjectInfo {
     public void addFieldInfo(JavaFieldInfo info) {
         fieldInfoMap.put(info.getFullName(), info);
     }
+    
+    public void addStatementInfo(JavaStatementInfo info)
+    {
+    	statementInfoMap.put(info.getBelongTo(), info);
+    }
 
     //解析依赖
     public void parseRels(BatchInserter inserter) {
@@ -57,12 +63,16 @@ public class JavaProjectInfo {
                 if (methodBindingMap.containsKey(call))
                     inserter.createRelationship(methodInfo.getNodeId(), methodBindingMap.get(call).getNodeId(), JavaExtractor.METHOD_CALL, new HashMap<>());
             });
+            methodInfo.getStatements().forEach(statement -> inserter.createRelationship(methodInfo.getNodeId(), statement, JavaExtractor.HAVE_STATEMENT, new HashMap<>()));
             findJavaFieldInfo(methodInfo.getFieldAccesses()).forEach(access -> inserter.createRelationship(methodInfo.getNodeId(), access.getNodeId(), JavaExtractor.FIELD_ACCESS, new HashMap<>()));
-        });
+    	});
+//        statementInfoMap.values().forEach(statementInfo -> {
+//            inserter.createRelationship(methodInfoMap.get(statementInfo.getBelongTo()).getNodeId(), statementInfo.getNodeId(), JavaExtractor.HAVE_STATEMENT, new HashMap<>());
+//        });
         fieldInfoMap.values().forEach(fieldInfo -> {
             findJavaClassInfo(fieldInfo.getBelongTo()).forEach(owner -> inserter.createRelationship(owner.getNodeId(), fieldInfo.getNodeId(), JavaExtractor.HAVE_FIELD, new HashMap<>()));
             findJavaClassInfo(fieldInfo.getFullType()).forEach(type -> inserter.createRelationship(fieldInfo.getNodeId(), type.getNodeId(), JavaExtractor.FIELD_TYPE, new HashMap<>()));
-        });
+        });  
     }
 
     private Set<JavaClassInfo> findJavaClassInfo(String str) {
@@ -94,4 +104,5 @@ public class JavaProjectInfo {
             r.add(packageInfoMap.get(token));
         return r;
     }
+
 }

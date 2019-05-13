@@ -23,7 +23,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -43,13 +42,11 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.16.20</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -106,17 +103,15 @@
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
             <version>1.23</version>
-        </dependency>
+            </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.25</version>
-        </dependency>
+            </dependency>
 	 <dependency>
   	     <groupId>org.slf4j</groupId>
   	     <artifactId>slf4j-nop</artifactId>
-  	     <version>1.7.2</version>
-  	 </dependency>
+  	     </dependency>
     </dependencies>
 
 </project>

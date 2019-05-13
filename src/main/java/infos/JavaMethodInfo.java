@@ -8,6 +8,7 @@ import main.java.JCExtractor.JavaExtractor;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -55,6 +56,8 @@ public class JavaMethodInfo {
     private String fieldAccesses;
     @Getter
     private String throwTypes;
+    @Getter
+    private ArrayList<Long> statements = new ArrayList<>();
     @Getter
     private long nodeId;
 
@@ -116,5 +119,10 @@ public class JavaMethodInfo {
         map.put(JavaExtractor.COMMENT, comment);
         map.put(JavaExtractor.PARAM_TYPE_STR, params);
         return inserter.createNode(map, JavaExtractor.METHOD);
+    }
+    
+    public void addStatement(long statementId)
+    {
+    	statements.add(statementId);
     }
 }

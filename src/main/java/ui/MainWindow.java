@@ -17,8 +17,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.awt.event.ActionEvent;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
 import java.awt.Font;
 import javax.swing.JProgressBar;
 
@@ -29,8 +27,6 @@ public class MainWindow {
 	private JFrame frmv;
 	private JTextField projectDirectory;
 	private JTextField graphDirectory;
-	private final Action action = new SwingAction();
-
 	/**
 	 * Launch the application.
 	 */
@@ -76,6 +72,7 @@ public class MainWindow {
 		projectDirectory.setBounds(219, 94, 334, 27);
 		frmv.getContentPane().add(projectDirectory);
 		projectDirectory.setColumns(10);
+		projectDirectory.setText("D:\\\\intellide-graph-master");
 		
 		JButton browseProject = new JButton("浏览");
 		browseProject.setFont(new Font("宋体", Font.PLAIN, 22));
@@ -103,6 +100,7 @@ public class MainWindow {
 		graphDirectory.setColumns(10);
 		graphDirectory.setBounds(219, 158, 334, 27);
 		frmv.getContentPane().add(graphDirectory);
+		graphDirectory.setText("D:\\neo4j-community-3.5.1\\data\\databases\\graph.db");
 		
 		JButton browseGraph = new JButton("浏览");
 		browseGraph.setFont(new Font("宋体", Font.PLAIN, 22));
@@ -120,9 +118,23 @@ public class MainWindow {
 		frmv.getContentPane().add(browseGraph);
 		
 		JButton Extraction = new JButton("抽取");
+		Extraction.setFont(new Font("宋体", Font.PLAIN, 22));
+		Extraction.setBounds(219, 238, 154, 29);
+		frmv.getContentPane().add(Extraction);
+		
+		JButton Cancel = new JButton("取消");
+		Cancel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				projectDirectory.setText("");
+				graphDirectory.setText("");
+			}
+		});
+		Cancel.setFont(new Font("宋体", Font.PLAIN, 22));
+		Cancel.setBounds(399, 238, 154, 29);
+		frmv.getContentPane().add(Cancel);
 		Extraction.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				File yamlFile = new File("process.yaml");
+				File yamlFile = new File("config.yaml");
 				String graphDir = "graphDir: "+graphDirectory.getText();
 				String projectDir = "main.java.JCExtractor.JavaExtractor: "+projectDirectory.getText()+"\\src";
 				try {
@@ -143,23 +155,16 @@ public class MainWindow {
 				
 				Thread t = new Thread(progressBar);
 				t.start();
+				Cancel.setEnabled(false);
+				Extraction.setEnabled(false);
 				KnowledgeExtractor.extract(yamlFile);
+				if(progressBar.getValue()==100) {
+					Cancel.setEnabled(true);
+					Extraction.setEnabled(true);
+				}
 			}
 		});
-		Extraction.setFont(new Font("宋体", Font.PLAIN, 22));
-		Extraction.setBounds(219, 238, 154, 29);
-		frmv.getContentPane().add(Extraction);
 		
-		JButton Cancel = new JButton("取消");
-		Cancel.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				projectDirectory.setText("");
-				graphDirectory.setText("");
-			}
-		});
-		Cancel.setFont(new Font("宋体", Font.PLAIN, 22));
-		Cancel.setBounds(399, 238, 154, 29);
-		frmv.getContentPane().add(Cancel);
 		
 		JLabel extractionPhase = new JLabel("代码抽取");
 		extractionPhase.setFont(new Font("黑体", Font.PLAIN, 22));
@@ -167,15 +172,12 @@ public class MainWindow {
 		frmv.getContentPane().add(extractionPhase);
 		
 	}
-	private class SwingAction extends AbstractAction {
-		public SwingAction() {
-			putValue(NAME, "SwingAction");
-			putValue(SHORT_DESCRIPTION, "Some short description");
-		}
-		public void actionPerformed(ActionEvent e) {
-		}
-	}
 	private class ExtractionProgress extends JProgressBar implements Runnable{
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 
 		@Override
 		public void run() {

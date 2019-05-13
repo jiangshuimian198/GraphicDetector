@@ -1,6 +1,5 @@
 package main.java.infos;
 
-
 import com.google.common.base.Preconditions;
 import lombok.Getter;
 import main.java.JCExtractor.JavaExtractor;

@@ -41,12 +41,18 @@ import java.util.*;
 @Slf4j
 public class JavaExtractor extends KnowledgeExtractor {
 
+	//节点类型
     public static final Label CLASS = Label.label("Class");
     public static final Label METHOD = Label.label("Method");
     public static final Label FIELD = Label.label("Field");
     public static final Label PACKAGE = Label.label("Package");
+    public static final Label STATEMENT = Label.label("Statement");
+    public static final Label EXPREESION = Label.label("Expression");
+    
+    //关系类型
     public static final RelationshipType EXTEND = RelationshipType.withName("extend");
     public static final RelationshipType CONTAIN = RelationshipType.withName("contain");
+    public static final RelationshipType HAVE_STATEMENT = RelationshipType.withName("haveStatement");
     public static final RelationshipType IMPLEMENT = RelationshipType.withName("implement");
     public static final RelationshipType HAVE_METHOD = RelationshipType.withName("haveMethod");
     public static final RelationshipType PARAM_TYPE = RelationshipType.withName("paramType");
@@ -57,6 +63,8 @@ public class JavaExtractor extends KnowledgeExtractor {
     public static final RelationshipType HAVE_FIELD = RelationshipType.withName("haveField");
     public static final RelationshipType FIELD_TYPE = RelationshipType.withName("fieldType");
     public static final RelationshipType FIELD_ACCESS = RelationshipType.withName("fieldAccess");
+    
+    //属性类型
     public static final String NAME = "name";
     public static final String FULLNAME = "fullName";
     public static final String IS_INTERFACE = "isInterface";
@@ -71,6 +79,9 @@ public class JavaExtractor extends KnowledgeExtractor {
     public static final String IS_CONSTRUCTOR = "isConstructor";
     public static final String IS_STATIC = "isStatic";
     public static final String IS_SYNCHRONIZED = "isSynchronized";
+    public static final String STATEMENT_TYPE = "statementType";
+    public static final String BELONG_TO = "belongTo";
+    public static final String STATEMENT_NO = "statementNo";
 
     @Override
     public boolean isBatchInsert() {
@@ -118,11 +129,13 @@ public class JavaExtractor extends KnowledgeExtractor {
                     log.debug("AST parsing: " + sourceFilePath);
                     //连接语法树结点(java源文件）对应的ASTVisitor
                     javaUnit.accept(new JavaASTVisitor(javaProjectInfo, FileUtils.readFileToString(new File(sourceFilePath), "utf-8"), inserter));
+                    javaUnit.accept(new JavaStatementVisitor(javaProjectInfo, FileUtils.readFileToString(new File(sourceFilePath), "utf-8"), inserter));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         }, null);
+       
         //解析依赖并创立数据库结点和关系
         javaProjectInfo.parseRels(this.getInserter());
     }
