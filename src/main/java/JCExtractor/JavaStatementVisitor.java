@@ -44,9 +44,11 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 
+import main.java.JCExtractor.NameResolver;
 import main.java.infos.JavaMethodInfo;
 import main.java.infos.JavaProjectInfo;
-import main.java.infos.JavaStatementInfo;
+import main.java.infos.statementinofs.IfStatementInfo;
+import main.java.infos.statementinofs.JavaStatementInfo;
 
 public class JavaStatementVisitor extends ASTVisitor{
 	
@@ -139,14 +141,57 @@ public class JavaStatementVisitor extends ASTVisitor{
 		if(statements!=null) {
 			for(int i =0;i<statements.size();i++)
 			{
-				int type = statements.get(i).getNodeType();
 				String methodName = name;
-				infos.add(new JavaStatementInfo(inserter, type, methodName, i));
+				infos.add(createJavaStatementInfo(inserter, methodName, i, statements.get(i)));
 			}
 			return infos;
 		}
 		else
 			return null;
+	}
+	
+	private JavaStatementInfo createJavaStatementInfo(BatchInserter inserter, String methodName, int statementNo, Statement statement)
+	{
+		if(statement.getNodeType()== ASTNode.IF_STATEMENT)
+			return new IfStatementInfo(inserter, methodName, statementNo, statement);
+		else if(statement.getNodeType() == ASTNode.BLOCK)
+			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
+        else if(statement.getNodeType() == ASTNode.ASSERT_STATEMENT)
+			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
+        else if(statement.getNodeType() == ASTNode.DO_STATEMENT)
+			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
+        else if(statement.getNodeType() == ASTNode.ENHANCED_FOR_STATEMENT)
+			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
+        else if(statement.getNodeType() == ASTNode.EXPRESSION_STATEMENT)
+			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
+        else if(statement.getNodeType() == ASTNode.FOR_STATEMENT)
+			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
+        else if(statement.getNodeType() == ASTNode.RETURN_STATEMENT)
+			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
+        else if(statement.getNodeType() == ASTNode.SWITCH_STATEMENT)
+			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
+        else if(statement.getNodeType() == ASTNode.THROW_STATEMENT)
+			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
+        else if(statement.getNodeType() == ASTNode.TRY_STATEMENT)
+			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
+        else if(statement.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT)
+			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
+        else if(statement.getNodeType() == ASTNode.WHILE_STATEMENT)
+			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
+        else if(statement.getNodeType() == ASTNode.SUPER_CONSTRUCTOR_INVOCATION)
+			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
+        else if(statement.getNodeType() == ASTNode.CONSTRUCTOR_INVOCATION)
+			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
+        else if(statement.getNodeType() == ASTNode.SYNCHRONIZED_STATEMENT)
+			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
+        else if(statement.getNodeType() == ASTNode.LABELED_STATEMENT)
+			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
+        else if(statement.getNodeType() == ASTNode.EXPRESSION_METHOD_REFERENCE)
+			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
+        else if(statement.getNodeType() == ASTNode.EMPTY_STATEMENT)
+			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
+        else
+        	return null;
 	}
 	
 	@SuppressWarnings("unchecked")

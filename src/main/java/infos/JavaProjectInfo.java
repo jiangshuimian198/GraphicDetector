@@ -1,15 +1,16 @@
 package main.java.infos;
 
 
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.neo4j.unsafe.batchinsert.BatchInserter;
-
-import main.java.JCExtractor.JavaExtractor;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.neo4j.unsafe.batchinsert.BatchInserter;
+
+import main.java.JCExtractor.JavaExtractor;
+import main.java.infos.statementinofs.JavaStatementInfo;
 
 
 public class JavaProjectInfo {
@@ -66,9 +67,6 @@ public class JavaProjectInfo {
             methodInfo.getStatements().forEach(statement -> inserter.createRelationship(methodInfo.getNodeId(), statement, JavaExtractor.HAVE_STATEMENT, new HashMap<>()));
             findJavaFieldInfo(methodInfo.getFieldAccesses()).forEach(access -> inserter.createRelationship(methodInfo.getNodeId(), access.getNodeId(), JavaExtractor.FIELD_ACCESS, new HashMap<>()));
     	});
-//        statementInfoMap.values().forEach(statementInfo -> {
-//            inserter.createRelationship(methodInfoMap.get(statementInfo.getBelongTo()).getNodeId(), statementInfo.getNodeId(), JavaExtractor.HAVE_STATEMENT, new HashMap<>());
-//        });
         fieldInfoMap.values().forEach(fieldInfo -> {
             findJavaClassInfo(fieldInfo.getBelongTo()).forEach(owner -> inserter.createRelationship(owner.getNodeId(), fieldInfo.getNodeId(), JavaExtractor.HAVE_FIELD, new HashMap<>()));
             findJavaClassInfo(fieldInfo.getFullType()).forEach(type -> inserter.createRelationship(fieldInfo.getNodeId(), type.getNodeId(), JavaExtractor.FIELD_TYPE, new HashMap<>()));

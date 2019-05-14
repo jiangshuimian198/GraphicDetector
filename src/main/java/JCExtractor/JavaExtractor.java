@@ -63,6 +63,8 @@ public class JavaExtractor extends KnowledgeExtractor {
     public static final RelationshipType HAVE_FIELD = RelationshipType.withName("haveField");
     public static final RelationshipType FIELD_TYPE = RelationshipType.withName("fieldType");
     public static final RelationshipType FIELD_ACCESS = RelationshipType.withName("fieldAccess");
+    public static final RelationshipType ELSE = RelationshipType.withName("else");
+    public static final RelationshipType ENTER_CONDITION = RelationshipType.withName("enterCondition");
     
     //属性类型
     public static final String NAME = "name";
@@ -82,6 +84,8 @@ public class JavaExtractor extends KnowledgeExtractor {
     public static final String STATEMENT_TYPE = "statementType";
     public static final String BELONG_TO = "belongTo";
     public static final String STATEMENT_NO = "statementNo";
+    public static final String IF_CONDITION_NO = "ifConditionNo";
+    public static final String EXPRESSION_TYPE = "expressionType";
 
     @Override
     public boolean isBatchInsert() {
