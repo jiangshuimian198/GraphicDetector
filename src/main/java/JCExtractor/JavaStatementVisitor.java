@@ -47,8 +47,10 @@ import org.neo4j.unsafe.batchinsert.BatchInserter;
 import main.java.JCExtractor.NameResolver;
 import main.java.infos.JavaMethodInfo;
 import main.java.infos.JavaProjectInfo;
+import main.java.infos.statementinofs.BlockStatementInfo;
 import main.java.infos.statementinofs.IfStatementInfo;
 import main.java.infos.statementinofs.JavaStatementInfo;
+import main.java.infos.statementinofs.WhileStatementInfo;
 
 public class JavaStatementVisitor extends ASTVisitor{
 	
@@ -155,7 +157,9 @@ public class JavaStatementVisitor extends ASTVisitor{
 		if(statement.getNodeType()== ASTNode.IF_STATEMENT)
 			return new IfStatementInfo(inserter, methodName, statementNo, statement);
 		else if(statement.getNodeType() == ASTNode.BLOCK)
-			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
+			return new BlockStatementInfo(inserter, methodName, statementNo, statement);
+		else if(statement.getNodeType() == ASTNode.WHILE_STATEMENT)
+			return new WhileStatementInfo(inserter, methodName, statementNo, statement);
         else if(statement.getNodeType() == ASTNode.ASSERT_STATEMENT)
 			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
         else if(statement.getNodeType() == ASTNode.DO_STATEMENT)
@@ -175,8 +179,6 @@ public class JavaStatementVisitor extends ASTVisitor{
         else if(statement.getNodeType() == ASTNode.TRY_STATEMENT)
 			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
         else if(statement.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT)
-			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
-        else if(statement.getNodeType() == ASTNode.WHILE_STATEMENT)
 			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
         else if(statement.getNodeType() == ASTNode.SUPER_CONSTRUCTOR_INVOCATION)
 			return new JavaStatementInfo(inserter, methodName, statementNo, statement);

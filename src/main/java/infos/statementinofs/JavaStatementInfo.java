@@ -22,20 +22,18 @@ public class JavaStatementInfo {
     private long nodeId;
 	
 	private HashMap<String, Object> map;
-	
-	public JavaStatementInfo() {}
-	
+		
 	public JavaStatementInfo(BatchInserter inserter, String belongTo, int statementNo, Statement statement)
 	{
 		Preconditions.checkArgument(belongTo != null);
         this.belongTo = belongTo;
         this.statementNo = statementNo;
-        if(statement.getNodeType() == ASTNode.BLOCK)
-        {
-        	this.statementType = "Block";
-        	nodeId = createNode(inserter);
-        }
-        else if(statement.getNodeType() == ASTNode.ASSERT_STATEMENT)
+        createStatementNode(inserter, statement);
+	}
+	
+	protected void createStatementNode(BatchInserter inserter, Statement statement)
+	{
+		if(statement.getNodeType() == ASTNode.ASSERT_STATEMENT)
         {
         	this.statementType = "AssertStatement";
         	nodeId = createNode(inserter);
@@ -83,11 +81,6 @@ public class JavaStatementInfo {
         else if(statement.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT)
         {
         	this.statementType = "VariableDeclarationStatement";
-        	nodeId = createNode(inserter);
-        }
-        else if(statement.getNodeType() == ASTNode.WHILE_STATEMENT)
-        {
-        	this.statementType = "WhileStatement";
         	nodeId = createNode(inserter);
         }
         else if(statement.getNodeType() == ASTNode.SUPER_CONSTRUCTOR_INVOCATION)

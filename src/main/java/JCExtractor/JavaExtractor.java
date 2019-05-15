@@ -53,6 +53,7 @@ public class JavaExtractor extends KnowledgeExtractor {
     public static final RelationshipType EXTEND = RelationshipType.withName("extend");
     public static final RelationshipType CONTAIN = RelationshipType.withName("contain");
     public static final RelationshipType HAVE_STATEMENT = RelationshipType.withName("haveStatement");
+    public static final RelationshipType STATEMENT_BODY = RelationshipType.withName("statementBody");
     public static final RelationshipType IMPLEMENT = RelationshipType.withName("implement");
     public static final RelationshipType HAVE_METHOD = RelationshipType.withName("haveMethod");
     public static final RelationshipType PARAM_TYPE = RelationshipType.withName("paramType");
@@ -65,6 +66,8 @@ public class JavaExtractor extends KnowledgeExtractor {
     public static final RelationshipType FIELD_ACCESS = RelationshipType.withName("fieldAccess");
     public static final RelationshipType ELSE = RelationshipType.withName("else");
     public static final RelationshipType ENTER_CONDITION = RelationshipType.withName("enterCondition");
+    public static final RelationshipType LOOP_CONDITION = RelationshipType.withName("loopCondition");
+    public static final RelationshipType THEN = RelationshipType.withName("then");
     
     //属性类型
     public static final String NAME = "name";
@@ -86,6 +89,7 @@ public class JavaExtractor extends KnowledgeExtractor {
     public static final String STATEMENT_NO = "statementNo";
     public static final String IF_CONDITION_NO = "ifConditionNo";
     public static final String EXPRESSION_TYPE = "expressionType";
+    public static final String IS_BLOCK_ELSE = "isBlockElse";
 
     @Override
     public boolean isBatchInsert() {

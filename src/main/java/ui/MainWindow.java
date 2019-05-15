@@ -18,7 +18,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.awt.event.ActionEvent;
 import java.awt.Font;
-import javax.swing.JProgressBar;
 
 
 
@@ -134,6 +133,9 @@ public class MainWindow {
 		frmv.getContentPane().add(Cancel);
 		Extraction.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				Cancel.setEnabled(false);
+				Extraction.setEnabled(false);
+				
 				File yamlFile = new File("config.yaml");
 				String graphDir = "graphDir: "+graphDirectory.getText();
 				String projectDir = "main.java.JCExtractor.JavaExtractor: "+projectDirectory.getText()+"\\src";
@@ -148,19 +150,25 @@ public class MainWindow {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				ExtractionProgress progressBar = new ExtractionProgress();
-				progressBar.setBounds(0, 306, 732, 21);
-				progressBar.setStringPainted(true);
-				frmv.getContentPane().add(progressBar);
-				
-				Thread t = new Thread(progressBar);
-				t.start();
-				Cancel.setEnabled(false);
-				Extraction.setEnabled(false);
-				KnowledgeExtractor.extract(yamlFile);
-				if(progressBar.getValue()==100) {
+				try {
+					Process process = Runtime.getRuntime().exec("cmd.exe /c neo4j stop");
+					process.waitFor();
+				} catch (IOException | InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				boolean extractionCompleted = KnowledgeExtractor.extract(yamlFile);
+				if(extractionCompleted) {
+					JOptionPane.showMessageDialog(Extraction, "抽取完成！");
 					Cancel.setEnabled(true);
 					Extraction.setEnabled(true);
+					try {
+						Process process = Runtime.getRuntime().exec("cmd.exe /c neo4j start");
+						process.waitFor();
+					} catch (IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				}
 			}
 		});
@@ -170,28 +178,6 @@ public class MainWindow {
 		extractionPhase.setFont(new Font("黑体", Font.PLAIN, 22));
 		extractionPhase.setBounds(30, 36, 154, 21);
 		frmv.getContentPane().add(extractionPhase);
-		
-	}
-	private class ExtractionProgress extends JProgressBar implements Runnable{
-
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public void run() {
-			// TODO Auto-generated method stub
-			for (int i = 0; i <= 100; i++) {
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				this.setValue(i);
-			}
-			JOptionPane.showMessageDialog(this, "抽取完成！");
-		}
 		
 	}
 }

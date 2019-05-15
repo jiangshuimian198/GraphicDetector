@@ -18,6 +18,7 @@ public class IfStatementInfo extends JavaStatementInfo{
 	@Getter
 	private int conditionNo;
 	private HashMap<String, Object> map;
+	private boolean isBlockElse = false;
 
 	private static int conditionNumber = 0;
 	
@@ -31,6 +32,8 @@ public class IfStatementInfo extends JavaStatementInfo{
 		if(statement.getNodeType()==ASTNode.IF_STATEMENT)
 		{
 			IfStatement ifStatement = (IfStatement)statement;
+			Statement thenStatement = ifStatement.getThenStatement();
+			Statement elseStatement = ifStatement.getElseStatement();
 			Expression conditionalExpression = ifStatement.getExpression();
 			nodeId = createNode(inserter);
 			long conditionalExpressionId = createExpressionInfo(inserter, conditionalExpression);
@@ -39,17 +42,32 @@ public class IfStatementInfo extends JavaStatementInfo{
 				inserter.createRelationship(nodeId, conditionalExpressionId, JavaExtractor.ENTER_CONDITION, new HashMap<>());
 			}
 			else;
-			long elseId = createElseStatement(inserter, belongTo, statementNo, ifStatement.getElseStatement());
+			long elseId = createElseStatement(inserter, belongTo, statementNo, elseStatement);
 			if(elseId!=-1)
 			{
 				inserter.createRelationship(nodeId, elseId, JavaExtractor.ELSE, new HashMap<>());
 			}
 			else;
+			long thenId = createThenStatement(inserter, belongTo, statementNo, thenStatement);
+			if(thenId!=-1)
+			{
+				inserter.createRelationship(nodeId, thenId, JavaExtractor.THEN, new HashMap<>());
+			}
+			else;
 		}
 		else
+		{
+			isBlockElse = true;
 			nodeId = createNode(inserter);
+		}
 	}
 	
+	private long createThenStatement(BatchInserter inserter, String belongTo, int statementNo,
+			Statement thenStatement) {
+		// TODO Auto-generated method stub
+		return JavaStatement.createJavaStatementNode(inserter, belongTo, statementNo, thenStatement);
+	}
+
 	private long createExpressionInfo(BatchInserter inserter, Expression conditionExpression) {
 		// TODO Auto-generated method stub
 		if(conditionExpression!=null)
@@ -76,15 +94,10 @@ public class IfStatementInfo extends JavaStatementInfo{
 	}
 	
 	private long createNode(BatchInserter inserter) {
-		addProperties();
-        long id = inserter.createNode(map, JavaExtractor.STATEMENT);
-        return id;
-    }
-	
-	private void addProperties()
-	{
 		super.addProperties(map);
 		map.put(JavaExtractor.IF_CONDITION_NO,conditionNo);
-	}
+		map.put(JavaExtractor.IS_BLOCK_ELSE,isBlockElse);
+        return inserter.createNode(map, JavaExtractor.STATEMENT);
+    }
 
 }

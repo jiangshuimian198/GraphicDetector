@@ -76,13 +76,15 @@ public abstract class KnowledgeExtractor {
             e.printStackTrace();
         }
     }*/
-    public static void extract(File yamlFile)
+    public static boolean extract(File yamlFile)
     {
     	try {
             KnowledgeExtractor.executeFromYaml(FileUtils.readFileToString(yamlFile, "utf-8"));
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
         }
+		return false;
     }
 
     public boolean isBatchInsert() {
