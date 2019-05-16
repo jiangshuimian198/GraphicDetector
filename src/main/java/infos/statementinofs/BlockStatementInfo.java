@@ -17,7 +17,8 @@ public class BlockStatementInfo extends JavaStatementInfo{
 	
 	public BlockStatementInfo(BatchInserter inserter, String belongTo, int statementNo, Statement statement)
 	{
-		super(inserter, belongTo, statementNo, statement);
+		super.belongTo=belongTo;
+		super.statementNo=statementNo;
 		super.setStatementType("Block");
 		map = new HashMap<String, Object>();
 		nodeId = createNode(inserter);
@@ -27,15 +28,11 @@ public class BlockStatementInfo extends JavaStatementInfo{
 		List<Statement> statements = block.statements();
 		for(int i = 0; i<statements.size();i++)
 		{
-			long id = createBlockStatement(inserter, belongTo, i, statements.get(i));
-			inserter.createRelationship(nodeId, id, JavaExtractor.STATEMENT_BODY, new HashMap<>());
+			long id = JavaStatementInfo.createJavaStatementInfo(inserter, belongTo, i, statements.get(i));
+			if(id!=-1)
+				inserter.createRelationship(nodeId, id, JavaExtractor.STATEMENT_BODY, new HashMap<>());
+			else;
 		}
-	}
-	
-	private long createBlockStatement(BatchInserter inserter, String belongTo, int statementNo,
-			Statement blockStatement) {
-		// TODO Auto-generated method stub
-		return JavaStatement.createJavaStatementNode(inserter, belongTo, statementNo, blockStatement);
 	}
 	
 	private long createNode(BatchInserter inserter) {

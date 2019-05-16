@@ -10,8 +10,6 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 
 import main.java.JCExtractor.JavaExtractor;
-import main.java.infos.statementinofs.JavaStatementInfo;
-
 
 public class JavaProjectInfo {
 
@@ -19,7 +17,6 @@ public class JavaProjectInfo {
     private Map<String, JavaMethodInfo> methodInfoMap = new HashMap<>();
     private Map<String, JavaFieldInfo> fieldInfoMap = new HashMap<>();
     private Map<String, JavaPackageInfo> packageInfoMap = new HashMap<>();
-    private Map<String, JavaStatementInfo> statementInfoMap = new HashMap<>();
 
     private Map<IMethodBinding, JavaMethodInfo> methodBindingMap = new HashMap<>();
     
@@ -39,11 +36,6 @@ public class JavaProjectInfo {
 
     public void addFieldInfo(JavaFieldInfo info) {
         fieldInfoMap.put(info.getFullName(), info);
-    }
-    
-    public void addStatementInfo(JavaStatementInfo info)
-    {
-    	statementInfoMap.put(info.getBelongTo(), info);
     }
 
     //解析依赖

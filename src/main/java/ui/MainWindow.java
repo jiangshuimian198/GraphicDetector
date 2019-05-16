@@ -57,7 +57,7 @@ public class MainWindow {
 		frmv.setResizable(false);
 		frmv.setTitle("缺陷检测-v1.0");
 		frmv.setBounds(100, 100, 738, 367);
-		frmv.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frmv.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frmv.getContentPane().setLayout(null);
 		
 		JLabel project = new JLabel("请选择项目目录：");
@@ -133,6 +133,8 @@ public class MainWindow {
 		frmv.getContentPane().add(Cancel);
 		Extraction.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				frmv.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+				frmv.setTitle("正在提取，请稍候......");
 				Cancel.setEnabled(false);
 				Extraction.setEnabled(false);
 				
@@ -160,6 +162,8 @@ public class MainWindow {
 				boolean extractionCompleted = KnowledgeExtractor.extract(yamlFile);
 				if(extractionCompleted) {
 					JOptionPane.showMessageDialog(Extraction, "抽取完成！");
+					frmv.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+					frmv.setTitle("缺陷检测-v1.0");
 					Cancel.setEnabled(true);
 					Extraction.setEnabled(true);
 					try {

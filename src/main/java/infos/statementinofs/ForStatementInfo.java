@@ -3,43 +3,46 @@ package main.java.infos.statementinofs;
 import java.util.HashMap;
 
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.WhileStatement;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 
 import lombok.Getter;
 import main.java.JCExtractor.JavaExtractor;
 import main.java.infos.JavaExpressionInfo;
 
-public class WhileStatementInfo extends JavaStatementInfo{
+public class ForStatementInfo extends JavaStatementInfo{
 	@Getter
 	private long nodeId;
 	private HashMap<String, Object> map;
 
-	public WhileStatementInfo(BatchInserter inserter, String belongTo, int statementNo, Statement statement) {
+	public ForStatementInfo(BatchInserter inserter, String belongTo, int statementNo, Statement statement) {
 		super.belongTo=belongTo;
 		super.statementNo=statementNo;
-		super.setStatementType("WhileStatement");
+		super.setStatementType("ForStatement");
 		map = new HashMap<String, Object>();
-		WhileStatement whileStatement = (WhileStatement)statement;
 		nodeId = createNode(inserter);
-		Expression loopCondition = whileStatement.getExpression();
-		Statement whileBody = whileStatement.getBody();
-		long loopConditionId = JavaExpressionInfo.createJavaExpressionInfo(inserter, loopCondition);
-		if(loopConditionId!=-1)
+		
+		ForStatement forStatement = (ForStatement)statement;
+		Expression loopCondition = forStatement.getExpression();
+		Statement forBody = forStatement.getBody();
+		long loopId = JavaExpressionInfo.createJavaExpressionInfo(inserter, loopCondition);
+		if(loopId!=-1)
 		{
-			inserter.createRelationship(nodeId, loopConditionId, JavaExtractor.LOOP_CONDITION, new HashMap<>());
+			inserter.createRelationship(nodeId, loopId, JavaExtractor.LOOP_CONDITION, new HashMap<>());
 		}
-		long bodyId = JavaStatementInfo.createJavaStatementInfo(inserter, belongTo, statementNo, whileBody);
+		else;
+		long bodyId = JavaStatementInfo.createJavaStatementInfo(inserter, belongTo, statementNo, forBody);
 		if(bodyId!=-1)
 		{
 			inserter.createRelationship(nodeId, bodyId, JavaExtractor.STATEMENT_BODY, new HashMap<>());
 		}
+		else;
 	}
 	
 	private long createNode(BatchInserter inserter) {
 		super.addProperties(map);
         return inserter.createNode(map, JavaExtractor.STATEMENT);
     }
-	
+
 }

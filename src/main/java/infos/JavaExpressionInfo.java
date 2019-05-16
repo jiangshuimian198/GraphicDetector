@@ -20,6 +20,12 @@ public class JavaExpressionInfo {
 	public JavaExpressionInfo(BatchInserter inserter, Expression expression)
 	{
 		map = new HashMap<String, Object>();
+		createJavaExpressionNode(expression);
+		nodeId = createNode(inserter);
+	}
+	
+	private void createJavaExpressionNode(Expression expression)
+	{
 		if(expression.getNodeType()==ASTNode.ANNOTATION_TYPE_DECLARATION)
 			expressionType = "ANNOTATION_TYPE_DECLARATION";
 		else if(expression.getNodeType()==ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION)
@@ -93,9 +99,17 @@ public class JavaExpressionInfo {
 			expressionType = ""+expression.getNodeType();
 			System.out.println(expressionType);
 		}
-		nodeId = createNode(inserter);
 	}
-
+	
+	public static long createJavaExpressionInfo(BatchInserter inserter, Expression expression)
+	{
+		if(expression!=null) {
+			JavaExpressionInfo info = new JavaExpressionInfo(inserter, expression);
+			return info.getNodeId();
+		}
+		else
+			return -1;
+	}
 
 	private long createNode(BatchInserter inserter) {
 		// TODO Auto-generated method stub

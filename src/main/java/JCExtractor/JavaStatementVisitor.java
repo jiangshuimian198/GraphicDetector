@@ -47,10 +47,7 @@ import org.neo4j.unsafe.batchinsert.BatchInserter;
 import main.java.JCExtractor.NameResolver;
 import main.java.infos.JavaMethodInfo;
 import main.java.infos.JavaProjectInfo;
-import main.java.infos.statementinofs.BlockStatementInfo;
-import main.java.infos.statementinofs.IfStatementInfo;
 import main.java.infos.statementinofs.JavaStatementInfo;
-import main.java.infos.statementinofs.WhileStatementInfo;
 
 public class JavaStatementVisitor extends ASTVisitor{
 	
@@ -82,12 +79,11 @@ public class JavaStatementVisitor extends ASTVisitor{
         for (MethodDeclaration methodDeclaration : methodDeclarations) {
             JavaMethodInfo javaMethodInfo = createJavaMethodInfo(methodDeclaration, NameResolver.getFullName(node));
             if (javaMethodInfo != null) {
-		        List<JavaStatementInfo> infos = createJavaStatementInfos(methodDeclaration,javaMethodInfo.getFullName());
+		        List<Long> infos = createJavaStatementInfos(methodDeclaration,javaMethodInfo.getFullName());
 		    	if(infos!=null) {
-		            for(JavaStatementInfo info : infos)
+		            for(Long info : infos)
 		        	{
-		            	javaMethodInfo.addStatement(info.getNodeId());
-		        		javaProjectInfo.addStatementInfo(info);
+		            	javaMethodInfo.addStatement(info);
 		        	}
 		    	}
             }
@@ -133,67 +129,23 @@ public class JavaStatementVisitor extends ASTVisitor{
         return info;
     }
 	
-	private List<JavaStatementInfo> createJavaStatementInfos(MethodDeclaration methodDeclaration, String name) {
+	private List<Long> createJavaStatementInfos(MethodDeclaration methodDeclaration, String name) {
 		// TODO Auto-generated method stub
 		if(methodDeclaration.getBody()==null)
 			return null;
 		@SuppressWarnings("unchecked")
 		List<Statement> statements = methodDeclaration.getBody().statements();
-		List<JavaStatementInfo> infos = new ArrayList<>();
+		List<Long> infos = new ArrayList<>();
 		if(statements!=null) {
 			for(int i =0;i<statements.size();i++)
 			{
 				String methodName = name;
-				infos.add(createJavaStatementInfo(inserter, methodName, i, statements.get(i)));
+				infos.add(JavaStatementInfo.createJavaStatementInfo(inserter, methodName, i, statements.get(i)));
 			}
 			return infos;
 		}
 		else
 			return null;
-	}
-	
-	private JavaStatementInfo createJavaStatementInfo(BatchInserter inserter, String methodName, int statementNo, Statement statement)
-	{
-		if(statement.getNodeType()== ASTNode.IF_STATEMENT)
-			return new IfStatementInfo(inserter, methodName, statementNo, statement);
-		else if(statement.getNodeType() == ASTNode.BLOCK)
-			return new BlockStatementInfo(inserter, methodName, statementNo, statement);
-		else if(statement.getNodeType() == ASTNode.WHILE_STATEMENT)
-			return new WhileStatementInfo(inserter, methodName, statementNo, statement);
-        else if(statement.getNodeType() == ASTNode.ASSERT_STATEMENT)
-			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
-        else if(statement.getNodeType() == ASTNode.DO_STATEMENT)
-			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
-        else if(statement.getNodeType() == ASTNode.ENHANCED_FOR_STATEMENT)
-			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
-        else if(statement.getNodeType() == ASTNode.EXPRESSION_STATEMENT)
-			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
-        else if(statement.getNodeType() == ASTNode.FOR_STATEMENT)
-			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
-        else if(statement.getNodeType() == ASTNode.RETURN_STATEMENT)
-			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
-        else if(statement.getNodeType() == ASTNode.SWITCH_STATEMENT)
-			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
-        else if(statement.getNodeType() == ASTNode.THROW_STATEMENT)
-			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
-        else if(statement.getNodeType() == ASTNode.TRY_STATEMENT)
-			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
-        else if(statement.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT)
-			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
-        else if(statement.getNodeType() == ASTNode.SUPER_CONSTRUCTOR_INVOCATION)
-			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
-        else if(statement.getNodeType() == ASTNode.CONSTRUCTOR_INVOCATION)
-			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
-        else if(statement.getNodeType() == ASTNode.SYNCHRONIZED_STATEMENT)
-			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
-        else if(statement.getNodeType() == ASTNode.LABELED_STATEMENT)
-			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
-        else if(statement.getNodeType() == ASTNode.EXPRESSION_METHOD_REFERENCE)
-			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
-        else if(statement.getNodeType() == ASTNode.EMPTY_STATEMENT)
-			return new JavaStatementInfo(inserter, methodName, statementNo, statement);
-        else
-        	return null;
 	}
 	
 	@SuppressWarnings("unchecked")

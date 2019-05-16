@@ -23,9 +23,8 @@ public class IfStatementInfo extends JavaStatementInfo{
 	private static int conditionNumber = 0;
 	
 	public IfStatementInfo(BatchInserter inserter, String belongTo, int statementNo, Statement statement) {
-		
-		// TODO Auto-generated constructor stub
-		super(inserter, belongTo, statementNo, statement);
+		super.belongTo=belongTo;
+		super.statementNo=statementNo;
 		super.setStatementType("IfStatement");
 		map = new HashMap<String, Object>();
 		this.conditionNo = conditionNumber;
@@ -36,19 +35,21 @@ public class IfStatementInfo extends JavaStatementInfo{
 			Statement elseStatement = ifStatement.getElseStatement();
 			Expression conditionalExpression = ifStatement.getExpression();
 			nodeId = createNode(inserter);
-			long conditionalExpressionId = createExpressionInfo(inserter, conditionalExpression);
+			long conditionalExpressionId = JavaExpressionInfo.createJavaExpressionInfo(inserter, conditionalExpression);
 			if(conditionalExpressionId!=-1)
 			{
 				inserter.createRelationship(nodeId, conditionalExpressionId, JavaExtractor.ENTER_CONDITION, new HashMap<>());
+				conditionNumber++;
 			}
 			else;
-			long elseId = createElseStatement(inserter, belongTo, statementNo, elseStatement);
+			long elseId = JavaStatementInfo.createJavaStatementInfo(inserter, belongTo, statementNo, elseStatement);
 			if(elseId!=-1)
 			{
 				inserter.createRelationship(nodeId, elseId, JavaExtractor.ELSE, new HashMap<>());
 			}
-			else;
-			long thenId = createThenStatement(inserter, belongTo, statementNo, thenStatement);
+			else
+				conditionNumber = 0;
+			long thenId = JavaStatementInfo.createJavaStatementInfo(inserter, belongTo, statementNo, thenStatement);
 			if(thenId!=-1)
 			{
 				inserter.createRelationship(nodeId, thenId, JavaExtractor.THEN, new HashMap<>());
@@ -59,37 +60,6 @@ public class IfStatementInfo extends JavaStatementInfo{
 		{
 			isBlockElse = true;
 			nodeId = createNode(inserter);
-		}
-	}
-	
-	private long createThenStatement(BatchInserter inserter, String belongTo, int statementNo,
-			Statement thenStatement) {
-		// TODO Auto-generated method stub
-		return JavaStatement.createJavaStatementNode(inserter, belongTo, statementNo, thenStatement);
-	}
-
-	private long createExpressionInfo(BatchInserter inserter, Expression conditionExpression) {
-		// TODO Auto-generated method stub
-		if(conditionExpression!=null)
-		{
-			conditionNumber++;
-			JavaExpressionInfo info = new JavaExpressionInfo(inserter, conditionExpression);
-			return info.getNodeId();
-		}
-		else
-			return -1;
-	}
-
-	private long createElseStatement(BatchInserter inserter, String belongTo, int statementNo, Statement elseStatement) {
-		// TODO Auto-generated method stub
-		if(elseStatement!=null)
-		{
-			IfStatementInfo info = new IfStatementInfo(inserter, belongTo, statementNo, elseStatement);
-			return info.getNodeId();
-		}
-		else {
-			conditionNumber = 0;
-			return -1;
 		}
 	}
 	

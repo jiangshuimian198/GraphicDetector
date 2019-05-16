@@ -22,16 +22,18 @@ public class JavaStatementInfo {
     private long nodeId;
 	
 	private HashMap<String, Object> map;
+	
+	public JavaStatementInfo() {}
 		
 	public JavaStatementInfo(BatchInserter inserter, String belongTo, int statementNo, Statement statement)
 	{
 		Preconditions.checkArgument(belongTo != null);
         this.belongTo = belongTo;
         this.statementNo = statementNo;
-        createStatementNode(inserter, statement);
+        createJavaStatementNode(inserter, statement);
 	}
 	
-	protected void createStatementNode(BatchInserter inserter, Statement statement)
+	protected void createJavaStatementNode(BatchInserter inserter, Statement statement)
 	{
 		if(statement.getNodeType() == ASTNode.ASSERT_STATEMENT)
         {
@@ -51,11 +53,6 @@ public class JavaStatementInfo {
         else if(statement.getNodeType() == ASTNode.EXPRESSION_STATEMENT)
         {
         	this.statementType = "ExpressionStatement";
-        	nodeId = createNode(inserter);
-        }
-        else if(statement.getNodeType() == ASTNode.FOR_STATEMENT)
-        {
-        	this.statementType = "ForStatement";
         	nodeId = createNode(inserter);
         }
         else if(statement.getNodeType() == ASTNode.RETURN_STATEMENT)
@@ -113,9 +110,20 @@ public class JavaStatementInfo {
         	this.statementType = "EmptyStatement";
         	nodeId = createNode(inserter);
         }
+        else if(statement.getNodeType() == ASTNode.CONTINUE_STATEMENT)
+        {
+        	this.statementType = "ContinueStatement";
+        	nodeId = createNode(inserter);
+        }
+        else if(statement.getNodeType() == ASTNode.BREAK_STATEMENT)
+        {
+        	this.statementType = "BreakStatement";
+        	nodeId = createNode(inserter);
+        }
         else
-    	{
+    	{	
         	this.statementType = ""+statement.getNodeType();
+        	System.out.println(statement.getNodeType());
         	//nodeId = createNode(inserter);
     	}
 	}
@@ -136,6 +144,40 @@ public class JavaStatementInfo {
 	public void setStatementType(String s)
 	{
 		this.statementType = s;
+	}
+	
+	public static long createJavaStatementInfo(BatchInserter inserter, String belongTo, int statementNo, Statement statement)
+	{
+		if(statement!=null)
+		{
+			if(statement.getNodeType()==ASTNode.BLOCK) 
+			{
+				BlockStatementInfo info = new BlockStatementInfo(inserter, belongTo, statementNo, statement);
+				return info.getNodeId();
+			}
+			else if(statement.getNodeType()==ASTNode.IF_STATEMENT) 
+			{
+				IfStatementInfo info = new IfStatementInfo(inserter, belongTo, statementNo, statement);
+				return info.getNodeId();
+			}
+			else if(statement.getNodeType()==ASTNode.WHILE_STATEMENT) 
+			{
+				WhileStatementInfo info = new WhileStatementInfo(inserter, belongTo, statementNo, statement);
+				return info.getNodeId();
+			}
+			else if(statement.getNodeType()==ASTNode.FOR_STATEMENT) 
+			{
+				ForStatementInfo info = new ForStatementInfo(inserter, belongTo, statementNo, statement);
+				return info.getNodeId();
+			}
+			else
+			{
+				JavaStatementInfo info = new JavaStatementInfo(inserter, belongTo, statementNo, statement);
+				return info.getNodeId();
+			}
+		}
+		else
+			return -1;
 	}
 }
 
