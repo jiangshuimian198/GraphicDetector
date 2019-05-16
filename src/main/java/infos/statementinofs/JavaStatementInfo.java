@@ -19,17 +19,20 @@ public class JavaStatementInfo {
 	@Getter
 	protected int statementNo;
 	@Getter
-    private long nodeId;
+    protected long nodeId;
 	
-	private HashMap<String, Object> map;
+	protected HashMap<String, Object> map;
 	
-	public JavaStatementInfo() {}
+	public JavaStatementInfo() {
+		map = new HashMap<String, Object>();
+	}
 		
 	public JavaStatementInfo(BatchInserter inserter, String belongTo, int statementNo, Statement statement)
 	{
 		Preconditions.checkArgument(belongTo != null);
         this.belongTo = belongTo;
         this.statementNo = statementNo;
+        map = new HashMap<String, Object>();
         createJavaStatementNode(inserter, statement);
 	}
 	
@@ -38,51 +41,55 @@ public class JavaStatementInfo {
 		if(statement.getNodeType() == ASTNode.ASSERT_STATEMENT)
         {
         	this.statementType = "AssertStatement";
-        	nodeId = createNode(inserter);
-        }
-        else if(statement.getNodeType() == ASTNode.DO_STATEMENT)
-        {
-        	this.statementType = "DoStatement";
+        	addProperties();
         	nodeId = createNode(inserter);
         }
         else if(statement.getNodeType() == ASTNode.ENHANCED_FOR_STATEMENT)
         {
         	this.statementType = "EnhancedForStatement";
+        	addProperties();
         	nodeId = createNode(inserter);
         }
         else if(statement.getNodeType() == ASTNode.EXPRESSION_STATEMENT)
         {
         	this.statementType = "ExpressionStatement";
+        	addProperties();
         	nodeId = createNode(inserter);
         }
         else if(statement.getNodeType() == ASTNode.RETURN_STATEMENT)
         {
         	this.statementType = "ReturnStatement";
+        	addProperties();
         	nodeId = createNode(inserter);
         }
         else if(statement.getNodeType() == ASTNode.SWITCH_STATEMENT)
         {
         	this.statementType = "SwitchStatement";
+        	addProperties();
         	nodeId = createNode(inserter);
         }
         else if(statement.getNodeType() == ASTNode.THROW_STATEMENT)
         {
         	this.statementType = "ThrowStatement";
+        	addProperties();
         	nodeId = createNode(inserter);
         }
         else if(statement.getNodeType() == ASTNode.TRY_STATEMENT)
         {
         	this.statementType = "TryStatement";
+        	addProperties();
         	nodeId = createNode(inserter);
         }
         else if(statement.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT)
         {
         	this.statementType = "VariableDeclarationStatement";
+        	addProperties();
         	nodeId = createNode(inserter);
         }
         else if(statement.getNodeType() == ASTNode.SUPER_CONSTRUCTOR_INVOCATION)
         {
         	this.statementType = "SuperConstructorInvocation";
+        	addProperties();
         	nodeId = createNode(inserter);
         }
         else if(statement.getNodeType() == ASTNode.CONSTRUCTOR_INVOCATION)
@@ -93,31 +100,37 @@ public class JavaStatementInfo {
         else if(statement.getNodeType() == ASTNode.SYNCHRONIZED_STATEMENT)
         {
         	this.statementType = "SynchronizedStatement";
+        	addProperties();
         	nodeId = createNode(inserter);
         }
         else if(statement.getNodeType() == ASTNode.LABELED_STATEMENT)
         {
         	this.statementType = "LabeledStatement";
+        	addProperties();
         	nodeId = createNode(inserter);
         }
         else if(statement.getNodeType() == ASTNode.EXPRESSION_METHOD_REFERENCE)
         {
         	this.statementType = "EXPRESSION_METHOD_REFERENCE";
+        	addProperties();
         	nodeId = createNode(inserter);
         }
         else if(statement.getNodeType() == ASTNode.EMPTY_STATEMENT)
         {
         	this.statementType = "EmptyStatement";
+        	addProperties();
         	nodeId = createNode(inserter);
         }
         else if(statement.getNodeType() == ASTNode.CONTINUE_STATEMENT)
         {
         	this.statementType = "ContinueStatement";
+        	addProperties();
         	nodeId = createNode(inserter);
         }
         else if(statement.getNodeType() == ASTNode.BREAK_STATEMENT)
         {
         	this.statementType = "BreakStatement";
+        	addProperties();
         	nodeId = createNode(inserter);
         }
         else
@@ -128,23 +141,16 @@ public class JavaStatementInfo {
     	}
 	}
 	
-	private long createNode(BatchInserter inserter) {
-		map = new HashMap<String, Object>();
-		addProperties(map);
+	protected long createNode(BatchInserter inserter) {
 		long id = inserter.createNode(map, JavaExtractor.STATEMENT);
         return id;
     }
 	
-	protected void addProperties(HashMap<String, Object> map) {
+	protected void addProperties() {
         map.put(JavaExtractor.STATEMENT_TYPE, statementType);
         map.put(JavaExtractor.BELONG_TO, belongTo);
         map.put(JavaExtractor.STATEMENT_NO, statementNo);
     }
-	
-	public void setStatementType(String s)
-	{
-		this.statementType = s;
-	}
 	
 	public static long createJavaStatementInfo(BatchInserter inserter, String belongTo, int statementNo, Statement statement)
 	{
@@ -170,6 +176,11 @@ public class JavaStatementInfo {
 				ForStatementInfo info = new ForStatementInfo(inserter, belongTo, statementNo, statement);
 				return info.getNodeId();
 			}
+			else if(statement.getNodeType() == ASTNode.DO_STATEMENT)
+	        {
+				DoStatementInfo info = new DoStatementInfo(inserter, belongTo, statementNo, statement);
+				return info.getNodeId();
+	        }
 			else
 			{
 				JavaStatementInfo info = new JavaStatementInfo(inserter, belongTo, statementNo, statement);

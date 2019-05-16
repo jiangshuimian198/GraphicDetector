@@ -14,27 +14,28 @@ import main.java.infos.JavaExpressionInfo;
 
 public class IfStatementInfo extends JavaStatementInfo{
 	@Getter
-	private long nodeId;
-	@Getter
 	private int conditionNo;
-	private HashMap<String, Object> map;
 	private boolean isBlockElse = false;
 
 	private static int conditionNumber = 0;
 	
 	public IfStatementInfo(BatchInserter inserter, String belongTo, int statementNo, Statement statement) {
+		super();
 		super.belongTo=belongTo;
 		super.statementNo=statementNo;
-		super.setStatementType("IfStatement");
-		map = new HashMap<String, Object>();
+		super.statementType="IfStatement";
 		this.conditionNo = conditionNumber;
+		super.addProperties();
+		map.put(JavaExtractor.IF_CONDITION_NO,conditionNo);
 		if(statement.getNodeType()==ASTNode.IF_STATEMENT)
 		{
 			IfStatement ifStatement = (IfStatement)statement;
 			Statement thenStatement = ifStatement.getThenStatement();
 			Statement elseStatement = ifStatement.getElseStatement();
 			Expression conditionalExpression = ifStatement.getExpression();
+			map.put(JavaExtractor.IS_BLOCK_ELSE,isBlockElse);
 			nodeId = createNode(inserter);
+			
 			long conditionalExpressionId = JavaExpressionInfo.createJavaExpressionInfo(inserter, conditionalExpression);
 			if(conditionalExpressionId!=-1)
 			{
@@ -59,15 +60,9 @@ public class IfStatementInfo extends JavaStatementInfo{
 		else
 		{
 			isBlockElse = true;
+			map.put(JavaExtractor.IS_BLOCK_ELSE,isBlockElse);
 			nodeId = createNode(inserter);
 		}
 	}
-	
-	private long createNode(BatchInserter inserter) {
-		super.addProperties(map);
-		map.put(JavaExtractor.IF_CONDITION_NO,conditionNo);
-		map.put(JavaExtractor.IS_BLOCK_ELSE,isBlockElse);
-        return inserter.createNode(map, JavaExtractor.STATEMENT);
-    }
 
 }

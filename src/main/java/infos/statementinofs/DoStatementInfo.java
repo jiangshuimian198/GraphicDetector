@@ -2,37 +2,39 @@ package main.java.infos.statementinofs;
 
 import java.util.HashMap;
 
+import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.WhileStatement;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 
 import main.java.JCExtractor.JavaExtractor;
 import main.java.infos.JavaExpressionInfo;
 
-public class WhileStatementInfo extends JavaStatementInfo{
+public class DoStatementInfo extends JavaStatementInfo{
 
-	public WhileStatementInfo(BatchInserter inserter, String belongTo, int statementNo, Statement statement) {
+	public DoStatementInfo(BatchInserter inserter, String belongTo, int statementNo, Statement statement) {
+		// TODO Auto-generated constructor stub
 		super();
 		super.belongTo=belongTo;
 		super.statementNo=statementNo;
-		super.statementType="WhileStatement";
+		super.statementType="DoStatement";
 		super.addProperties();
 		nodeId = createNode(inserter);
 		
-		WhileStatement whileStatement = (WhileStatement)statement;
-		Expression loopCondition = whileStatement.getExpression();
-		Statement whileBody = whileStatement.getBody();
+		DoStatement doStatement = (DoStatement)statement;
+		Statement doBody = doStatement.getBody();
+		Expression loopCondition = doStatement.getExpression();
+		
 		long loopConditionId = JavaExpressionInfo.createJavaExpressionInfo(inserter, loopCondition);
 		if(loopConditionId!=-1)
 		{
 			inserter.createRelationship(nodeId, loopConditionId, JavaExtractor.LOOP_CONDITION, new HashMap<>());
 		}else;
-		long bodyId = JavaStatementInfo.createJavaStatementInfo(inserter, belongTo, statementNo, whileBody);
+		long bodyId = JavaStatementInfo.createJavaStatementInfo(inserter, belongTo, statementNo, doBody);
 		if(bodyId!=-1)
 		{
 			inserter.createRelationship(nodeId, bodyId, JavaExtractor.STATEMENT_BODY, new HashMap<>());
 		}else;
 	}
-	
+
 }

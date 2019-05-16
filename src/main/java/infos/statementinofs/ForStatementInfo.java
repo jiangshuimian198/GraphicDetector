@@ -7,20 +7,17 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.Statement;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 
-import lombok.Getter;
 import main.java.JCExtractor.JavaExtractor;
 import main.java.infos.JavaExpressionInfo;
 
 public class ForStatementInfo extends JavaStatementInfo{
-	@Getter
-	private long nodeId;
-	private HashMap<String, Object> map;
-
+	
 	public ForStatementInfo(BatchInserter inserter, String belongTo, int statementNo, Statement statement) {
+		super();
 		super.belongTo=belongTo;
 		super.statementNo=statementNo;
-		super.setStatementType("ForStatement");
-		map = new HashMap<String, Object>();
+		super.statementType="ForStatement";
+		super.addProperties();
 		nodeId = createNode(inserter);
 		
 		ForStatement forStatement = (ForStatement)statement;
@@ -39,10 +36,5 @@ public class ForStatementInfo extends JavaStatementInfo{
 		}
 		else;
 	}
-	
-	private long createNode(BatchInserter inserter) {
-		super.addProperties(map);
-        return inserter.createNode(map, JavaExtractor.STATEMENT);
-    }
 
 }
