@@ -68,6 +68,10 @@ public class JavaExtractor extends KnowledgeExtractor {
     public static final RelationshipType ENTER_CONDITION = RelationshipType.withName("enterCondition");
     public static final RelationshipType LOOP_CONDITION = RelationshipType.withName("loopCondition");
     public static final RelationshipType RETURN = RelationshipType.withName("return");
+    public static final RelationshipType INITIALIZER = RelationshipType.withName("initializer");
+	public static final RelationshipType UPDATERS = RelationshipType.withName("updater");
+	public static final RelationshipType ASSERT = RelationshipType.withName("assert");
+
     
     //属性类型
     public static final String NAME = "name";
@@ -91,6 +95,8 @@ public class JavaExtractor extends KnowledgeExtractor {
     public static final String IF_CONDITION_NO = "ifConditionNo";
     public static final String EXPRESSION_TYPE = "expressionType";
     public static final String IS_BLOCK_ELSE = "isBlockElse";
+	public static final String IS_DEFAULT = "isDefault";
+	
 
     @Override
     public boolean isBatchInsert() {

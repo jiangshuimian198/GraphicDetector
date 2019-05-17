@@ -47,7 +47,7 @@ import org.neo4j.unsafe.batchinsert.BatchInserter;
 import main.java.JCExtractor.NameResolver;
 import main.java.infos.JavaMethodInfo;
 import main.java.infos.JavaProjectInfo;
-import main.java.infos.statementinofs.JavaStatementInfo;
+import main.java.infos.JavaStatementInfo;
 
 public class JavaStatementVisitor extends ASTVisitor{
 	
@@ -140,7 +140,7 @@ public class JavaStatementVisitor extends ASTVisitor{
 			for(int i =0;i<statements.size();i++)
 			{
 				String methodName = name;
-				infos.add(JavaStatementInfo.createJavaStatementInfo(inserter, methodName, i, statements.get(i)));
+				infos.add(JavaStatementInfo.createJavaStatementNode(inserter, methodName, i, statements.get(i)));
 			}
 			return infos;
 		}

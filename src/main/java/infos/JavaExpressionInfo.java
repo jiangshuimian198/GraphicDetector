@@ -103,7 +103,7 @@ public class JavaExpressionInfo {
 		}
 	}
 	
-	public static long createJavaExpressionInfo(BatchInserter inserter, Expression expression)
+	public static long createJavaExpressionNode(BatchInserter inserter, Expression expression)
 	{
 		if(expression!=null) {
 			JavaExpressionInfo info = new JavaExpressionInfo(inserter, expression);
