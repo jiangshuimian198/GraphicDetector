@@ -44,30 +44,7 @@ public class JavaStatementInfo {
         	addProperties();
         	nodeId = createNode(inserter);
         }
-        else if(statement.getNodeType() == ASTNode.ENHANCED_FOR_STATEMENT)
-        {
-        	this.statementType = "EnhancedForStatement";
-        	addProperties();
-        	nodeId = createNode(inserter);
-        }
-        else if(statement.getNodeType() == ASTNode.EXPRESSION_STATEMENT)
-        {
-        	this.statementType = "ExpressionStatement";
-        	addProperties();
-        	nodeId = createNode(inserter);
-        }
-        else if(statement.getNodeType() == ASTNode.RETURN_STATEMENT)
-        {
-        	this.statementType = "ReturnStatement";
-        	addProperties();
-        	nodeId = createNode(inserter);
-        }
-        else if(statement.getNodeType() == ASTNode.SWITCH_STATEMENT)
-        {
-        	this.statementType = "SwitchStatement";
-        	addProperties();
-        	nodeId = createNode(inserter);
-        }
+        
         else if(statement.getNodeType() == ASTNode.THROW_STATEMENT)
         {
         	this.statementType = "ThrowStatement";
@@ -121,15 +98,9 @@ public class JavaStatementInfo {
         	addProperties();
         	nodeId = createNode(inserter);
         }
-        else if(statement.getNodeType() == ASTNode.CONTINUE_STATEMENT)
+        else if(statement.getNodeType() == ASTNode.SWITCH_CASE)
         {
-        	this.statementType = "ContinueStatement";
-        	addProperties();
-        	nodeId = createNode(inserter);
-        }
-        else if(statement.getNodeType() == ASTNode.BREAK_STATEMENT)
-        {
-        	this.statementType = "BreakStatement";
+        	this.statementType = "SwitchCase";
         	addProperties();
         	nodeId = createNode(inserter);
         }
@@ -137,7 +108,6 @@ public class JavaStatementInfo {
     	{	
         	this.statementType = ""+statement.getNodeType();
         	System.out.println(statement.getNodeType());
-        	//nodeId = createNode(inserter);
     	}
 	}
 	
@@ -148,7 +118,7 @@ public class JavaStatementInfo {
 	
 	protected void addProperties() {
         map.put(JavaExtractor.STATEMENT_TYPE, statementType);
-        map.put(JavaExtractor.BELONG_TO, belongTo);
+        map.put(JavaExtractor.METHOD_NAME, belongTo);
         map.put(JavaExtractor.STATEMENT_NO, statementNo);
     }
 	
@@ -156,6 +126,11 @@ public class JavaStatementInfo {
 	{
 		if(statement!=null)
 		{
+			if(statement.getNodeType() == ASTNode.EXPRESSION_STATEMENT)
+	        {
+				ExpressionStatementInfo info = new ExpressionStatementInfo(inserter, belongTo, statementNo, statement);
+				return info.getNodeId();
+	        }
 			if(statement.getNodeType()==ASTNode.BLOCK) 
 			{
 				BlockStatementInfo info = new BlockStatementInfo(inserter, belongTo, statementNo, statement);
@@ -176,9 +151,34 @@ public class JavaStatementInfo {
 				ForStatementInfo info = new ForStatementInfo(inserter, belongTo, statementNo, statement);
 				return info.getNodeId();
 			}
+			else if(statement.getNodeType() == ASTNode.ENHANCED_FOR_STATEMENT)
+	        {
+				EnhancedForStatementInfo info = new EnhancedForStatementInfo(inserter, belongTo, statementNo, statement);
+				return info.getNodeId();
+	        }
 			else if(statement.getNodeType() == ASTNode.DO_STATEMENT)
 	        {
 				DoStatementInfo info = new DoStatementInfo(inserter, belongTo, statementNo, statement);
+				return info.getNodeId();
+	        }
+			else if(statement.getNodeType() == ASTNode.RETURN_STATEMENT)
+	        {
+				ReturnStatementInfo info = new ReturnStatementInfo(inserter, belongTo, statementNo, statement);
+				return info.getNodeId();
+	        }
+			else if(statement.getNodeType() == ASTNode.BREAK_STATEMENT)
+	        {
+				BreakStatementInfo info = new BreakStatementInfo(inserter, belongTo, statementNo, statement);
+				return info.getNodeId();
+	        }
+			else if(statement.getNodeType() == ASTNode.CONTINUE_STATEMENT)
+	        {
+				ContinueStatementInfo info = new ContinueStatementInfo(inserter, belongTo, statementNo, statement);
+				return info.getNodeId();
+	        }
+			else if(statement.getNodeType() == ASTNode.SWITCH_STATEMENT)
+	        {
+				SwitchStatementInfo info = new SwitchStatementInfo(inserter, belongTo, statementNo, statement);
 				return info.getNodeId();
 	        }
 			else

@@ -2,26 +2,26 @@ package main.java.infos.statementinofs;
 
 import java.util.HashMap;
 
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.Statement;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 
 import main.java.JCExtractor.JavaExtractor;
 import main.java.infos.JavaExpressionInfo;
 
-public class ForStatementInfo extends JavaStatementInfo{
+public class EnhancedForStatementInfo extends JavaStatementInfo{
 	
-	public ForStatementInfo(BatchInserter inserter, String belongTo, int statementNo, Statement statement) {
+	public EnhancedForStatementInfo(BatchInserter inserter, String belongTo, int statementNo, Statement statement) {
 		super.belongTo=belongTo;
 		super.statementNo=statementNo;
-		super.statementType="ForStatement";
+		super.statementType="EnhancedForStatement";
 		super.addProperties();
 		nodeId = createNode(inserter);
 		
-		ForStatement forStatement = (ForStatement)statement;
-		Expression loopCondition = forStatement.getExpression();
-		Statement forBody = forStatement.getBody();
+		EnhancedForStatement enhancedForStatement = (EnhancedForStatement)statement;
+		Expression loopCondition = enhancedForStatement.getExpression();
+		Statement forBody = enhancedForStatement.getBody();
 		long loopId = JavaExpressionInfo.createJavaExpressionInfo(inserter, loopCondition);
 		if(loopId!=-1)
 		{
@@ -35,5 +35,4 @@ public class ForStatementInfo extends JavaStatementInfo{
 		}
 		else;
 	}
-
 }

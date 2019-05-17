@@ -42,7 +42,7 @@ public class JavaProjectInfo {
     public void parseRels(BatchInserter inserter) {
         methodInfoMap.values().forEach(info -> methodBindingMap.put(info.getMethodBinding(), info));
         classInfoMap.values().forEach(classInfo -> {
-        	findJavaPackageInfo(classInfo.getFullName()).forEach(packageInfo -> inserter.createRelationship(packageInfo.getNodeId(), classInfo.getNodeId(), JavaExtractor.CONTAIN, new HashMap<>()));
+        	findJavaPackageInfo(classInfo.getFullName()).forEach(packageInfo -> inserter.createRelationship(packageInfo.getNodeId(), classInfo.getNodeId(), JavaExtractor.HAVE_CLASS, new HashMap<>()));
             findJavaClassInfo(classInfo.getSuperClassType()).forEach(superClassInfo -> inserter.createRelationship(classInfo.getNodeId(), superClassInfo.getNodeId(), JavaExtractor.EXTEND, new HashMap<>()));
             findJavaClassInfo(classInfo.getSuperInterfaceTypes()).forEach(superInterfaceInfo -> inserter.createRelationship(classInfo.getNodeId(), superInterfaceInfo.getNodeId(), JavaExtractor.IMPLEMENT, new HashMap<>()));
         });

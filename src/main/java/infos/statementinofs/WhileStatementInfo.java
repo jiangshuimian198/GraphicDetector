@@ -13,7 +13,6 @@ import main.java.infos.JavaExpressionInfo;
 public class WhileStatementInfo extends JavaStatementInfo{
 
 	public WhileStatementInfo(BatchInserter inserter, String belongTo, int statementNo, Statement statement) {
-		super();
 		super.belongTo=belongTo;
 		super.statementNo=statementNo;
 		super.statementType="WhileStatement";

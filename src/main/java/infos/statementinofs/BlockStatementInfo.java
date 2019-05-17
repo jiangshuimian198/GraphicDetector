@@ -13,7 +13,6 @@ public class BlockStatementInfo extends JavaStatementInfo{
 	
 	public BlockStatementInfo(BatchInserter inserter, String belongTo, int statementNo, Statement statement)
 	{
-		super();
 		super.belongTo=belongTo;
 		super.statementNo=statementNo;
 		super.statementType="Block";

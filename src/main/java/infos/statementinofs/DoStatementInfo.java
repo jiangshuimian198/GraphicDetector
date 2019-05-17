@@ -14,7 +14,6 @@ public class DoStatementInfo extends JavaStatementInfo{
 
 	public DoStatementInfo(BatchInserter inserter, String belongTo, int statementNo, Statement statement) {
 		// TODO Auto-generated constructor stub
-		super();
 		super.belongTo=belongTo;
 		super.statementNo=statementNo;
 		super.statementType="DoStatement";

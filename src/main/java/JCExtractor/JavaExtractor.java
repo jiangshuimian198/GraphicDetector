@@ -51,11 +51,11 @@ public class JavaExtractor extends KnowledgeExtractor {
     
     //关系类型
     public static final RelationshipType EXTEND = RelationshipType.withName("extend");
-    public static final RelationshipType CONTAIN = RelationshipType.withName("contain");
+    public static final RelationshipType HAVE_CLASS = RelationshipType.withName("haveClass");
+    public static final RelationshipType HAVE_METHOD = RelationshipType.withName("haveMethod");
     public static final RelationshipType HAVE_STATEMENT = RelationshipType.withName("haveStatement");
     public static final RelationshipType STATEMENT_BODY = RelationshipType.withName("statementBody");
     public static final RelationshipType IMPLEMENT = RelationshipType.withName("implement");
-    public static final RelationshipType HAVE_METHOD = RelationshipType.withName("haveMethod");
     public static final RelationshipType PARAM_TYPE = RelationshipType.withName("paramType");
     public static final RelationshipType RETURN_TYPE = RelationshipType.withName("returnType");
     public static final RelationshipType THROW_TYPE = RelationshipType.withName("throwType");
@@ -67,11 +67,12 @@ public class JavaExtractor extends KnowledgeExtractor {
     public static final RelationshipType ELSE = RelationshipType.withName("else");
     public static final RelationshipType ENTER_CONDITION = RelationshipType.withName("enterCondition");
     public static final RelationshipType LOOP_CONDITION = RelationshipType.withName("loopCondition");
-    public static final RelationshipType THEN = RelationshipType.withName("then");
+    public static final RelationshipType RETURN = RelationshipType.withName("return");
     
     //属性类型
     public static final String NAME = "name";
     public static final String FULLNAME = "fullName";
+    public static final String LABEL = "label";
     public static final String IS_INTERFACE = "isInterface";
     public static final String VISIBILITY = "visibility";
     public static final String IS_ABSTRACT = "isAbstract";
@@ -85,7 +86,7 @@ public class JavaExtractor extends KnowledgeExtractor {
     public static final String IS_STATIC = "isStatic";
     public static final String IS_SYNCHRONIZED = "isSynchronized";
     public static final String STATEMENT_TYPE = "statementType";
-    public static final String BELONG_TO = "belongTo";
+    public static final String METHOD_NAME = "mehtodName";
     public static final String STATEMENT_NO = "statementNo";
     public static final String IF_CONDITION_NO = "ifConditionNo";
     public static final String EXPRESSION_TYPE = "expressionType";

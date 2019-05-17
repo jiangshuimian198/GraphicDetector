@@ -94,6 +94,8 @@ public class JavaExpressionInfo {
 			expressionType = "QUALIFIED_NAME";
 		else if(expression.getNodeType()==ASTNode.SIMPLE_NAME)
 			expressionType = "SIMPLE_NAME";
+		else if(expression.getNodeType()==ASTNode.NUMBER_LITERAL)
+			expressionType = "NUMBER_LITERAL";
 		else
 		{
 			expressionType = ""+expression.getNodeType();
