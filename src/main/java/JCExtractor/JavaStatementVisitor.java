@@ -139,8 +139,7 @@ public class JavaStatementVisitor extends ASTVisitor{
 		if(statements!=null) {
 			for(int i =0;i<statements.size();i++)
 			{
-				String methodName = name;
-				infos.add(JavaStatementInfo.createJavaStatementNode(inserter, methodName, i, statements.get(i)));
+				infos.add(JavaStatementInfo.createJavaStatementNode(inserter, name, i, sourceContent, statements.get(i)));
 			}
 			return infos;
 		}

@@ -48,6 +48,10 @@ public class JavaExtractor extends KnowledgeExtractor {
     public static final Label PACKAGE = Label.label("Package");
     public static final Label STATEMENT = Label.label("Statement");
     public static final Label EXPREESION = Label.label("Expression");
+    public static final Label VARIABLE_DECLARATION_FRAGMENT = Label.label("VariableDeclarationFragment");
+    public static final Label SINGLE_VARIABLE_DECLARATION = Label.label("SingleVariableDeclaration");
+	public static final Label CATCH_CLAUSE = Label.label("CatchClause");
+
     
     //关系类型
     public static final RelationshipType EXTEND = RelationshipType.withName("extend");
@@ -71,8 +75,15 @@ public class JavaExtractor extends KnowledgeExtractor {
     public static final RelationshipType INITIALIZER = RelationshipType.withName("initializer");
 	public static final RelationshipType UPDATERS = RelationshipType.withName("updater");
 	public static final RelationshipType ASSERT = RelationshipType.withName("assert");
-
-    
+	public static final RelationshipType THROW = RelationshipType.withName("throw");
+	public static final RelationshipType FINALLY = RelationshipType.withName("finally");
+	public static final RelationshipType CATCH = RelationshipType.withName("catch");
+	public static final RelationshipType TRY_RESOURCE = RelationshipType.withName("tryResource");
+	public static final RelationshipType EXCEPTION_DECLARATION = RelationshipType.withName("exceptionDeclaration");
+	public static final RelationshipType CONSTRUCTOR_ARG = RelationshipType.withName("constructorArg");
+	public static final RelationshipType SUPER_CONSTRUCTOR_EXP = RelationshipType.withName("superConstructorExp");
+	public static final RelationshipType SYNCHRONIZED = RelationshipType.withName("synchronized");
+	
     //属性类型
     public static final String NAME = "name";
     public static final String FULLNAME = "fullName";
@@ -96,7 +107,9 @@ public class JavaExtractor extends KnowledgeExtractor {
     public static final String EXPRESSION_TYPE = "expressionType";
     public static final String IS_BLOCK_ELSE = "isBlockElse";
 	public static final String IS_DEFAULT = "isDefault";
-	
+	public static final String DECLARED_TYPE = "declaredType";
+	public static final String TYPE_ARG_TYPE = "typeArgType";
+	public static final String CATCH_NO = "catchNo";
 
     @Override
     public boolean isBatchInsert() {
