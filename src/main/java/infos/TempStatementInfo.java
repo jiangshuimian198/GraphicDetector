@@ -13,7 +13,6 @@ public class TempStatementInfo {
 	
     protected String statementType;
 	protected String belongTo;
-	protected int statementNo;
 	@Getter
     protected long nodeId;
 	
@@ -23,11 +22,10 @@ public class TempStatementInfo {
 		map = new HashMap<String, Object>();
 	}
 		
-	public TempStatementInfo(BatchInserter inserter, String belongTo, int statementNo, Statement statement)
+	public TempStatementInfo(BatchInserter inserter, String belongTo, Statement statement)
 	{
 		Preconditions.checkArgument(belongTo != null);
         this.belongTo = belongTo;
-        this.statementNo = statementNo;
         map = new HashMap<String, Object>();
         createJavaStatementNode(inserter, statement);
 	}
@@ -46,7 +44,6 @@ public class TempStatementInfo {
 	protected void addProperties() {
         map.put(JavaExtractor.STATEMENT_TYPE, statementType);
         map.put(JavaExtractor.METHOD_NAME, belongTo);
-        map.put(JavaExtractor.STATEMENT_NO, statementNo);
     }
 	
 }

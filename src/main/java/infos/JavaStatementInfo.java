@@ -38,17 +38,18 @@ import main.java.JCExtractor.JavaExtractor;
 public abstract class JavaStatementInfo {
 	private static int conditionNo = 0;
 	
-	public static long createJavaStatementNode(BatchInserter inserter, String methodName, int statementNo, String sourceContent, Statement statement)
+	public static long createJavaStatementNode(BatchInserter inserter, String methodName, String sourceContent, Statement statement)
 	{
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		long nodeId;
+		String statementType;
 		
 		if(statement!=null) 
 		{
 			if(statement.getNodeType() == ASTNode.ASSERT_STATEMENT)
 	        {
-	        	String statementType="AssertStatement";
-				addProperties(statement, sourceContent, map, statementType, methodName, statementNo);
+	        	statementType="AssertStatement";
+				addProperties(statement, sourceContent, map, statementType, methodName);
 				AssertStatement assertStatement = (AssertStatement)statement;
 				nodeId = createNode(inserter, map);
 				Expression assertExpression = assertStatement.getExpression();
@@ -61,8 +62,8 @@ public abstract class JavaStatementInfo {
 	        }
 			else if(statement.getNodeType()==ASTNode.BLOCK) 
 			{
-				String statementType="Block";
-				addProperties(statement, sourceContent, map, statementType, methodName, statementNo);
+				statementType="Block";
+				addProperties(statement, sourceContent, map, statementType, methodName);
 				nodeId = createNode(inserter, map);
 				
 				Block block = (Block)statement;
@@ -70,7 +71,7 @@ public abstract class JavaStatementInfo {
 				List<Statement> statements = block.statements();
 				for(int i = 0; i<statements.size();i++)
 				{
-					long id = JavaStatementInfo.createJavaStatementNode(inserter, methodName, i, sourceContent, statements.get(i));
+					long id = JavaStatementInfo.createJavaStatementNode(inserter, methodName, sourceContent, statements.get(i));
 					if(id!=-1)
 						inserter.createRelationship(nodeId, id, JavaExtractor.STATEMENT_BODY, new HashMap<>());
 					else;
@@ -79,8 +80,8 @@ public abstract class JavaStatementInfo {
 			}
 			else if(statement.getNodeType() == ASTNode.BREAK_STATEMENT)
 	        {
-				String statementType="BreakStatement";
-				addProperties(statement, sourceContent, map, statementType, methodName, statementNo);
+				statementType="BreakStatement";
+				addProperties(statement, sourceContent, map, statementType, methodName);
 				BreakStatement breakStatement = (BreakStatement)statement;
 				SimpleName identifier = breakStatement.getLabel();
 				if(identifier!=null)
@@ -92,8 +93,8 @@ public abstract class JavaStatementInfo {
 	        }
 			else if(statement.getNodeType() == ASTNode.CONSTRUCTOR_INVOCATION)
 	        {
-				String statementType="ConstructorInvocation";
-				addProperties(statement, sourceContent, map, statementType, methodName, statementNo);
+				statementType="ConstructorInvocation";
+				addProperties(statement, sourceContent, map, statementType, methodName);
 				ConstructorInvocation constructorInvocation = (ConstructorInvocation)statement;
 				//constructorInvocation.resolveConstructorBinding();
 				@SuppressWarnings("unchecked")
@@ -152,8 +153,8 @@ public abstract class JavaStatementInfo {
 	        }
 			else if(statement.getNodeType() == ASTNode.CONTINUE_STATEMENT)
 	        {
-	        	String statementType="ContinueStatement";
-	        	addProperties(statement, sourceContent, map, statementType, methodName, statementNo);
+	        	statementType="ContinueStatement";
+	        	addProperties(statement, sourceContent, map, statementType, methodName);
 	        	ContinueStatement continueStatement = (ContinueStatement)statement;
 	    		SimpleName identifier = continueStatement.getLabel();
 	    		if(identifier!=null)
@@ -165,8 +166,8 @@ public abstract class JavaStatementInfo {
 	        }
 	        else if(statement.getNodeType() == ASTNode.DO_STATEMENT)
 	        {
-	        	String statementType="DoStatement";
-	        	addProperties(statement, sourceContent, map, statementType, methodName, statementNo);
+	        	statementType="DoStatement";
+	        	addProperties(statement, sourceContent, map, statementType, methodName);
 	        	nodeId = createNode(inserter, map);
 	        	DoStatement doStatement = (DoStatement)statement;
 	    		Statement doBody = doStatement.getBody();
@@ -177,7 +178,7 @@ public abstract class JavaStatementInfo {
 	    		{
 	    			inserter.createRelationship(nodeId, loopConditionId, JavaExtractor.LOOP_CONDITION, new HashMap<>());
 	    		}else;
-	    		long bodyId = JavaStatementInfo.createJavaStatementNode(inserter, methodName, statementNo, sourceContent, doBody);
+	    		long bodyId = JavaStatementInfo.createJavaStatementNode(inserter, methodName, sourceContent, doBody);
 	    		if(bodyId!=-1)
 	    		{
 	    			inserter.createRelationship(nodeId, bodyId, JavaExtractor.STATEMENT_BODY, new HashMap<>());
@@ -186,15 +187,15 @@ public abstract class JavaStatementInfo {
 	        }
 	        else if(statement.getNodeType() == ASTNode.EMPTY_STATEMENT)
 	        {
-	        	String statementType = "EmptyStatement";
-	        	addProperties(statement, sourceContent, map, statementType, methodName, statementNo);
+	        	statementType = "EmptyStatement";
+	        	addProperties(statement, sourceContent, map, statementType, methodName);
 	        	nodeId = createNode(inserter, map);
 	        	return nodeId;
 	        }
 	        else if(statement.getNodeType() == ASTNode.ENHANCED_FOR_STATEMENT)
 	        {
-	        	String statementType="EnhancedForStatement";
-	        	addProperties(statement, sourceContent, map, statementType, methodName, statementNo);
+	        	statementType="EnhancedForStatement";
+	        	addProperties(statement, sourceContent, map, statementType, methodName);
 	        	nodeId = createNode(inserter, map);
 	        	EnhancedForStatement enhancedForStatement = (EnhancedForStatement)statement;
 	    		Expression loopCondition = enhancedForStatement.getExpression();
@@ -205,7 +206,7 @@ public abstract class JavaStatementInfo {
 	    			inserter.createRelationship(nodeId, loopId, JavaExtractor.LOOP_CONDITION, new HashMap<>());
 	    		}
 	    		else;
-	    		long bodyId = JavaStatementInfo.createJavaStatementNode(inserter, methodName, statementNo, sourceContent, forBody);
+	    		long bodyId = JavaStatementInfo.createJavaStatementNode(inserter, methodName, sourceContent, forBody);
 	    		if(bodyId!=-1)
 	    		{
 	    			inserter.createRelationship(nodeId, bodyId, JavaExtractor.STATEMENT_BODY, new HashMap<>());
@@ -213,18 +214,10 @@ public abstract class JavaStatementInfo {
 	    		else;
 	    		return nodeId;
 	        }
-//	        else if(statement.getNodeType() == ASTNode.EXPRESSION_METHOD_REFERENCE)
-//	        {
-//	        	String statementType = "ExpressionMethodReference";
-//	        	addProperties(map, statementType, methodName, statementNo);
-//	        	nodeId = createNode(inserter, map);
-//	        	//ExpressionMethodReference expressionMethodReference = (ExpressionMethodReference)statement;
-//	        	return nodeId;
-//	        }
 	        else if(statement.getNodeType() == ASTNode.EXPRESSION_STATEMENT)
 	        {
-	        	String statementType="ExpressionStatement";
-	        	addProperties(statement, sourceContent, map, statementType, methodName, statementNo);
+	        	statementType="ExpressionStatement";
+	        	addProperties(statement, sourceContent, map, statementType, methodName);
 	        	nodeId = createNode(inserter, map);
 	        	ExpressionStatement expressionStatement = (ExpressionStatement)statement;
 	    		Expression expression = expressionStatement.getExpression();
@@ -238,8 +231,8 @@ public abstract class JavaStatementInfo {
 	        }
 	        else if(statement.getNodeType()==ASTNode.FOR_STATEMENT) 
 			{
-	        	String statementType="ForStatement";
-	        	addProperties(statement, sourceContent, map, statementType, methodName, statementNo);
+	        	statementType="ForStatement";
+	        	addProperties(statement, sourceContent, map, statementType, methodName);
 	        	nodeId = createNode(inserter, map);
 	    		
 	    		ForStatement forStatement = (ForStatement)statement;
@@ -273,7 +266,7 @@ public abstract class JavaStatementInfo {
 	    			}
 	    			else;
 	    		}
-	    		long bodyId = JavaStatementInfo.createJavaStatementNode(inserter, methodName, statementNo, sourceContent, forBody);
+	    		long bodyId = JavaStatementInfo.createJavaStatementNode(inserter, methodName, sourceContent, forBody);
 	    		if(bodyId!=-1)
 	    		{
 	    			inserter.createRelationship(nodeId, bodyId, JavaExtractor.STATEMENT_BODY, new HashMap<>());
@@ -284,8 +277,8 @@ public abstract class JavaStatementInfo {
 	        else if(statement.getNodeType()==ASTNode.IF_STATEMENT) 
 			{
 	
-	        	String statementType="IfStatement";
-	        	addProperties(statement, sourceContent, map, statementType, methodName, statementNo);
+	        	statementType="IfStatement";
+	        	addProperties(statement, sourceContent, map, statementType, methodName);
 	        	map.put(JavaExtractor.IF_CONDITION_NO,conditionNo);
 	    		
 	    		IfStatement ifStatement = (IfStatement)statement;
@@ -301,14 +294,14 @@ public abstract class JavaStatementInfo {
 	    			conditionNo++;
 	    		}
 	    		else;
-	    		long elseId = JavaStatementInfo.createJavaStatementNode(inserter, methodName, statementNo, sourceContent, elseStatement);
+	    		long elseId = JavaStatementInfo.createJavaStatementNode(inserter, methodName, sourceContent, elseStatement);
 	    		if(elseId!=-1)
 	    		{
 	    			inserter.createRelationship(nodeId, elseId, JavaExtractor.ELSE, new HashMap<>());
 	    		}
 	    		else
 	    			conditionNo = 0;
-	    		long thenId = JavaStatementInfo.createJavaStatementNode(inserter, methodName, statementNo, sourceContent, thenStatement);
+	    		long thenId = JavaStatementInfo.createJavaStatementNode(inserter, methodName, sourceContent, thenStatement);
 	    		if(thenId!=-1)
 	    		{
 	    			inserter.createRelationship(nodeId, thenId, JavaExtractor.STATEMENT_BODY, new HashMap<>());
@@ -318,14 +311,14 @@ public abstract class JavaStatementInfo {
 			}
 	        else if(statement.getNodeType() == ASTNode.LABELED_STATEMENT)
 	        {
-	        	String statementType = "LabeledStatement";
-	        	addProperties(statement, sourceContent, map, statementType, methodName, statementNo);
+	        	statementType = "LabeledStatement";
+	        	addProperties(statement, sourceContent, map, statementType, methodName);
 	        	LabeledStatement labeledStatement = (LabeledStatement)statement;
 	        	Statement labeledBody = labeledStatement.getBody();
 	        	String identifier = labeledStatement.getLabel().getIdentifier();
 	        	map.put(JavaExtractor.LABEL, identifier);
 				nodeId = createNode(inserter, map);
-				long bodyId = JavaStatementInfo.createJavaStatementNode(inserter, methodName, statementNo, sourceContent, labeledBody);
+				long bodyId = JavaStatementInfo.createJavaStatementNode(inserter, methodName, sourceContent, labeledBody);
 	    		if(bodyId!=-1)
 	    		{
 	    			inserter.createRelationship(nodeId, bodyId, JavaExtractor.STATEMENT_BODY, new HashMap<>());
@@ -335,8 +328,8 @@ public abstract class JavaStatementInfo {
 	        }
 	        else if(statement.getNodeType() == ASTNode.RETURN_STATEMENT)
 	        {
-	        	String statementType="ReturnStatement";
-				addProperties(statement, sourceContent, map, statementType, methodName, statementNo);
+	        	statementType="ReturnStatement";
+				addProperties(statement, sourceContent, map, statementType, methodName);
 				nodeId = createNode(inserter, map);
 				ReturnStatement returnStatement = (ReturnStatement)statement;
 				Expression returnExpression = returnStatement.getExpression();
@@ -350,8 +343,8 @@ public abstract class JavaStatementInfo {
 	        }
 	        else if(statement.getNodeType() == ASTNode.SUPER_CONSTRUCTOR_INVOCATION)
 	        {
-	        	String statementType = "SuperConstructorInvocation";
-	        	addProperties(statement, sourceContent, map, statementType, methodName, statementNo);
+	        	statementType = "SuperConstructorInvocation";
+	        	addProperties(statement, sourceContent, map, statementType, methodName);
 	        	SuperConstructorInvocation superConstructorInvocation = (SuperConstructorInvocation)statement;
 	        	
 	        	@SuppressWarnings("unchecked")
@@ -410,15 +403,15 @@ public abstract class JavaStatementInfo {
 				long expressionId = JavaExpressionInfo.createJavaExpressionNode(inserter, expression, sourceContent, methodName);
 	    		if(expressionId!=-1)
 	    		{
-	    			inserter.createRelationship(nodeId, expressionId, JavaExtractor.SUPER_CONSTRUCTOR_EXP, new HashMap<>());
+	    			inserter.createRelationship(nodeId, expressionId, JavaExtractor.SUPER_CONSTRUCTOR_INVOCATION, new HashMap<>());
 	    		}else;
 				//superConstructorInvocation.resolveConstructorBinding();
 				return nodeId;
 	        }
 	        else if(statement.getNodeType() == ASTNode.SWITCH_CASE)
 	        {
-	        	String statementType="SwitchCase";
-	        	addProperties(statement, sourceContent, map, statementType, methodName, statementNo);
+	        	statementType="SwitchCase";
+	        	addProperties(statement, sourceContent, map, statementType, methodName);
 	        	SwitchCase switchCase = (SwitchCase)statement;
 	        	Boolean isDefault = switchCase.isDefault();
 				map.put(JavaExtractor.IS_DEFAULT, isDefault);
@@ -433,8 +426,8 @@ public abstract class JavaStatementInfo {
 	        }
 	        else if(statement.getNodeType() == ASTNode.SWITCH_STATEMENT)
 	        {
-	        	String statementType="SwitchStatement";
-				addProperties(statement, sourceContent, map, statementType, methodName, statementNo);
+	        	statementType="SwitchStatement";
+				addProperties(statement, sourceContent, map, statementType, methodName);
 				nodeId = createNode(inserter, map);
 				SwitchStatement switchStatement = (SwitchStatement)statement;
 				Expression enterCondition = switchStatement.getExpression();
@@ -447,7 +440,7 @@ public abstract class JavaStatementInfo {
 				List<Statement> statements=switchStatement.statements();
 				for(int i = 0; i<statements.size();i++)
 				{
-					long id = JavaStatementInfo.createJavaStatementNode(inserter, methodName, i, sourceContent, statements.get(i));
+					long id = JavaStatementInfo.createJavaStatementNode(inserter, methodName, sourceContent, statements.get(i));
 					if(id!=-1)
 						inserter.createRelationship(nodeId, id, JavaExtractor.STATEMENT_BODY, new HashMap<>());
 					else;
@@ -456,13 +449,13 @@ public abstract class JavaStatementInfo {
 	        }
 	        else if(statement.getNodeType() == ASTNode.SYNCHRONIZED_STATEMENT)
 	        {
-	        	String statementType = "SynchronizedStatement";
-	        	addProperties(statement, sourceContent, map, statementType, methodName, statementNo);
+	        	statementType = "SynchronizedStatement";
+	        	addProperties(statement, sourceContent, map, statementType, methodName);
 	        	nodeId = createNode(inserter, map);
 	        	SynchronizedStatement synchronizedStatement = (SynchronizedStatement)statement;
 	        	Statement synchronizedBody = synchronizedStatement.getBody();
 	        	Expression synchronizedExpression = synchronizedStatement.getExpression();
-	        	long bodyId = JavaStatementInfo.createJavaStatementNode(inserter, methodName, statementNo, sourceContent, synchronizedBody);
+	        	long bodyId = JavaStatementInfo.createJavaStatementNode(inserter, methodName, sourceContent, synchronizedBody);
 				if(bodyId!=-1)
 					inserter.createRelationship(nodeId, bodyId, JavaExtractor.STATEMENT_BODY, new HashMap<>());
 				else;
@@ -475,8 +468,8 @@ public abstract class JavaStatementInfo {
 	        }
 	        else if(statement.getNodeType() == ASTNode.THROW_STATEMENT)
 	        {
-	        	String statementType="ThrowStatement";
-				addProperties(statement, sourceContent, map, statementType, methodName, statementNo);
+	        	statementType="ThrowStatement";
+				addProperties(statement, sourceContent, map, statementType, methodName);
 				nodeId = createNode(inserter, map);
 				ThrowStatement throwStatement = (ThrowStatement)statement;
 				Expression throwExpression = throwStatement.getExpression();
@@ -489,8 +482,8 @@ public abstract class JavaStatementInfo {
 			}
 	        else if(statement.getNodeType() == ASTNode.TRY_STATEMENT)
 	        {
-	        	String statementType="TryStatement";
-				addProperties(statement, sourceContent, map, statementType, methodName, statementNo);
+	        	statementType="TryStatement";
+				addProperties(statement, sourceContent, map, statementType, methodName);
 				nodeId = createNode(inserter, map);
 				TryStatement tryStatement = (TryStatement)statement;
 				Statement tryBody = tryStatement.getBody();
@@ -499,12 +492,12 @@ public abstract class JavaStatementInfo {
 				List<Expression> resources = tryStatement.resources();
 				@SuppressWarnings("unchecked")
 				List<CatchClause> catchClauses = tryStatement.catchClauses();
-				long bodyId = JavaStatementInfo.createJavaStatementNode(inserter, methodName, statementNo, sourceContent, tryBody);
+				long bodyId = JavaStatementInfo.createJavaStatementNode(inserter, methodName, sourceContent, tryBody);
 				if(bodyId!=-1)
 				{
 					inserter.createRelationship(nodeId, bodyId, JavaExtractor.STATEMENT_BODY, new HashMap<>());
 				}else;
-				long finallyId = JavaStatementInfo.createJavaStatementNode(inserter, methodName, statementNo, sourceContent, tryFinally);
+				long finallyId = JavaStatementInfo.createJavaStatementNode(inserter, methodName, sourceContent, tryFinally);
 				if(finallyId!=-1)
 				{
 					inserter.createRelationship(nodeId, finallyId, JavaExtractor.FINALLY, new HashMap<>());
@@ -523,8 +516,8 @@ public abstract class JavaStatementInfo {
 	        }
 	        else if(statement.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT)
             {
-	        	String statementType="VariableDeclarationStatement";
-				addProperties(statement, sourceContent, map, statementType, methodName, statementNo);
+	        	statementType="VariableDeclarationStatement";
+				addProperties(statement, sourceContent, map, statementType, methodName);
 				VariableDeclarationStatement variableDeclarationStatement = (VariableDeclarationStatement)statement;
 				Type type = variableDeclarationStatement.getType();
 				boolean isAnnotatable = type.isAnnotatable();
@@ -575,8 +568,8 @@ public abstract class JavaStatementInfo {
             }
 	        else if(statement.getNodeType()==ASTNode.WHILE_STATEMENT) 
 			{
-	        	String statementType="WhileStatement";
-				addProperties(statement, sourceContent, map, statementType, methodName, statementNo);
+	        	statementType="WhileStatement";
+				addProperties(statement, sourceContent, map, statementType, methodName);
 				nodeId = createNode(inserter, map);
 				WhileStatement whileStatement = (WhileStatement)statement;
 				Expression loopCondition = whileStatement.getExpression();
@@ -586,7 +579,7 @@ public abstract class JavaStatementInfo {
 				{
 					inserter.createRelationship(nodeId, loopConditionId, JavaExtractor.LOOP_CONDITION, new HashMap<>());
 				}else;
-				long bodyId = JavaStatementInfo.createJavaStatementNode(inserter, methodName, statementNo, sourceContent, whileBody);
+				long bodyId = JavaStatementInfo.createJavaStatementNode(inserter, methodName, sourceContent, whileBody);
 				if(bodyId!=-1)
 				{
 					inserter.createRelationship(nodeId, bodyId, JavaExtractor.STATEMENT_BODY, new HashMap<>());
@@ -595,7 +588,7 @@ public abstract class JavaStatementInfo {
 			}
 	        else
 			{
-				TempStatementInfo info = new TempStatementInfo(inserter, methodName, statementNo, statement);
+				TempStatementInfo info = new TempStatementInfo(inserter, methodName, statement);
 				return info.getNodeId();
 			}
 		}
@@ -605,8 +598,8 @@ public abstract class JavaStatementInfo {
 	
 	private static long createVariableDeclarationFragmentNode(BatchInserter inserter, HashMap<String, Object> map, String methodName, int decNo,
 			VariableDeclarationFragment variableDeclarationFragment, String sourceContent) {
-		String statementType="VariableDeclarationFragment";
-		addProperties(variableDeclarationFragment, sourceContent, map, statementType, methodName, decNo);
+		String statementType = "VariableDeclarationFragment";
+		addProperties(variableDeclarationFragment, sourceContent, map, statementType, methodName);
 		long nodeId = inserter.createNode(map, JavaExtractor.VARIABLE_DECLARATION_FRAGMENT);
 		return nodeId;
 	}
@@ -619,7 +612,7 @@ public abstract class JavaStatementInfo {
 		long nodeId = inserter.createNode(map, JavaExtractor.CATCH_CLAUSE);
 		Statement catchBody = catchClause.getBody();
 		SingleVariableDeclaration exception = catchClause.getException();
-		long bodyId = JavaStatementInfo.createJavaStatementNode(inserter, methodName, i, sourceContent, catchBody);
+		long bodyId = JavaStatementInfo.createJavaStatementNode(inserter, methodName, sourceContent, catchBody);
 		if(bodyId!=-1)
 		{
 			inserter.createRelationship(nodeId, bodyId, JavaExtractor.STATEMENT_BODY, new HashMap<>());
@@ -645,11 +638,12 @@ public abstract class JavaStatementInfo {
         return id;
     }
 	
-	private static void addProperties(ASTNode statement, String sourceContent, HashMap<String, Object> map, String statementType, String belongTo, int statementNo) {
+	private static void addProperties(ASTNode statement, String sourceContent, HashMap<String, Object> map, String statementType, String belongTo) {
         map.put(JavaExtractor.STATEMENT_TYPE, statementType);
         map.put(JavaExtractor.METHOD_NAME, belongTo);
-        map.put(JavaExtractor.STATEMENT_NO, statementNo);
     	String content = sourceContent.substring(statement.getStartPosition(),statement.getStartPosition()+statement.getLength());
 		map.put(JavaExtractor.CONTENT, content);
+		int rowNo = sourceContent.substring(0, statement.getStartPosition()).split("\n").length;
+		map.put(JavaExtractor.ROW_NO, rowNo);
     }
 }

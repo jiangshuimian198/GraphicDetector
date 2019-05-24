@@ -48,6 +48,7 @@ public class JavaExtractor extends KnowledgeExtractor {
     public static final Label PACKAGE = Label.label("Package");
     public static final Label STATEMENT = Label.label("Statement");
     public static final Label EXPREESION = Label.label("Expression");
+    public static final Label OPERATOR = Label.label("Operator");
     public static final Label VARIABLE_DECLARATION_FRAGMENT = Label.label("VariableDeclarationFragment");
     public static final Label SINGLE_VARIABLE_DECLARATION = Label.label("SingleVariableDeclaration");
 	public static final Label CATCH_CLAUSE = Label.label("CatchClause");
@@ -81,8 +82,17 @@ public class JavaExtractor extends KnowledgeExtractor {
 	public static final RelationshipType TRY_RESOURCE = RelationshipType.withName("tryResource");
 	public static final RelationshipType EXCEPTION_DECLARATION = RelationshipType.withName("exceptionDeclaration");
 	public static final RelationshipType CONSTRUCTOR_ARG = RelationshipType.withName("constructorArg");
-	public static final RelationshipType SUPER_CONSTRUCTOR_EXP = RelationshipType.withName("superConstructorExp");
+	public static final RelationshipType SUPER_CONSTRUCTOR_INVOCATION = RelationshipType.withName("superConstructorInvocation");
 	public static final RelationshipType SYNCHRONIZED = RelationshipType.withName("synchronized");
+	public static final RelationshipType ARRAY_ACCESS = RelationshipType.withName("arrayAccess");
+	public static final RelationshipType ARRAY_ACCESS_INDEX = RelationshipType.withName("arrayAccessIndex");
+	public static final RelationshipType ARRAY_INITIALIZER = RelationshipType.withName("arrayInitializer");
+	public static final RelationshipType SUB_ARRAY_INITIALIZER = RelationshipType.withName("subArrayInitializer");
+	public static final RelationshipType DIMENSIONS = RelationshipType.withName("dimensions");
+	public static final RelationshipType ASSIGNMENT = RelationshipType.withName("assignment");
+	public static final RelationshipType LEFT_OPERAND = RelationshipType.withName("leftOperand");
+	public static final RelationshipType RIGHT_OPERAND = RelationshipType.withName("rightOperand");
+
 	
     //属性类型
     public static final String NAME = "name";
@@ -110,7 +120,14 @@ public class JavaExtractor extends KnowledgeExtractor {
 	public static final String DECLARED_TYPE = "declaredType";
 	public static final String TYPE_ARG_TYPE = "typeArgType";
 	public static final String CATCH_NO = "catchNo";
-
+	public static final String ARRAY_TYPE = "arrayType";
+	public static final String DIMENSION = "dimension";
+	public static final String ELEMENT_TYPE = "elementType";
+	public static final String COMPONENT_TYPE = "componentType";
+	public static final String OPERATOR_TYPE = "operatorType";
+	public static final String OPERATOR_LITERAL = "operatorLiteral";
+	public static final String ROW_NO = "rowNo";
+	
     @Override
     public boolean isBatchInsert() {
         return true;
