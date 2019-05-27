@@ -81,8 +81,7 @@ public class JavaExtractor extends KnowledgeExtractor {
 	public static final RelationshipType CATCH = RelationshipType.withName("catch");
 	public static final RelationshipType TRY_RESOURCE = RelationshipType.withName("tryResource");
 	public static final RelationshipType EXCEPTION_DECLARATION = RelationshipType.withName("exceptionDeclaration");
-	public static final RelationshipType CONSTRUCTOR_ARG = RelationshipType.withName("constructorArg");
-	public static final RelationshipType SUPER_CONSTRUCTOR_INVOCATION = RelationshipType.withName("superConstructorInvocation");
+	public static final RelationshipType HAVE_PARAM = RelationshipType.withName("haveParament");
 	public static final RelationshipType SYNCHRONIZED = RelationshipType.withName("synchronized");
 	public static final RelationshipType ARRAY_ACCESS = RelationshipType.withName("arrayAccess");
 	public static final RelationshipType ARRAY_ACCESS_INDEX = RelationshipType.withName("arrayAccessIndex");
@@ -92,6 +91,8 @@ public class JavaExtractor extends KnowledgeExtractor {
 	public static final RelationshipType ASSIGNMENT = RelationshipType.withName("assignment");
 	public static final RelationshipType LEFT_OPERAND = RelationshipType.withName("leftOperand");
 	public static final RelationshipType RIGHT_OPERAND = RelationshipType.withName("rightOperand");
+	public static final RelationshipType VAR_DECLARATION_FRAG = RelationshipType.withName("variableDeclarationFragment");
+	public static final RelationshipType INVOCATION = RelationshipType.withName("invocation");;
 
 	
     //属性类型
@@ -102,14 +103,17 @@ public class JavaExtractor extends KnowledgeExtractor {
     public static final String VISIBILITY = "visibility";
     public static final String IS_ABSTRACT = "isAbstract";
     public static final String IS_FINAL = "isFinal";
+	public static final String IS_VOLATILE = "isVolatile";
+	public static final String IS_TRANSIENT = "isTransient";
     public static final String COMMENT = "comment";
     public static final String CONTENT = "content";
     public static final String RETURN_TYPE_STR = "returnType";
-    public static final String TYPE_STR = "type";
-    public static final String PARAM_TYPE_STR = "paramType";
+    public static final String VAR_TYPE_STR = "varialbleType";
+    public static final String PARAM_TYPE_STR = "paramentType";
     public static final String IS_CONSTRUCTOR = "isConstructor";
     public static final String IS_STATIC = "isStatic";
     public static final String IS_SYNCHRONIZED = "isSynchronized";
+    public static final String SIMPLENAME_TYPE = "simpleNameType";
     public static final String STATEMENT_TYPE = "statementType";
     public static final String METHOD_NAME = "mehtodName";
     public static final String STATEMENT_NO = "statementNo";
@@ -118,8 +122,6 @@ public class JavaExtractor extends KnowledgeExtractor {
     public static final String IS_BLOCK_ELSE = "isBlockElse";
 	public static final String IS_DEFAULT = "isDefault";
 	public static final String DECLARED_TYPE = "declaredType";
-	public static final String TYPE_ARG_TYPE = "typeArgType";
-	public static final String CATCH_NO = "catchNo";
 	public static final String ARRAY_TYPE = "arrayType";
 	public static final String DIMENSION = "dimension";
 	public static final String ELEMENT_TYPE = "elementType";
@@ -127,6 +129,9 @@ public class JavaExtractor extends KnowledgeExtractor {
 	public static final String OPERATOR_TYPE = "operatorType";
 	public static final String OPERATOR_LITERAL = "operatorLiteral";
 	public static final String ROW_NO = "rowNo";
+	public static final String QUALIFIER = "qualifier";
+	public static final String TYPE_ARG_TYPE_STR = "typeArgmentType";
+	public static final String METHOD_TYPE = "methodType";
 	
     @Override
     public boolean isBatchInsert() {

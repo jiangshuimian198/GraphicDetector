@@ -1,5 +1,6 @@
 package main.java.infos;
 
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.List;
 
@@ -11,7 +12,15 @@ import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Assignment.Operator;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeMethodReference;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 
 import main.java.JCExtractor.JavaExtractor;
@@ -279,6 +288,16 @@ public abstract class JavaExpressionInfo {
 			{
 				expressionType = "ThisExpression";
 				addProperties(map, expression, expressionType, methodName, sourceContent);
+				ThisExpression thisExpression = (ThisExpression)expression;
+				Name name = thisExpression.getQualifier();
+				if(name!=null)
+					map.put(JavaExtractor.FULLNAME, name.toString());
+				else
+					map.put(JavaExtractor.FULLNAME, "null");
+//				thisExpression.resolveBoxing();
+//				thisExpression.resolveConstantExpressionValue();
+//				thisExpression.resolveTypeBinding();
+//				thisExpression.resolveUnboxing();
 				nodeId = createNode(inserter, map);
 			}
 			else if(expression.getNodeType()==ASTNode.TYPE_LITERAL)
@@ -291,23 +310,170 @@ public abstract class JavaExpressionInfo {
 			{
 				expressionType = "TypeMethodReference";
 				addProperties(map, expression, expressionType, methodName, sourceContent);
+				TypeMethodReference typeMethodReference = (TypeMethodReference)expression;
+				String name = typeMethodReference.getName().getIdentifier();
+				map.put(JavaExtractor.NAME, name);
+				Type type = typeMethodReference.getType();
+				//ITypeBinding typeBinding = type.resolveBinding();
+				map.put(JavaExtractor.METHOD_TYPE, type.toString());
+//				typeMethodReference.resolveConstantExpressionValue();
+//				typeMethodReference.resolveBoxing();
+//				typeMethodReference.resolveMethodBinding();
+//				typeMethodReference.resolveTypeBinding();
+//				typeMethodReference.resolveUnboxing();
+				@SuppressWarnings("unchecked")
+				List<Type> typeArgsTypeList = typeMethodReference.typeArguments();
+				String[] typeArgsDeclaredTypes = new String[typeArgsTypeList.size()];
+				String[] typeArgsTypes = new String[typeArgsTypeList.size()];
+				for(int i = 0; i<typeArgsTypeList.size(); i++)
+				{
+					Type element = typeArgsTypeList.get(i);
+					typeArgsTypes[i]=element.toString();
+					//type.resolveBinding();
+					boolean isAnnotatable = element.isAnnotatable();
+					boolean isArrayType = element.isArrayType();
+					boolean isIntersectionType = element.isIntersectionType();
+					boolean isNameQualifiedType = element.isNameQualifiedType();
+					boolean isParameterizedType = element.isParameterizedType();
+					boolean isPrimitiveType = element.isPrimitiveType();
+					boolean isQualifiedType = element.isQualifiedType();
+					boolean isSimpleType = element.isSimpleType();
+					boolean isUnionType = element.isUnionType();
+					boolean isVar = element.isVar();
+					boolean isWildcardType = element.isWildcardType();
+					if(isAnnotatable)
+						typeArgsDeclaredTypes[i]="Annotatable";
+					else if(isArrayType)
+						typeArgsDeclaredTypes[i]="ArrayType";
+					else if(isIntersectionType)
+						typeArgsDeclaredTypes[i]="IntersectionType";
+					else if(isNameQualifiedType)
+						typeArgsDeclaredTypes[i]="NameQualifiedType";
+					else if(isParameterizedType)
+						typeArgsDeclaredTypes[i]="ParameterizedType";
+					else if(isPrimitiveType)
+						typeArgsDeclaredTypes[i]="PrimitiveType";
+					else if(isQualifiedType)
+						typeArgsDeclaredTypes[i]="QualifiedType";
+					else if(isSimpleType)
+						typeArgsDeclaredTypes[i]="SimpleType";
+					else if(isUnionType)
+						typeArgsDeclaredTypes[i]="UnionType";
+					else if(isVar)
+						typeArgsDeclaredTypes[i]="Varialbe";
+					else if(isWildcardType)
+						typeArgsDeclaredTypes[i]="WildcardType";
+				}
+				map.put(JavaExtractor.DECLARED_TYPE, typeArgsDeclaredTypes);
+				map.put(JavaExtractor.TYPE_ARG_TYPE_STR, typeArgsDeclaredTypes);
 				nodeId = createNode(inserter, map);
 			}
 			else if(expression.getNodeType()==ASTNode.VARIABLE_DECLARATION_EXPRESSION)
 			{
 				expressionType = "VariableDeclarationExpression";
 				addProperties(map, expression, expressionType, methodName, sourceContent);
+				VariableDeclarationExpression variableDeclarationExpression = (VariableDeclarationExpression)expression;
+				int modifier = variableDeclarationExpression.getModifiers();
+				if(Modifier.isFinal(modifier))
+					map.put(JavaExtractor.IS_FINAL, true);
+				else
+					map.put(JavaExtractor.IS_FINAL, false);
+				if(Modifier.isStatic(modifier))
+					map.put(JavaExtractor.IS_STATIC, true);
+				else
+					map.put(JavaExtractor.IS_STATIC, false);
+				if(Modifier.isVolatile(modifier))
+					map.put(JavaExtractor.IS_VOLATILE, true);
+				else
+					map.put(JavaExtractor.IS_VOLATILE, false);
+				if(Modifier.isTransient(modifier))
+					map.put(JavaExtractor.IS_TRANSIENT, true);
+				else
+					map.put(JavaExtractor.IS_TRANSIENT, false);
+				variableDeclarationExpression.fragments();
+				Type type = variableDeclarationExpression.getType();
+				String typeLiteral = type.toString();
+				map.put(JavaExtractor.VAR_TYPE_STR, typeLiteral);
+				boolean isAnnotatable = type.isAnnotatable();
+				boolean isArrayType = type.isArrayType();
+				boolean isIntersectionType = type.isIntersectionType();
+				boolean isNameQualifiedType = type.isNameQualifiedType();
+				boolean isParameterizedType = type.isParameterizedType();
+				boolean isPrimitiveType = type.isPrimitiveType();
+				boolean isQualifiedType = type.isQualifiedType();
+				boolean isSimpleType = type.isSimpleType();
+				boolean isUnionType = type.isUnionType();
+				boolean isVar = type.isVar();
+				boolean isWildcardType = type.isWildcardType();
+				if(isAnnotatable)
+				map.put(JavaExtractor.DECLARED_TYPE, "Annotatable");
+				else if(isArrayType)
+				map.put(JavaExtractor.DECLARED_TYPE, "ArrayType");
+				else if(isIntersectionType)
+				map.put(JavaExtractor.DECLARED_TYPE, "IntersectionType");
+				else if(isNameQualifiedType)
+				map.put(JavaExtractor.DECLARED_TYPE, "NameQualifiedType");
+				else if(isParameterizedType)
+				map.put(JavaExtractor.DECLARED_TYPE, "ParameterizedType");
+				else if(isPrimitiveType)
+				map.put(JavaExtractor.DECLARED_TYPE, "PrimitiveType");
+				else if(isQualifiedType)
+				map.put(JavaExtractor.DECLARED_TYPE, "QualifiedType");
+				else if(isSimpleType)
+				map.put(JavaExtractor.DECLARED_TYPE, "SimpleType");
+				else if(isUnionType)
+				map.put(JavaExtractor.DECLARED_TYPE, "UnionType");
+				else if(isVar)
+				map.put(JavaExtractor.DECLARED_TYPE, "Varialbe");
+				else if(isWildcardType)
+				map.put(JavaExtractor.DECLARED_TYPE, "WildcardType");
 				nodeId = createNode(inserter, map);
+				
+				@SuppressWarnings("unchecked")
+				List<VariableDeclarationFragment> fragments = variableDeclarationExpression.fragments();
+				for(int i = 0; i<fragments.size(); i++)
+				{
+					long id = JavaStatementInfo.createVariableDeclarationFragmentNode(inserter, map, methodName, i, fragments.get(i), sourceContent);
+					if(id!=-1)
+						inserter.createRelationship(nodeId, id, JavaExtractor.VAR_DECLARATION_FRAG, new HashMap<>());
+					else;
+				}
 			}
 			else if(expression.getNodeType()==ASTNode.QUALIFIED_NAME)
 			{
 				expressionType = "QualifiedName";
+				QualifiedName qualifiedName = (QualifiedName)expression;
+				String name = qualifiedName.getName().getIdentifier();
+				String qualifier = qualifiedName.getQualifier().toString();
+				map.put(JavaExtractor.NAME, name);
+				map.put(JavaExtractor.QUALIFIER, qualifier);
 				addProperties(map, expression, expressionType, methodName, sourceContent);
+//				qualifiedName.resolveBinding();
+//				qualifiedName.resolveBoxing();
+//				qualifiedName.resolveConstantExpressionValue();
+//				qualifiedName.resolveTypeBinding();
+//				qualifiedName.resolveUnboxing();
 				nodeId = createNode(inserter, map);
 			}
 			else if(expression.getNodeType()==ASTNode.SIMPLE_NAME)
 			{
 				expressionType = "SimpleName";
+				SimpleName simpleName = (SimpleName)expression;
+				String identifier = simpleName.getIdentifier();
+				map.put(JavaExtractor.NAME, identifier);
+				boolean isDeclaration = simpleName.isDeclaration();
+				boolean isVar = simpleName.isVar();
+//				simpleName.resolveBinding();
+//				simpleName.resolveBoxing();
+//				simpleName.resolveConstantExpressionValue();
+//				simpleName.resolveTypeBinding();
+//				simpleName.resolveUnboxing();
+				if(isDeclaration)
+					map.put(JavaExtractor.SIMPLENAME_TYPE, "Declaration");
+				else if(isVar)
+					map.put(JavaExtractor.SIMPLENAME_TYPE, "Var");
+				else
+					map.put(JavaExtractor.SIMPLENAME_TYPE, "Else");
 				addProperties(map, expression, expressionType, methodName, sourceContent);
 				nodeId = createNode(inserter, map);
 			}

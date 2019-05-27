@@ -1,5 +1,6 @@
 package main.java.infos;
 
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.List;
 
@@ -58,7 +59,6 @@ public abstract class JavaStatementInfo {
 	    		{
 	    			inserter.createRelationship(nodeId, assertId, JavaExtractor.ASSERT, new HashMap<>());
 	    		}else;
-				return nodeId;
 	        }
 			else if(statement.getNodeType()==ASTNode.BLOCK) 
 			{
@@ -76,7 +76,6 @@ public abstract class JavaStatementInfo {
 						inserter.createRelationship(nodeId, id, JavaExtractor.STATEMENT_BODY, new HashMap<>());
 					else;
 				}
-				return nodeId;
 			}
 			else if(statement.getNodeType() == ASTNode.BREAK_STATEMENT)
 	        {
@@ -89,7 +88,6 @@ public abstract class JavaStatementInfo {
 				else
 					map.put(JavaExtractor.LABEL,"null");
 				nodeId = createNode(inserter, map);
-				return nodeId;
 	        }
 			else if(statement.getNodeType() == ASTNode.CONSTRUCTOR_INVOCATION)
 	        {
@@ -101,10 +99,13 @@ public abstract class JavaStatementInfo {
 				List<Expression> constructorArgs = constructorInvocation.arguments();
 				@SuppressWarnings("unchecked")
 				List<Type> constructorTypeArgs =constructorInvocation.typeArguments();
+				String[] typeArgsDeclaredTypes = new String[constructorTypeArgs.size()];
 				String[] typeArgsTypes = new String[constructorTypeArgs.size()];
 				for(int i = 0; i<constructorTypeArgs.size(); i++)
 				{
 					Type type = constructorTypeArgs.get(i);
+					typeArgsTypes[i]=type.toString();
+					//type.resolveBinding();
 					boolean isAnnotatable = type.isAnnotatable();
 					boolean isArrayType = type.isArrayType();
 					boolean isIntersectionType = type.isIntersectionType();
@@ -117,39 +118,39 @@ public abstract class JavaStatementInfo {
 					boolean isVar = type.isVar();
 					boolean isWildcardType = type.isWildcardType();
 					if(isAnnotatable)
-						typeArgsTypes[i]="Annotatable";
+						typeArgsDeclaredTypes[i]="Annotatable";
 					else if(isArrayType)
-						typeArgsTypes[i]="ArrayType";
+						typeArgsDeclaredTypes[i]="ArrayType";
 					else if(isIntersectionType)
-						typeArgsTypes[i]="IntersectionType";
+						typeArgsDeclaredTypes[i]="IntersectionType";
 					else if(isNameQualifiedType)
-						typeArgsTypes[i]="NameQualifiedType";
+						typeArgsDeclaredTypes[i]="NameQualifiedType";
 					else if(isParameterizedType)
-						typeArgsTypes[i]="ParameterizedType";
+						typeArgsDeclaredTypes[i]="ParameterizedType";
 					else if(isPrimitiveType)
-						typeArgsTypes[i]="PrimitiveType";
+						typeArgsDeclaredTypes[i]="PrimitiveType";
 					else if(isQualifiedType)
-						typeArgsTypes[i]="QualifiedType";
+						typeArgsDeclaredTypes[i]="QualifiedType";
 					else if(isSimpleType)
-						typeArgsTypes[i]="SimpleType";
+						typeArgsDeclaredTypes[i]="SimpleType";
 					else if(isUnionType)
-						typeArgsTypes[i]="UnionType";
+						typeArgsDeclaredTypes[i]="UnionType";
 					else if(isVar)
-						typeArgsTypes[i]="Varialbe";
+						typeArgsDeclaredTypes[i]="Varialbe";
 					else if(isWildcardType)
-						typeArgsTypes[i]="WildcardType";
+						typeArgsDeclaredTypes[i]="WildcardType";
 				}
-				map.put(JavaExtractor.TYPE_ARG_TYPE, typeArgsTypes);
+				map.put(JavaExtractor.DECLARED_TYPE, typeArgsDeclaredTypes);
+				map.put(JavaExtractor.TYPE_ARG_TYPE_STR, typeArgsDeclaredTypes);
 				nodeId = createNode(inserter, map);
 				for(int i = 0; i<constructorArgs.size(); i++)
 				{
 					long argId = JavaExpressionInfo.createJavaExpressionNode(inserter, constructorArgs.get(i), sourceContent, methodName);
 		    		if(argId!=-1)
 		    		{
-		    			inserter.createRelationship(nodeId, argId, JavaExtractor.CONSTRUCTOR_ARG, new HashMap<>());
+		    			inserter.createRelationship(nodeId, argId, JavaExtractor.HAVE_PARAM, new HashMap<>());
 		    		}else;
 				}
-				return nodeId;
 	        }
 			else if(statement.getNodeType() == ASTNode.CONTINUE_STATEMENT)
 	        {
@@ -162,7 +163,6 @@ public abstract class JavaStatementInfo {
 	    		else
 	    			map.put(JavaExtractor.LABEL,"null");
 	    		nodeId = createNode(inserter, map);
-	    		return nodeId;
 	        }
 	        else if(statement.getNodeType() == ASTNode.DO_STATEMENT)
 	        {
@@ -183,14 +183,12 @@ public abstract class JavaStatementInfo {
 	    		{
 	    			inserter.createRelationship(nodeId, bodyId, JavaExtractor.STATEMENT_BODY, new HashMap<>());
 	    		}else;
-	    		return nodeId;
 	        }
 	        else if(statement.getNodeType() == ASTNode.EMPTY_STATEMENT)
 	        {
 	        	statementType = "EmptyStatement";
 	        	addProperties(statement, sourceContent, map, statementType, methodName);
 	        	nodeId = createNode(inserter, map);
-	        	return nodeId;
 	        }
 	        else if(statement.getNodeType() == ASTNode.ENHANCED_FOR_STATEMENT)
 	        {
@@ -212,7 +210,6 @@ public abstract class JavaStatementInfo {
 	    			inserter.createRelationship(nodeId, bodyId, JavaExtractor.STATEMENT_BODY, new HashMap<>());
 	    		}
 	    		else;
-	    		return nodeId;
 	        }
 	        else if(statement.getNodeType() == ASTNode.EXPRESSION_STATEMENT)
 	        {
@@ -227,7 +224,6 @@ public abstract class JavaStatementInfo {
 	    			inserter.createRelationship(nodeId, expressionId, JavaExtractor.STATEMENT_BODY, new HashMap<>());
 	    		}
 	    		else;
-	    		return nodeId;
 	        }
 	        else if(statement.getNodeType()==ASTNode.FOR_STATEMENT) 
 			{
@@ -272,7 +268,6 @@ public abstract class JavaStatementInfo {
 	    			inserter.createRelationship(nodeId, bodyId, JavaExtractor.STATEMENT_BODY, new HashMap<>());
 	    		}
 	    		else;
-	    		return nodeId;
 			}
 	        else if(statement.getNodeType()==ASTNode.IF_STATEMENT) 
 			{
@@ -307,7 +302,6 @@ public abstract class JavaStatementInfo {
 	    			inserter.createRelationship(nodeId, thenId, JavaExtractor.STATEMENT_BODY, new HashMap<>());
 	    		}
 	    		else;
-	    		return nodeId;
 			}
 	        else if(statement.getNodeType() == ASTNode.LABELED_STATEMENT)
 	        {
@@ -324,7 +318,6 @@ public abstract class JavaStatementInfo {
 	    			inserter.createRelationship(nodeId, bodyId, JavaExtractor.STATEMENT_BODY, new HashMap<>());
 	    		}
 	    		else;
-				return nodeId;
 	        }
 	        else if(statement.getNodeType() == ASTNode.RETURN_STATEMENT)
 	        {
@@ -339,7 +332,6 @@ public abstract class JavaStatementInfo {
 					inserter.createRelationship(nodeId, returnId, JavaExtractor.RETURN, new HashMap<>());
 				}
 				else;
-				return nodeId;
 	        }
 	        else if(statement.getNodeType() == ASTNode.SUPER_CONSTRUCTOR_INVOCATION)
 	        {
@@ -349,10 +341,13 @@ public abstract class JavaStatementInfo {
 	        	
 	        	@SuppressWarnings("unchecked")
 				List<Type> constructorTypeArgs =superConstructorInvocation.typeArguments();
+				String[] typeArgsDeclaredTypes = new String[constructorTypeArgs.size()];
 				String[] typeArgsTypes = new String[constructorTypeArgs.size()];
 				for(int i = 0; i<constructorTypeArgs.size(); i++)
 				{
 					Type type = constructorTypeArgs.get(i);
+					typeArgsTypes[i]=type.toString();
+					//type.resolveBinding();
 					boolean isAnnotatable = type.isAnnotatable();
 					boolean isArrayType = type.isArrayType();
 					boolean isIntersectionType = type.isIntersectionType();
@@ -365,29 +360,30 @@ public abstract class JavaStatementInfo {
 					boolean isVar = type.isVar();
 					boolean isWildcardType = type.isWildcardType();
 					if(isAnnotatable)
-						typeArgsTypes[i]="Annotatable";
+						typeArgsDeclaredTypes[i]="Annotatable";
 					else if(isArrayType)
-						typeArgsTypes[i]="ArrayType";
+						typeArgsDeclaredTypes[i]="ArrayType";
 					else if(isIntersectionType)
-						typeArgsTypes[i]="IntersectionType";
+						typeArgsDeclaredTypes[i]="IntersectionType";
 					else if(isNameQualifiedType)
-						typeArgsTypes[i]="NameQualifiedType";
+						typeArgsDeclaredTypes[i]="NameQualifiedType";
 					else if(isParameterizedType)
-						typeArgsTypes[i]="ParameterizedType";
+						typeArgsDeclaredTypes[i]="ParameterizedType";
 					else if(isPrimitiveType)
-						typeArgsTypes[i]="PrimitiveType";
+						typeArgsDeclaredTypes[i]="PrimitiveType";
 					else if(isQualifiedType)
-						typeArgsTypes[i]="QualifiedType";
+						typeArgsDeclaredTypes[i]="QualifiedType";
 					else if(isSimpleType)
-						typeArgsTypes[i]="SimpleType";
+						typeArgsDeclaredTypes[i]="SimpleType";
 					else if(isUnionType)
-						typeArgsTypes[i]="UnionType";
+						typeArgsDeclaredTypes[i]="UnionType";
 					else if(isVar)
-						typeArgsTypes[i]="Varialbe";
+						typeArgsDeclaredTypes[i]="Varialbe";
 					else if(isWildcardType)
-						typeArgsTypes[i]="WildcardType";
+						typeArgsDeclaredTypes[i]="WildcardType";
 				}
-				map.put(JavaExtractor.TYPE_ARG_TYPE, typeArgsTypes);
+				map.put(JavaExtractor.DECLARED_TYPE, typeArgsDeclaredTypes);
+				map.put(JavaExtractor.TYPE_ARG_TYPE_STR, typeArgsDeclaredTypes);
 	        	@SuppressWarnings("unchecked")
 				List<Expression> constructorArgs = superConstructorInvocation.arguments();
 				nodeId = createNode(inserter, map);
@@ -396,17 +392,16 @@ public abstract class JavaStatementInfo {
 					long argId = JavaExpressionInfo.createJavaExpressionNode(inserter, constructorArgs.get(i), sourceContent, methodName);
 		    		if(argId!=-1)
 		    		{
-		    			inserter.createRelationship(nodeId, argId, JavaExtractor.CONSTRUCTOR_ARG, new HashMap<>());
+		    			inserter.createRelationship(nodeId, argId, JavaExtractor.HAVE_PARAM, new HashMap<>());
 		    		}else;
 				}
 				Expression expression = superConstructorInvocation.getExpression();
 				long expressionId = JavaExpressionInfo.createJavaExpressionNode(inserter, expression, sourceContent, methodName);
 	    		if(expressionId!=-1)
 	    		{
-	    			inserter.createRelationship(nodeId, expressionId, JavaExtractor.SUPER_CONSTRUCTOR_INVOCATION, new HashMap<>());
+	    			inserter.createRelationship(expressionId, nodeId, JavaExtractor.INVOCATION, new HashMap<>());
 	    		}else;
 				//superConstructorInvocation.resolveConstructorBinding();
-				return nodeId;
 	        }
 	        else if(statement.getNodeType() == ASTNode.SWITCH_CASE)
 	        {
@@ -422,7 +417,6 @@ public abstract class JavaStatementInfo {
 				{
 					inserter.createRelationship(nodeId, caseId, JavaExtractor.ENTER_CONDITION, new HashMap<>());
 				}
-				return nodeId;
 	        }
 	        else if(statement.getNodeType() == ASTNode.SWITCH_STATEMENT)
 	        {
@@ -445,7 +439,6 @@ public abstract class JavaStatementInfo {
 						inserter.createRelationship(nodeId, id, JavaExtractor.STATEMENT_BODY, new HashMap<>());
 					else;
 				}
-				return nodeId;
 	        }
 	        else if(statement.getNodeType() == ASTNode.SYNCHRONIZED_STATEMENT)
 	        {
@@ -464,7 +457,6 @@ public abstract class JavaStatementInfo {
 				{
 					inserter.createRelationship(nodeId, syncExpressionId, JavaExtractor.SYNCHRONIZED, new HashMap<>());
 				}else;
-				return nodeId;
 	        }
 	        else if(statement.getNodeType() == ASTNode.THROW_STATEMENT)
 	        {
@@ -478,7 +470,6 @@ public abstract class JavaStatementInfo {
 				{
 					inserter.createRelationship(nodeId, throwId, JavaExtractor.THROW, new HashMap<>());
 				}else;
-				return nodeId;
 			}
 	        else if(statement.getNodeType() == ASTNode.TRY_STATEMENT)
 	        {
@@ -504,7 +495,7 @@ public abstract class JavaStatementInfo {
 				}else;
 				for(int i = 0; i < catchClauses.size(); i++)
 				{
-					long catchId = JavaStatementInfo.createCatchClauseNode(inserter, methodName, i, sourceContent, catchClauses.get(i));
+					long catchId = JavaStatementInfo.createCatchClauseNode(inserter, statement, methodName, sourceContent, catchClauses.get(i));
 					inserter.createRelationship(nodeId, catchId, JavaExtractor.CATCH, new HashMap<>());
 				}
 				for(Expression resource:resources)
@@ -512,7 +503,6 @@ public abstract class JavaStatementInfo {
 					long resourceId = JavaExpressionInfo.createJavaExpressionNode(inserter, resource, sourceContent, methodName);
 					inserter.createRelationship(nodeId, resourceId, JavaExtractor.TRY_RESOURCE, new HashMap<>());
 				}
-				return nodeId;
 	        }
 	        else if(statement.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT)
             {
@@ -520,6 +510,25 @@ public abstract class JavaStatementInfo {
 				addProperties(statement, sourceContent, map, statementType, methodName);
 				VariableDeclarationStatement variableDeclarationStatement = (VariableDeclarationStatement)statement;
 				Type type = variableDeclarationStatement.getType();
+				String typeLiteral = type.toString();
+				map.put(JavaExtractor.VAR_TYPE_STR, typeLiteral);
+				int modifier = variableDeclarationStatement.getModifiers();
+				if(Modifier.isFinal(modifier))
+					map.put(JavaExtractor.IS_FINAL, true);
+				else
+					map.put(JavaExtractor.IS_FINAL, false);
+				if(Modifier.isStatic(modifier))
+					map.put(JavaExtractor.IS_STATIC, true);
+				else
+					map.put(JavaExtractor.IS_STATIC, false);
+				if(Modifier.isVolatile(modifier))
+					map.put(JavaExtractor.IS_VOLATILE, true);
+				else
+					map.put(JavaExtractor.IS_VOLATILE, false);
+				if(Modifier.isTransient(modifier))
+					map.put(JavaExtractor.IS_TRANSIENT, true);
+				else
+					map.put(JavaExtractor.IS_TRANSIENT, false);
 				boolean isAnnotatable = type.isAnnotatable();
 				boolean isArrayType = type.isArrayType();
 				boolean isIntersectionType = type.isIntersectionType();
@@ -561,10 +570,9 @@ public abstract class JavaStatementInfo {
 				{
 					long id = JavaStatementInfo.createVariableDeclarationFragmentNode(inserter, map, methodName, i, fragments.get(i), sourceContent);
 					if(id!=-1)
-						inserter.createRelationship(nodeId, id, JavaExtractor.STATEMENT_BODY, new HashMap<>());
+						inserter.createRelationship(nodeId, id, JavaExtractor.VAR_DECLARATION_FRAG, new HashMap<>());
 					else;
 				}
-				return nodeId;
             }
 	        else if(statement.getNodeType()==ASTNode.WHILE_STATEMENT) 
 			{
@@ -584,30 +592,41 @@ public abstract class JavaStatementInfo {
 				{
 					inserter.createRelationship(nodeId, bodyId, JavaExtractor.STATEMENT_BODY, new HashMap<>());
 				}else;
-				return nodeId;
 			}
 	        else
 			{
 				TempStatementInfo info = new TempStatementInfo(inserter, methodName, statement);
-				return info.getNodeId();
+				nodeId = info.getNodeId();
 			}
+			return nodeId;
 		}
 		else
 			return -1;	
 	}
 	
-	private static long createVariableDeclarationFragmentNode(BatchInserter inserter, HashMap<String, Object> map, String methodName, int decNo,
+	static long createVariableDeclarationFragmentNode(BatchInserter inserter, HashMap<String, Object> map, String methodName, int decNo,
 			VariableDeclarationFragment variableDeclarationFragment, String sourceContent) {
 		String statementType = "VariableDeclarationFragment";
 		addProperties(variableDeclarationFragment, sourceContent, map, statementType, methodName);
+		int dimensions = variableDeclarationFragment.getExtraDimensions();
+		Expression initializer = variableDeclarationFragment.getInitializer();
+		String identifier = variableDeclarationFragment.getName().getIdentifier();
+//		variableDeclarationFragment.resolveBinding();
+		map.put(JavaExtractor.DIMENSION, dimensions);
+		map.put(JavaExtractor.NAME, identifier);
 		long nodeId = inserter.createNode(map, JavaExtractor.VARIABLE_DECLARATION_FRAGMENT);
+		long initializerId = JavaExpressionInfo.createJavaExpressionNode(inserter, initializer, sourceContent, methodName);
+		if(initializerId!=-1)
+			inserter.createRelationship(nodeId, initializerId, JavaExtractor.INITIALIZER, new HashMap<>());
+		else;
 		return nodeId;
 	}
 
-	private static long createCatchClauseNode(BatchInserter inserter, String methodName, int i, String sourceContent,
+	private static long createCatchClauseNode(BatchInserter inserter, Statement statement, String methodName, String sourceContent,
 			CatchClause catchClause) {
 		HashMap<String, Object> map = new  HashMap<>();
-		map.put(JavaExtractor.CATCH_NO, i);
+		int rowNo = sourceContent.substring(0, statement.getStartPosition()).split("\n").length;
+		map.put(JavaExtractor.ROW_NO, rowNo);
 		map.put(JavaExtractor.METHOD_NAME, methodName);
 		long nodeId = inserter.createNode(map, JavaExtractor.CATCH_CLAUSE);
 		Statement catchBody = catchClause.getBody();

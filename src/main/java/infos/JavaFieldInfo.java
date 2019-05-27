@@ -59,7 +59,7 @@ public class JavaFieldInfo {
         Map<String, Object> map = new HashMap<>();
         map.put(JavaExtractor.NAME, name);
         map.put(JavaExtractor.FULLNAME, fullName);
-        map.put(JavaExtractor.TYPE_STR, type);
+        map.put(JavaExtractor.VAR_TYPE_STR, type);
         map.put(JavaExtractor.VISIBILITY, visibility);
         map.put(JavaExtractor.IS_STATIC, isStatic);
         map.put(JavaExtractor.IS_FINAL, isFinal);
