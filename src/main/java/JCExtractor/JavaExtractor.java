@@ -52,7 +52,7 @@ public class JavaExtractor extends KnowledgeExtractor {
     public static final Label VARIABLE_DECLARATION_FRAGMENT = Label.label("VariableDeclarationFragment");
     public static final Label SINGLE_VARIABLE_DECLARATION = Label.label("SingleVariableDeclaration");
 	public static final Label CATCH_CLAUSE = Label.label("CatchClause");
-
+	public static final Label DIMENSION = Label.label("Dimension");
     
     //关系类型
     public static final RelationshipType EXTEND = RelationshipType.withName("extend");
@@ -80,7 +80,7 @@ public class JavaExtractor extends KnowledgeExtractor {
 	public static final RelationshipType FINALLY = RelationshipType.withName("finally");
 	public static final RelationshipType CATCH = RelationshipType.withName("catch");
 	public static final RelationshipType TRY_RESOURCE = RelationshipType.withName("tryResource");
-	public static final RelationshipType EXCEPTION_DECLARATION = RelationshipType.withName("exceptionDeclaration");
+	public static final RelationshipType EXCEPTION_CAUGHT = RelationshipType.withName("exceptionCaught");
 	public static final RelationshipType HAVE_PARAM = RelationshipType.withName("haveParament");
 	public static final RelationshipType SYNCHRONIZED = RelationshipType.withName("synchronized");
 	public static final RelationshipType ARRAY_ACCESS = RelationshipType.withName("arrayAccess");
@@ -92,9 +92,21 @@ public class JavaExtractor extends KnowledgeExtractor {
 	public static final RelationshipType LEFT_OPERAND = RelationshipType.withName("leftOperand");
 	public static final RelationshipType RIGHT_OPERAND = RelationshipType.withName("rightOperand");
 	public static final RelationshipType VAR_DECLARATION_FRAG = RelationshipType.withName("variableDeclarationFragment");
-	public static final RelationshipType INVOCATION = RelationshipType.withName("invocation");;
+	public static final RelationshipType INVOCATION = RelationshipType.withName("invocation");
+	public static final RelationshipType NORMAL_ANNOTATION_VALUE = RelationshipType.withName("normalannotationValue");
+	public static final RelationshipType SINGLE_MEMBER_ANNOTATION_VALUE = RelationshipType.withName("singleMemberAnnotation");
+	public static final RelationshipType PREFIX_OPRD = RelationshipType.withName("prefixOprd");
+	public static final RelationshipType PREFIX = RelationshipType.withName("prefix");
+	public static final RelationshipType POSTFIX = RelationshipType.withName("postfix");
+	public static final RelationshipType POSTFIX_OPRD = RelationshipType.withName("postfixOprd");
+	public static final RelationshipType INFIX = RelationshipType.withName("infix");
+	public static final RelationshipType CAST = RelationshipType.withName("cast");	
+	public static final RelationshipType LAMBDA_BODY = RelationshipType.withName("lambdaBody");
+	public static final RelationshipType EXTRA_DIMENSION = RelationshipType.withName("extraDimension");
+	public static final RelationshipType HAVE_ANNOTATION = RelationshipType.withName("haveAnnotation");
+	public static final RelationshipType LAMBDA_PARAMETER = RelationshipType.withName("lambdaParameter");
+	public static final RelationshipType SWITCH = RelationshipType.withName("switch");
 
-	
     //属性类型
     public static final String NAME = "name";
     public static final String FULLNAME = "fullName";
@@ -122,8 +134,9 @@ public class JavaExtractor extends KnowledgeExtractor {
     public static final String IS_BLOCK_ELSE = "isBlockElse";
 	public static final String IS_DEFAULT = "isDefault";
 	public static final String DECLARED_TYPE = "declaredType";
+	public static final String TYPE_CASTED_TO = "typeCastedTo";
 	public static final String ARRAY_TYPE = "arrayType";
-	public static final String DIMENSION = "dimension";
+	public static final String DIMENSION_NUM = "dimensionNum";
 	public static final String ELEMENT_TYPE = "elementType";
 	public static final String COMPONENT_TYPE = "componentType";
 	public static final String OPERATOR_TYPE = "operatorType";
@@ -132,6 +145,10 @@ public class JavaExtractor extends KnowledgeExtractor {
 	public static final String QUALIFIER = "qualifier";
 	public static final String TYPE_ARG_TYPE_STR = "typeArgmentType";
 	public static final String METHOD_TYPE = "methodType";
+	public static final String IDENTIFIER = "identifier";
+	public static final String INSTANCE_TYPE = "instanceType";
+	public static final String VARIABLE_IDENTIFIER = "variableIdentifier";
+	public static final String IS_VARIABLE_ARITY_METHOD_ARG = "isVarargs";
 	
     @Override
     public boolean isBatchInsert() {
