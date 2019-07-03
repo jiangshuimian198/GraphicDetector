@@ -29,7 +29,6 @@ import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
-import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
@@ -40,6 +39,7 @@ import main.java.JCExtractor.JavaExtractor;
 public abstract class JavaStatementInfo {
 	private static int conditionNo = 0;
 	
+	@SuppressWarnings("unchecked")
 	public static long createJavaStatementNode(BatchInserter inserter, String methodName, String codeContent, Statement statement)
 	{
 		HashMap<String, Object> map = new HashMap<String, Object>();
@@ -54,6 +54,7 @@ public abstract class JavaStatementInfo {
 				addProperties(statement, codeContent, map, statementType, methodName);
 				AssertStatement assertStatement = (AssertStatement)statement;
 				nodeId = createNode(inserter, map);
+				
 				Expression assertExpression = assertStatement.getExpression();
 				long assertId = JavaExpressionInfo.createJavaExpressionNode(inserter, assertExpression, codeContent, methodName);
 	    		if(assertId!=-1)
@@ -68,7 +69,6 @@ public abstract class JavaStatementInfo {
 				nodeId = createNode(inserter, map);
 				
 				Block block = (Block)statement;
-				@SuppressWarnings("unchecked")
 				List<Statement> statements = block.statements();
 				for(int i = 0; i<statements.size();i++)
 				{
@@ -96,46 +96,13 @@ public abstract class JavaStatementInfo {
 				addProperties(statement, codeContent, map, statementType, methodName);
 				ConstructorInvocation constructorInvocation = (ConstructorInvocation)statement;
 				//constructorInvocation.resolveConstructorBinding();
-				@SuppressWarnings("unchecked")
-				List<Expression> constructorArgs = constructorInvocation.arguments();
-				@SuppressWarnings("unchecked")
-				List<Type> constructorTypeArgs =constructorInvocation.typeArguments();
-				String[] typeArgsDeclaredTypes = new String[constructorTypeArgs.size()];
-				String[] typeArgsTypes = new String[constructorTypeArgs.size()];
-				for(int i = 0; i<constructorTypeArgs.size(); i++)
-				{
-					Type type = constructorTypeArgs.get(i);
-					typeArgsTypes[i]=type.toString();
-					//type.resolveBinding();
-					if(type.isAnnotatable())
-						typeArgsDeclaredTypes[i]="Annotatable";
-					else if(type.isArrayType())
-						typeArgsDeclaredTypes[i]="ArrayType";
-					else if(type.isIntersectionType())
-						typeArgsDeclaredTypes[i]="IntersectionType";
-					else if(type.isNameQualifiedType())
-						typeArgsDeclaredTypes[i]="NameQualifiedType";
-					else if(type.isParameterizedType())
-						typeArgsDeclaredTypes[i]="ParameterizedType";
-					else if(type.isPrimitiveType())
-						typeArgsDeclaredTypes[i]="PrimitiveType";
-					else if(type.isQualifiedType())
-						typeArgsDeclaredTypes[i]="QualifiedType";
-					else if(type.isSimpleType())
-						typeArgsDeclaredTypes[i]="SimpleType";
-					else if(type.isUnionType())
-						typeArgsDeclaredTypes[i]="UnionType";
-					else if(type.isVar())
-						typeArgsDeclaredTypes[i]="Varialbe";
-					else if(type.isWildcardType())
-						typeArgsDeclaredTypes[i]="WildcardType";
-				}
-				map.put(JavaExtractor.DECLARED_TYPE, typeArgsDeclaredTypes);
-				map.put(JavaExtractor.TYPE_ARG_TYPE_STR, typeArgsDeclaredTypes);
+				JavaExpressionInfo.addTypeArgProperties(map,constructorInvocation.typeArguments());
 				nodeId = createNode(inserter, map);
-				for(int i = 0; i<constructorArgs.size(); i++)
+				
+				List<Expression> constructorArgs = constructorInvocation.arguments();
+				for(Expression element : constructorArgs)
 				{
-					long argId = JavaExpressionInfo.createJavaExpressionNode(inserter, constructorArgs.get(i), codeContent, methodName);
+					long argId = JavaExpressionInfo.createJavaExpressionNode(inserter, element, codeContent, methodName);
 		    		if(argId!=-1)
 		    		{
 		    			inserter.createRelationship(nodeId, argId, JavaExtractor.HAVE_PARAM, new HashMap<>());
@@ -159,10 +126,10 @@ public abstract class JavaStatementInfo {
 	        	statementType="DoStatement";
 	        	addProperties(statement, codeContent, map, statementType, methodName);
 	        	nodeId = createNode(inserter, map);
+	        	
 	        	DoStatement doStatement = (DoStatement)statement;
 	    		Statement doBody = doStatement.getBody();
 	    		Expression loopCondition = doStatement.getExpression();
-	    		
 	    		long loopConditionId = JavaExpressionInfo.createJavaExpressionNode(inserter, loopCondition, codeContent, methodName);
 	    		if(loopConditionId!=-1)
 	    		{
@@ -185,6 +152,7 @@ public abstract class JavaStatementInfo {
 	        	statementType="EnhancedForStatement";
 	        	addProperties(statement, codeContent, map, statementType, methodName);
 	        	nodeId = createNode(inserter, map);
+	        	
 	        	EnhancedForStatement enhancedForStatement = (EnhancedForStatement)statement;
 	    		Expression loopCondition = enhancedForStatement.getExpression();
 	    		Statement forBody = enhancedForStatement.getBody();
@@ -206,6 +174,7 @@ public abstract class JavaStatementInfo {
 	        	statementType="ExpressionStatement";
 	        	addProperties(statement, codeContent, map, statementType, methodName);
 	        	nodeId = createNode(inserter, map);
+	        	
 	        	ExpressionStatement expressionStatement = (ExpressionStatement)statement;
 	    		Expression expression = expressionStatement.getExpression();
 	    		long expressionId = JavaExpressionInfo.createJavaExpressionNode(inserter, expression, codeContent, methodName);
@@ -222,15 +191,13 @@ public abstract class JavaStatementInfo {
 	        	nodeId = createNode(inserter, map);
 	    		
 	    		ForStatement forStatement = (ForStatement)statement;
-	    		@SuppressWarnings("unchecked")
-				List<Expression> initializers = forStatement.initializers();
+	    		List<Expression> initializers = forStatement.initializers();
 	    		Expression loopCondition = forStatement.getExpression();
 	    		Statement forBody = forStatement.getBody();
-	    		@SuppressWarnings("unchecked")
-				List<Expression> updaters = forStatement.updaters();
-	    		for(int i =0;i<initializers.size();i++)
+	    		List<Expression> updaters = forStatement.updaters();
+	    		for(Expression element : initializers)
 	    		{
-	    			long initId = JavaExpressionInfo.createJavaExpressionNode(inserter, initializers.get(i), codeContent, methodName);
+	    			long initId = JavaExpressionInfo.createJavaExpressionNode(inserter, element, codeContent, methodName);
 	    			if(initId!=-1)
 	    			{
 	    				inserter.createRelationship(nodeId, initId, JavaExtractor.INITIALIZER, new HashMap<>());
@@ -243,12 +210,12 @@ public abstract class JavaStatementInfo {
 	    			inserter.createRelationship(nodeId, loopId, JavaExtractor.LOOP_CONDITION, new HashMap<>());
 	    		}
 	    		else;
-	    		for(int i =0;i<updaters.size();i++)
+	    		for(Expression element : updaters)
 	    		{
-	    			long initId = JavaExpressionInfo.createJavaExpressionNode(inserter, updaters.get(i), codeContent, methodName);
+	    			long initId = JavaExpressionInfo.createJavaExpressionNode(inserter, element, codeContent, methodName);
 	    			if(initId!=-1)
 	    			{
-	    				inserter.createRelationship(nodeId, initId, JavaExtractor.UPDATERS, new HashMap<>());
+	    				inserter.createRelationship(nodeId, initId, JavaExtractor.UPDATER, new HashMap<>());
 	    			}
 	    			else;
 	    		}
@@ -265,13 +232,12 @@ public abstract class JavaStatementInfo {
 	        	statementType="IfStatement";
 	        	addProperties(statement, codeContent, map, statementType, methodName);
 	        	map.put(JavaExtractor.IF_CONDITION_NO,conditionNo);
+	        	nodeId = createNode(inserter, map);
 	    		
 	    		IfStatement ifStatement = (IfStatement)statement;
 	    		Statement thenStatement = ifStatement.getThenStatement();
 	    		Statement elseStatement = ifStatement.getElseStatement();
 	    		Expression conditionalExpression = ifStatement.getExpression();
-	    		nodeId = createNode(inserter, map);
-	    		
 	    		long conditionalExpressionId = JavaExpressionInfo.createJavaExpressionNode(inserter, conditionalExpression, codeContent, methodName);
 	    		if(conditionalExpressionId!=-1)
 	    		{
@@ -289,7 +255,7 @@ public abstract class JavaStatementInfo {
 	    		long thenId = JavaStatementInfo.createJavaStatementNode(inserter, methodName, codeContent, thenStatement);
 	    		if(thenId!=-1)
 	    		{
-	    			inserter.createRelationship(nodeId, thenId, JavaExtractor.STATEMENT_BODY, new HashMap<>());
+	    			inserter.createRelationship(nodeId, thenId, JavaExtractor.THEN, new HashMap<>());
 	    		}
 	    		else;
 			}
@@ -299,9 +265,9 @@ public abstract class JavaStatementInfo {
 	        	addProperties(statement, codeContent, map, statementType, methodName);
 	        	LabeledStatement labeledStatement = (LabeledStatement)statement;
 	        	Statement labeledBody = labeledStatement.getBody();
-	        	String identifier = labeledStatement.getLabel().getIdentifier();
-	        	map.put(JavaExtractor.LABEL, identifier);
+	        	map.put(JavaExtractor.LABEL, labeledStatement.getLabel().getIdentifier());
 				nodeId = createNode(inserter, map);
+				
 				long bodyId = JavaStatementInfo.createJavaStatementNode(inserter, methodName, codeContent, labeledBody);
 	    		if(bodyId!=-1)
 	    		{
@@ -314,6 +280,7 @@ public abstract class JavaStatementInfo {
 	        	statementType="ReturnStatement";
 				addProperties(statement, codeContent, map, statementType, methodName);
 				nodeId = createNode(inserter, map);
+				
 				ReturnStatement returnStatement = (ReturnStatement)statement;
 				Expression returnExpression = returnStatement.getExpression();
 				long returnId = JavaExpressionInfo.createJavaExpressionNode(inserter, returnExpression, codeContent, methodName);
@@ -327,45 +294,11 @@ public abstract class JavaStatementInfo {
 	        {
 	        	statementType = "SuperConstructorInvocation";
 	        	addProperties(statement, codeContent, map, statementType, methodName);
+	        	nodeId = createNode(inserter, map);
 	        	SuperConstructorInvocation superConstructorInvocation = (SuperConstructorInvocation)statement;
-	        	
-	        	@SuppressWarnings("unchecked")
-				List<Type> constructorTypeArgs =superConstructorInvocation.typeArguments();
-				String[] typeArgsDeclaredTypes = new String[constructorTypeArgs.size()];
-				String[] typeArgsTypes = new String[constructorTypeArgs.size()];
-				for(int i = 0; i<constructorTypeArgs.size(); i++)
-				{
-					Type type = constructorTypeArgs.get(i);
-					typeArgsTypes[i]=type.toString();
-					//type.resolveBinding();
-					if(type.isAnnotatable())
-						typeArgsDeclaredTypes[i]="Annotatable";
-					else if(type.isArrayType())
-						typeArgsDeclaredTypes[i]="ArrayType";
-					else if(type.isIntersectionType())
-						typeArgsDeclaredTypes[i]="IntersectionType";
-					else if(type.isNameQualifiedType())
-						typeArgsDeclaredTypes[i]="NameQualifiedType";
-					else if(type.isParameterizedType())
-						typeArgsDeclaredTypes[i]="ParameterizedType";
-					else if(type.isPrimitiveType())
-						typeArgsDeclaredTypes[i]="PrimitiveType";
-					else if(type.isQualifiedType())
-						typeArgsDeclaredTypes[i]="QualifiedType";
-					else if(type.isSimpleType())
-						typeArgsDeclaredTypes[i]="SimpleType";
-					else if(type.isUnionType())
-						typeArgsDeclaredTypes[i]="UnionType";
-					else if(type.isVar())
-						typeArgsDeclaredTypes[i]="Varialbe";
-					else if(type.isWildcardType())
-						typeArgsDeclaredTypes[i]="WildcardType";
-				}
-				map.put(JavaExtractor.DECLARED_TYPE, typeArgsDeclaredTypes);
-				map.put(JavaExtractor.TYPE_ARG_TYPE_STR, typeArgsDeclaredTypes);
-	        	@SuppressWarnings("unchecked")
-				List<Expression> constructorArgs = superConstructorInvocation.arguments();
-				nodeId = createNode(inserter, map);
+
+				JavaExpressionInfo.addTypeArgProperties(map,superConstructorInvocation.typeArguments());
+	        	List<Expression> constructorArgs = superConstructorInvocation.arguments();
 				for(Expression element : constructorArgs)
 				{
 					long argId = JavaExpressionInfo.createJavaExpressionNode(inserter, element, codeContent, methodName);
@@ -390,6 +323,7 @@ public abstract class JavaStatementInfo {
 	        	Boolean isDefault = switchCase.isDefault();
 				map.put(JavaExtractor.IS_DEFAULT, isDefault);
 				nodeId = createNode(inserter, map);
+				
 				Expression caseExpression = switchCase.getExpression();
 				long caseId = JavaExpressionInfo.createJavaExpressionNode(inserter, caseExpression, codeContent, methodName);
 				if(caseId!=-1)
@@ -402,6 +336,7 @@ public abstract class JavaStatementInfo {
 	        	statementType="SwitchStatement";
 				addProperties(statement, codeContent, map, statementType, methodName);
 				nodeId = createNode(inserter, map);
+				
 				SwitchStatement switchStatement = (SwitchStatement)statement;
 				Expression enterCondition = switchStatement.getExpression();
 				long conditionId = JavaExpressionInfo.createJavaExpressionNode(inserter, enterCondition, codeContent, methodName);
@@ -409,7 +344,6 @@ public abstract class JavaStatementInfo {
 				{
 					inserter.createRelationship(nodeId, conditionId, JavaExtractor.SWITCH, new HashMap<>());
 				}
-				@SuppressWarnings("unchecked")
 				List<Statement> statements=switchStatement.statements();
 				for(int i = 0; i<statements.size();i++)
 				{
@@ -424,6 +358,7 @@ public abstract class JavaStatementInfo {
 	        	statementType = "SynchronizedStatement";
 	        	addProperties(statement, codeContent, map, statementType, methodName);
 	        	nodeId = createNode(inserter, map);
+	        	
 	        	SynchronizedStatement synchronizedStatement = (SynchronizedStatement)statement;
 	        	Statement synchronizedBody = synchronizedStatement.getBody();
 	        	Expression synchronizedExpression = synchronizedStatement.getExpression();
@@ -442,6 +377,7 @@ public abstract class JavaStatementInfo {
 	        	statementType="ThrowStatement";
 				addProperties(statement, codeContent, map, statementType, methodName);
 				nodeId = createNode(inserter, map);
+				
 				ThrowStatement throwStatement = (ThrowStatement)statement;
 				Expression throwExpression = throwStatement.getExpression();
 				long throwId = JavaExpressionInfo.createJavaExpressionNode(inserter, throwExpression, codeContent, methodName);
@@ -455,12 +391,11 @@ public abstract class JavaStatementInfo {
 	        	statementType="TryStatement";
 				addProperties(statement, codeContent, map, statementType, methodName);
 				nodeId = createNode(inserter, map);
+				
 				TryStatement tryStatement = (TryStatement)statement;
 				Statement tryBody = tryStatement.getBody();
 				Statement tryFinally = tryStatement.getFinally();
-				@SuppressWarnings("unchecked")
 				List<Expression> resources = tryStatement.resources();
-				@SuppressWarnings("unchecked")
 				List<CatchClause> catchClauses = tryStatement.catchClauses();
 				long bodyId = JavaStatementInfo.createJavaStatementNode(inserter, methodName, codeContent, tryBody);
 				if(bodyId!=-1)
@@ -493,7 +428,6 @@ public abstract class JavaStatementInfo {
 				JavaExpressionInfo.addDeclaredTypeProperty(map, variableDeclarationStatement.getType());
 				nodeId = createNode(inserter, map);
 				
-				@SuppressWarnings("unchecked")
 				List<VariableDeclarationFragment> fragments = variableDeclarationStatement.fragments();
 				for(VariableDeclarationFragment element : fragments)
 				{
@@ -508,6 +442,7 @@ public abstract class JavaStatementInfo {
 	        	statementType="WhileStatement";
 				addProperties(statement, codeContent, map, statementType, methodName);
 				nodeId = createNode(inserter, map);
+				
 				WhileStatement whileStatement = (WhileStatement)statement;
 				Expression loopCondition = whileStatement.getExpression();
 				Statement whileBody = whileStatement.getBody();
@@ -534,21 +469,17 @@ public abstract class JavaStatementInfo {
 	}
 	
 	static long createVariableDeclarationFragmentNode(BatchInserter inserter, String methodName,
-			VariableDeclarationFragment variableDeclarationFragment, String sourceContent) {
+			VariableDeclarationFragment variableDeclarationFragment, String codeContent) {
 		HashMap<String, Object> map = new  HashMap<>();
 		map.put(JavaExtractor.METHOD_NAME, methodName);
-    	String content = sourceContent.substring(variableDeclarationFragment.getStartPosition(),variableDeclarationFragment.getStartPosition()+variableDeclarationFragment.getLength());
-		map.put(JavaExtractor.CONTENT, content);
-		int rowNo = sourceContent.substring(0, variableDeclarationFragment.getStartPosition()).split("\n").length;
-		map.put(JavaExtractor.ROW_NO, rowNo);
-		int dimensions = variableDeclarationFragment.getExtraDimensions();
+		map.put(JavaExtractor.CONTENT, codeContent.substring(variableDeclarationFragment.getStartPosition(),variableDeclarationFragment.getStartPosition()+variableDeclarationFragment.getLength()));
+		map.put(JavaExtractor.ROW_NO, codeContent.substring(0, variableDeclarationFragment.getStartPosition()).split("\n").length);
 		Expression initializer = variableDeclarationFragment.getInitializer();
-		String identifier = variableDeclarationFragment.getName().getIdentifier();
 //		variableDeclarationFragment.resolveBinding();
-		map.put(JavaExtractor.DIMENSION_NUM, dimensions);
-		map.put(JavaExtractor.VARIABLE_IDENTIFIER, identifier);
+		map.put(JavaExtractor.EXTRA_DIMENSION_NUM, variableDeclarationFragment.getExtraDimensions());
+		map.put(JavaExtractor.IDENTIFIER, variableDeclarationFragment.getName().getIdentifier());
 		long nodeId = inserter.createNode(map, JavaExtractor.VARIABLE_DECLARATION_FRAGMENT);
-		long initializerId = JavaExpressionInfo.createJavaExpressionNode(inserter, initializer, sourceContent, methodName);
+		long initializerId = JavaExpressionInfo.createJavaExpressionNode(inserter, initializer, codeContent, methodName);
 		if(initializerId!=-1)
 			inserter.createRelationship(nodeId, initializerId, JavaExtractor.INITIALIZER, new HashMap<>());
 		else;
@@ -582,7 +513,7 @@ public abstract class JavaStatementInfo {
 		map.put(JavaExtractor.METHOD_NAME, methodName);
 		map.put(JavaExtractor.CONTENT, codeContent.substring(singleVarDec.getStartPosition(),singleVarDec.getStartPosition()+singleVarDec.getLength()));
 		map.put(JavaExtractor.ROW_NO, codeContent.substring(0, singleVarDec.getStartPosition()).split("\n").length);
-		map.put(JavaExtractor.VARIABLE_IDENTIFIER, singleVarDec.getName().getIdentifier());
+		map.put(JavaExtractor.IDENTIFIER, singleVarDec.getName().getIdentifier());
 		JavaExpressionInfo.addModifierProperty(map, singleVarDec.getModifiers());
 		map.put(JavaExtractor.IS_VARIABLE_ARITY_METHOD_ARG, Boolean.toString(singleVarDec.isVarargs()));
 		long nodeId = inserter.createNode(map, JavaExtractor.SINGLE_VARIABLE_DECLARATION);

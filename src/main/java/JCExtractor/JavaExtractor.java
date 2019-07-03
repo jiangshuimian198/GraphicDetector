@@ -69,12 +69,13 @@ public class JavaExtractor extends KnowledgeExtractor {
     public static final RelationshipType HAVE_FIELD = RelationshipType.withName("haveField");
     public static final RelationshipType FIELD_TYPE = RelationshipType.withName("fieldType");
     public static final RelationshipType FIELD_ACCESS = RelationshipType.withName("fieldAccess");
+	public static final RelationshipType THEN = RelationshipType.withName("then");
     public static final RelationshipType ELSE = RelationshipType.withName("else");
     public static final RelationshipType ENTER_CONDITION = RelationshipType.withName("enterCondition");
     public static final RelationshipType LOOP_CONDITION = RelationshipType.withName("loopCondition");
     public static final RelationshipType RETURN = RelationshipType.withName("return");
     public static final RelationshipType INITIALIZER = RelationshipType.withName("initializer");
-	public static final RelationshipType UPDATERS = RelationshipType.withName("updater");
+	public static final RelationshipType UPDATER = RelationshipType.withName("updater");
 	public static final RelationshipType ASSERT = RelationshipType.withName("assert");
 	public static final RelationshipType THROW = RelationshipType.withName("throw");
 	public static final RelationshipType FINALLY = RelationshipType.withName("finally");
@@ -106,6 +107,9 @@ public class JavaExtractor extends KnowledgeExtractor {
 	public static final RelationshipType HAVE_ANNOTATION = RelationshipType.withName("haveAnnotation");
 	public static final RelationshipType LAMBDA_PARAMETER = RelationshipType.withName("lambdaParameter");
 	public static final RelationshipType SWITCH = RelationshipType.withName("switch");
+	public static final RelationshipType PARENTHESIZE = RelationshipType.withName("parenthesize");
+	public static final RelationshipType CREATED_BY = RelationshipType.withName("createdBy");
+	public static final RelationshipType DOMAIN = RelationshipType.withName("domain");
 
     //属性类型
     public static final String NAME = "name";
@@ -143,12 +147,14 @@ public class JavaExtractor extends KnowledgeExtractor {
 	public static final String OPERATOR_LITERAL = "operatorLiteral";
 	public static final String ROW_NO = "rowNo";
 	public static final String QUALIFIER = "qualifier";
-	public static final String TYPE_ARG_TYPE_STR = "typeArgmentType";
+	public static final String TYPE_ARG_TYPE_NAME = "typeArgmentType";
 	public static final String METHOD_TYPE = "methodType";
 	public static final String IDENTIFIER = "identifier";
-	public static final String INSTANCE_TYPE = "instanceType";
-	public static final String VARIABLE_IDENTIFIER = "variableIdentifier";
 	public static final String IS_VARIABLE_ARITY_METHOD_ARG = "isVarargs";
+	public static final String TYPE_NAME = "typeName";
+	public static final String IS_RESOLVED_TYPE_INFERRED_FROM_EXPECTED_TYPE = "isResolvedTypeInferredFromExpectedType";
+	public static final String TYPE_ARG_DECLARED_TYPE = "typeArgDeclaredType";
+	public static final String EXTRA_DIMENSION_NUM = "extraDimensionNum";
 	
     @Override
     public boolean isBatchInsert() {
