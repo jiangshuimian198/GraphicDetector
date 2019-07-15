@@ -52,14 +52,14 @@ import main.java.infos.JavaStatementInfo;
 public class JavaStatementVisitor extends ASTVisitor{
 	
 	private JavaProjectInfo javaProjectInfo;
-    private BatchInserter inserter;
-    private String sourceContent;
+    private static BatchInserter inserter;
+    private static String sourceContent;
 
 	public JavaStatementVisitor(JavaProjectInfo javaProjectInfo, String sourceContent, BatchInserter inserter) {
 		// TODO Auto-generated constructor stub
 		this.javaProjectInfo = javaProjectInfo;
-		this.sourceContent = sourceContent;
-        this.inserter = inserter;
+		JavaStatementVisitor.sourceContent = sourceContent;
+        JavaStatementVisitor.inserter = inserter;
 	}
 	
 	private static String getVisibility(int modifiers) {
@@ -80,10 +80,10 @@ public class JavaStatementVisitor extends ASTVisitor{
             JavaMethodInfo javaMethodInfo = createJavaMethodInfo(methodDeclaration, NameResolver.getFullName(node));
             if (javaMethodInfo != null) {
 		        List<Long> infos = createJavaStatementInfos(methodDeclaration,javaMethodInfo.getFullName());
-		    	if(infos!=null) {
+		    	if(infos != null) {
 		            for(Long info : infos)
 		        	{
-		            	javaMethodInfo.addStatement(info);
+		            	javaMethodInfo.addStatementInfo(info);
 		        	}
 		    	}
             }
@@ -93,11 +93,12 @@ public class JavaStatementVisitor extends ASTVisitor{
 	}
 	
 	@SuppressWarnings("unchecked")
-	private JavaMethodInfo createJavaMethodInfo(MethodDeclaration node, String belongTo) {
+	public static JavaMethodInfo createJavaMethodInfo(MethodDeclaration node, String belongTo) {
         IMethodBinding methodBinding = node.resolveBinding();
         if (methodBinding == null)
             return null;
         String name = node.getName().getFullyQualifiedName();
+        String identifier = node.getName().getIdentifier();
         Type type = node.getReturnType2();
         String returnType = type == null ? "void" : type.toString();
         String fullReturnType = NameResolver.getFullName(type);
@@ -122,7 +123,7 @@ public class JavaStatementVisitor extends ASTVisitor{
         Set<IMethodBinding> methodCalls = new HashSet<>();
         StringBuilder fullVariables = new StringBuilder();
         StringBuilder fieldAccesses = new StringBuilder();
-        JavaMethodInfo info = new JavaMethodInfo(inserter, name, fullName, returnType, visibility, isConstruct, isAbstract,
+        JavaMethodInfo info = new JavaMethodInfo(inserter, name, identifier, fullName, returnType, visibility, isConstruct, isAbstract,
                 isFinal, isStatic, isSynchronized, content, comment, params, methodBinding,
                 fullReturnType, belongTo, fullParams, fullVariables.toString(), methodCalls, fieldAccesses.toString(), throwTypes);
         parseMethodBody(methodCalls, fullVariables, fieldAccesses, node.getBody());
@@ -137,9 +138,9 @@ public class JavaStatementVisitor extends ASTVisitor{
 		List<Statement> statements = methodDeclaration.getBody().statements();
 		List<Long> infos = new ArrayList<>();
 		if(statements!=null) {
-			for(int i =0;i<statements.size();i++)
+			for(Statement statement : statements)
 			{
-				infos.add(JavaStatementInfo.createJavaStatementNode(inserter, name, sourceContent, statements.get(i)));
+				infos.add(JavaStatementInfo.createJavaStatementNode(inserter, javaProjectInfo, name, sourceContent, statement));
 			}
 			return infos;
 		}
@@ -148,7 +149,7 @@ public class JavaStatementVisitor extends ASTVisitor{
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void parseMethodBody(Set<IMethodBinding> methodCalls, StringBuilder fullVariables, StringBuilder fieldAccesses, Block methodBody) {
+	private static void parseMethodBody(Set<IMethodBinding> methodCalls, StringBuilder fullVariables, StringBuilder fieldAccesses, Block methodBody) {
         if (methodBody == null)
             return;
         List<Statement> statementList = methodBody.statements();
@@ -278,7 +279,7 @@ public class JavaStatementVisitor extends ASTVisitor{
     }
 
     @SuppressWarnings("unchecked")
-	private void parseExpression(Set<IMethodBinding> methodCalls, StringBuilder fieldAccesses, Expression expression) {
+	private static void parseExpression(Set<IMethodBinding> methodCalls, StringBuilder fieldAccesses, Expression expression) {
         if (expression == null) {
             return;
         }

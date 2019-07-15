@@ -57,7 +57,7 @@ public class MainWindow {
 		frmv.setResizable(false);
 		frmv.setTitle("缺陷检测-v1.0");
 		frmv.setBounds(100, 100, 738, 367);
-		frmv.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		frmv.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmv.getContentPane().setLayout(null);
 		
 		JLabel project = new JLabel("请选择项目目录：");

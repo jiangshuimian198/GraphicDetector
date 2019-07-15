@@ -37,6 +37,26 @@ public class JavaProjectInfo {
     public void addFieldInfo(JavaFieldInfo info) {
         fieldInfoMap.put(info.getFullName(), info);
     }
+    
+    public boolean containsBindedClass(String className)
+    {
+    	return classInfoMap.containsKey(className);
+    }
+    
+    public boolean containsBindedMethod(IMethodBinding methodBinding)
+    {
+    	return methodBindingMap.containsKey(methodBinding);
+    }
+    
+    public long getBindedTypeId(String className)
+    {
+    	return classInfoMap.get(className).getNodeId();
+    }
+    
+    public long getBindedMethodId(IMethodBinding methodBinding) 
+    {
+		return methodBindingMap.get(methodBinding).getNodeId();
+	}
 
     //解析依赖
     public void parseRels(BatchInserter inserter) {

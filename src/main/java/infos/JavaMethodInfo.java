@@ -1,6 +1,5 @@
 package main.java.infos;
 
-
 import com.google.common.base.Preconditions;
 import lombok.Getter;
 import main.java.JCExtractor.JavaExtractor;
@@ -17,6 +16,8 @@ public class JavaMethodInfo {
 
     @Getter
     private String name;
+    @Getter
+    private String identifier;
     @Getter
     private String fullName;
     @Getter
@@ -61,7 +62,7 @@ public class JavaMethodInfo {
     @Getter
     private long nodeId;
 
-    public JavaMethodInfo(BatchInserter inserter, String name, String fullName, String returnType, String visibility, boolean isConstruct, boolean isAbstract,
+    public JavaMethodInfo(BatchInserter inserter, String name, String identifier, String fullName, String returnType, String visibility, boolean isConstruct, boolean isAbstract,
                           boolean isFinal, boolean isStatic, boolean isSynchronized, String content, String comment, String params, IMethodBinding methodBinding,
                           String fullReturnType, String belongTo, String fullParams, String fullVariables, Set<IMethodBinding> methodCalls, String fieldAccesses, String throwTypes) {
         Preconditions.checkArgument(name != null);
@@ -121,7 +122,7 @@ public class JavaMethodInfo {
         return inserter.createNode(map, JavaExtractor.METHOD);
     }
     
-    public void addStatement(long statementId)
+    public void addStatementInfo(long statementId)
     {
     	statements.add(statementId);
     }

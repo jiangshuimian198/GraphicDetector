@@ -43,6 +43,7 @@ public class JavaExtractor extends KnowledgeExtractor {
 
 	//节点类型
     public static final Label CLASS = Label.label("Class");
+	public static final Label ANONYMOUS_CLASS = Label.label("AnonymousClass");
     public static final Label METHOD = Label.label("Method");
     public static final Label FIELD = Label.label("Field");
     public static final Label PACKAGE = Label.label("Package");
@@ -53,6 +54,7 @@ public class JavaExtractor extends KnowledgeExtractor {
     public static final Label SINGLE_VARIABLE_DECLARATION = Label.label("SingleVariableDeclaration");
 	public static final Label CATCH_CLAUSE = Label.label("CatchClause");
 	public static final Label DIMENSION = Label.label("Dimension");
+	
     
     //关系类型
     public static final RelationshipType EXTEND = RelationshipType.withName("extend");
@@ -110,6 +112,9 @@ public class JavaExtractor extends KnowledgeExtractor {
 	public static final RelationshipType PARENTHESIZE = RelationshipType.withName("parenthesize");
 	public static final RelationshipType CREATED_BY = RelationshipType.withName("createdBy");
 	public static final RelationshipType DOMAIN = RelationshipType.withName("domain");
+	public static final RelationshipType BINDED_TYPE = RelationshipType.withName("bindedType");
+	public static final RelationshipType BINDED_METHOD = RelationshipType.withName("bindedMethod");
+	public static final RelationshipType ANONYMOUS_CLASS_DECLARATION = RelationshipType.withName("anonymousClassDeclaration");
 
     //属性类型
     public static final String NAME = "name";
@@ -155,6 +160,8 @@ public class JavaExtractor extends KnowledgeExtractor {
 	public static final String IS_RESOLVED_TYPE_INFERRED_FROM_EXPECTED_TYPE = "isResolvedTypeInferredFromExpectedType";
 	public static final String TYPE_ARG_DECLARED_TYPE = "typeArgDeclaredType";
 	public static final String EXTRA_DIMENSION_NUM = "extraDimensionNum";
+	public static final String CONST_EXPR_VALUE = "contantExpressionValue";
+	public static final String SUPER_CLASS = "superClass";
 	
     @Override
     public boolean isBatchInsert() {
