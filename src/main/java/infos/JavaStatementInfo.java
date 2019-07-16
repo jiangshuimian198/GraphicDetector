@@ -17,7 +17,8 @@ import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
-import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -71,9 +72,9 @@ public abstract class JavaStatementInfo {
 				
 				Block block = (Block)statement;
 				List<Statement> statements = block.statements();
-				for(int i = 0; i<statements.size();i++)
+				for(Statement element : statements)
 				{
-					long id = JavaStatementInfo.createJavaStatementNode(inserter, javaProjectInfo, methodName, codeContent, statements.get(i));
+					long id = JavaStatementInfo.createJavaStatementNode(inserter, javaProjectInfo, methodName, codeContent, element);
 					if(id!=-1)
 						inserter.createRelationship(nodeId, id, JavaExtractor.STATEMENT_BODY, new HashMap<>());
 					else;
@@ -96,8 +97,7 @@ public abstract class JavaStatementInfo {
 				statementType="ConstructorInvocation";
 				addProperties(statement, codeContent, map, statementType, methodName);
 				ConstructorInvocation constructorInvocation = (ConstructorInvocation)statement;
-				//constructorInvocation.resolveConstructorBinding();
-				JavaExpressionInfo.addTypeArgProperties(map,constructorInvocation.typeArguments());
+				List<ITypeBinding> bindedTypeList = JavaExpressionInfo.addTypeArgProperties(map,constructorInvocation.typeArguments());
 				nodeId = createNode(inserter, map);
 				
 				List<Expression> constructorArgs = constructorInvocation.arguments();
@@ -109,6 +109,12 @@ public abstract class JavaStatementInfo {
 		    			inserter.createRelationship(nodeId, argId, JavaExtractor.HAVE_PARAM, new HashMap<>());
 		    		}else;
 				}
+				
+				for(ITypeBinding element : bindedTypeList)
+					JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, element);
+				IMethodBinding constructorBinding = constructorInvocation.resolveConstructorBinding();
+				if(constructorBinding != null)
+					JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, constructorBinding);
 	        }
 			else if(statement.getNodeType() == ASTNode.CONTINUE_STATEMENT)
 	        {
@@ -299,7 +305,7 @@ public abstract class JavaStatementInfo {
 	        	nodeId = createNode(inserter, map);
 	        	SuperConstructorInvocation superConstructorInvocation = (SuperConstructorInvocation)statement;
 
-				JavaExpressionInfo.addTypeArgProperties(map,superConstructorInvocation.typeArguments());
+	        	List<ITypeBinding> bindedTypeList = JavaExpressionInfo.addTypeArgProperties(map,superConstructorInvocation.typeArguments());
 	        	List<Expression> constructorArgs = superConstructorInvocation.arguments();
 				for(Expression element : constructorArgs)
 				{
@@ -315,7 +321,12 @@ public abstract class JavaStatementInfo {
 	    		{
 	    			inserter.createRelationship(expressionId, nodeId, JavaExtractor.INVOCATION, new HashMap<>());
 	    		}else;
-				//superConstructorInvocation.resolveConstructorBinding();
+	
+	    		for(ITypeBinding element : bindedTypeList)
+					JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, element);
+	    		IMethodBinding constructorBinding = superConstructorInvocation.resolveConstructorBinding();
+				if(constructorBinding != null)
+					JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, constructorBinding);
 	        }
 	        else if(statement.getNodeType() == ASTNode.SWITCH_CASE)
 	        {

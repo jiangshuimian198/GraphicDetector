@@ -143,7 +143,6 @@ public class JavaExtractor extends KnowledgeExtractor {
     public static final String IS_BLOCK_ELSE = "isBlockElse";
 	public static final String IS_DEFAULT = "isDefault";
 	public static final String DECLARED_TYPE = "declaredType";
-	public static final String TYPE_CASTED_TO = "typeCastedTo";
 	public static final String ARRAY_TYPE = "arrayType";
 	public static final String DIMENSION_NUM = "dimensionNum";
 	public static final String ELEMENT_TYPE = "elementType";

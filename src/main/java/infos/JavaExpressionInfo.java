@@ -2,6 +2,7 @@ package main.java.infos;
 
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -21,7 +22,6 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -176,7 +176,8 @@ public abstract class JavaExpressionInfo {
 				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
 				CastExpression castExpression = (CastExpression)expression;
 				JavaExpressionInfo.addDeclaredTypeProperty(map, castExpression.getType());
-				map.put(JavaExtractor.TYPE_CASTED_TO, castExpression.getType().toString());
+				if(castExpression.getType().resolveBinding() != null)
+					JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, castExpression.getType().resolveBinding());
 				nodeId = createNode(inserter, map);
 				
 				Expression castedExpression = castExpression.getExpression();
@@ -198,7 +199,7 @@ public abstract class JavaExpressionInfo {
 				ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation)expression;
 				map.put(JavaExtractor.TYPE_NAME, classInstanceCreation.getType().toString());
 				JavaExpressionInfo.addDeclaredTypeProperty(map, classInstanceCreation.getType());
-				JavaExpressionInfo.addTypeArgProperties(map,classInstanceCreation.typeArguments());
+				List<ITypeBinding> bindedTypeList = JavaExpressionInfo.addTypeArgProperties(map,classInstanceCreation.typeArguments());
 				nodeId = createNode(inserter, map);
 				
 				List<Expression> argsList = classInstanceCreation.arguments();
@@ -210,6 +211,9 @@ public abstract class JavaExpressionInfo {
 					else;
 				}
 				
+				for(ITypeBinding element : bindedTypeList)
+					JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, element);
+				
 				AnonymousClassDeclaration anonymousClassDeclaration = classInstanceCreation.getAnonymousClassDeclaration();
 				if(anonymousClassDeclaration != null)
 				{
@@ -217,10 +221,7 @@ public abstract class JavaExpressionInfo {
 					innerMap.put(JavaExtractor.SUPER_CLASS, anonymousClassDeclaration.resolveBinding().getSuperclass().getQualifiedName());
 					ITypeBinding[] typeBindings = anonymousClassDeclaration.resolveBinding().getInterfaces();
 					for(ITypeBinding binding : typeBindings)
-					{
-						System.out.println(binding.getQualifiedName());
-						JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, innerMap, binding.getQualifiedName());
-					}
+						JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, binding);
 					innerMap.put(JavaExtractor.METHOD_NAME,methodName);
 					innerMap.put(JavaExtractor.CONTENT, sourceContent.substring(expression.getStartPosition(), expression.getStartPosition()+expression.getLength()));
 					innerMap.put(JavaExtractor.ROW_NO, sourceContent.substring(0, expression.getStartPosition()).split("\n").length);					
@@ -278,7 +279,7 @@ public abstract class JavaExpressionInfo {
 					inserter.createRelationship(nodeId, creationId, JavaExtractor.CREATED_BY, new HashMap<>());
 				else;
 				
-				JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, map, classInstanceCreation.resolveConstructorBinding());
+				JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, classInstanceCreation.resolveConstructorBinding());
 			}
 			else if(expression.getNodeType()==ASTNode.CONDITIONAL_EXPRESSION)
 			{
@@ -306,10 +307,12 @@ public abstract class JavaExpressionInfo {
 				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
 				CreationReference creationReference = (CreationReference)expression;
 				JavaExpressionInfo.addDeclaredTypeProperty(map, creationReference.getType());
-				JavaExpressionInfo.addTypeArgProperties(map, creationReference.typeArguments());
+				List<ITypeBinding> bindedTypeList = JavaExpressionInfo.addTypeArgProperties(map, creationReference.typeArguments());
 				nodeId = createNode(inserter, map);
 				
-				JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, map, creationReference.resolveMethodBinding());
+				for(ITypeBinding element : bindedTypeList)
+					JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, element);
+				JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, creationReference.resolveMethodBinding());
 			}
 			else if(expression.getNodeType()==ASTNode.EXPRESSION_METHOD_REFERENCE)
 			{
@@ -317,7 +320,7 @@ public abstract class JavaExpressionInfo {
 				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
 				ExpressionMethodReference expressionMethodReference = (ExpressionMethodReference)expression;
 				map.put(JavaExtractor.IDENTIFIER, expressionMethodReference.getName().getIdentifier());
-				JavaExpressionInfo.addTypeArgProperties(map, expressionMethodReference.typeArguments());
+				List<ITypeBinding> bindedTypeList = JavaExpressionInfo.addTypeArgProperties(map, expressionMethodReference.typeArguments());
 				nodeId = createNode(inserter, map);
 				
 				Expression ref = expressionMethodReference.getExpression();
@@ -326,7 +329,9 @@ public abstract class JavaExpressionInfo {
 					inserter.createRelationship(nodeId, refId, JavaExtractor.DOMAIN, new HashMap<>());
 				else;
 				
-				JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, map, expressionMethodReference.resolveMethodBinding());
+				for(ITypeBinding element : bindedTypeList)
+					JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, element);
+				JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, expressionMethodReference.resolveMethodBinding());
 			}
 			else if(expression.getNodeType()==ASTNode.FIELD_ACCESS)
 			{
@@ -342,9 +347,9 @@ public abstract class JavaExpressionInfo {
 					inserter.createRelationship(accessId, nodeId, JavaExtractor.FIELD_ACCESS, new HashMap<>());
 				else;
 				
-				IVariableBinding fieldBinding = fieldAccess.resolveFieldBinding();
-				if(fieldBinding != null)
-					JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, map, fieldBinding.getType().getQualifiedName());
+//				IVariableBinding fieldBinding = fieldAccess.resolveFieldBinding();
+//				if(fieldBinding != null)
+//					JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, fieldBinding.getType().getQualifiedName());
 			}
 			else if(expression.getNodeType()==ASTNode.INFIX_EXPRESSION)
 			{
@@ -419,7 +424,7 @@ public abstract class JavaExpressionInfo {
 					else;
 				}
 				
-				JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, map, lambdaExpression.resolveMethodBinding());
+				JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, lambdaExpression.resolveMethodBinding());
 			}
 			else if(expression.getNodeType()==ASTNode.MARKER_ANNOTATION)
 			{
@@ -453,7 +458,7 @@ public abstract class JavaExpressionInfo {
 					inserter.createRelationship(nodeId, invokId, JavaExtractor.INVOCATION, new HashMap<>());
 				else;
 				
-				JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, map, methodInvocation.resolveMethodBinding());
+				JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, methodInvocation.resolveMethodBinding());
 			}
 			else if(expression.getNodeType()==ASTNode.METHOD_REF)
 			{
@@ -565,14 +570,14 @@ public abstract class JavaExpressionInfo {
 				
 				IVariableBinding fieldBinding = superFieldAccess.resolveFieldBinding();
 				if(fieldBinding != null)
-					JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, map, fieldBinding.getType().getQualifiedName());
+					JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, fieldBinding.getType());
 			}
 			else if(expression.getNodeType()==ASTNode.SUPER_METHOD_INVOCATION)
 			{
 				expressionType = "SuperMethodInvocation";
 				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
 				SuperMethodInvocation superMethodInvocation = (SuperMethodInvocation)expression;
-				JavaExpressionInfo.addTypeArgProperties(map, superMethodInvocation.typeArguments());
+				List<ITypeBinding> bindedTypeList = JavaExpressionInfo.addTypeArgProperties(map, superMethodInvocation.typeArguments());
 				Name superMethodName = superMethodInvocation.getQualifier();
 				if(superMethodName!=null)
 					map.put(JavaExtractor.FULLNAME, superMethodName.getFullyQualifiedName());
@@ -589,7 +594,9 @@ public abstract class JavaExpressionInfo {
 					else;
 				}
 				
-				JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, map, superMethodInvocation.resolveMethodBinding());
+				for(ITypeBinding element : bindedTypeList)
+					JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, element);
+				JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, superMethodInvocation.resolveMethodBinding());
 			}
 			else if(expression.getNodeType()==ASTNode.THIS_EXPRESSION)
 			{
@@ -612,7 +619,7 @@ public abstract class JavaExpressionInfo {
 				map.put(JavaExtractor.TYPE_NAME, typeLiteral.getType().toString());
 				nodeId = createNode(inserter, map);
 				
-				JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, map, typeLiteral.getType().toString());
+				JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, typeLiteral.getType().resolveBinding());
 			}
 			else if(expression.getNodeType()==ASTNode.TYPE_METHOD_REFERENCE)
 			{
@@ -622,10 +629,12 @@ public abstract class JavaExpressionInfo {
 				map.put(JavaExtractor.IDENTIFIER, typeMethodReference.getName().getIdentifier());
 				typeMethodReference.getType().resolveBinding();
 				map.put(JavaExtractor.METHOD_TYPE, typeMethodReference.getType().toString());
-				JavaExpressionInfo.addTypeArgProperties(map, typeMethodReference.typeArguments());
+				List<ITypeBinding> bindedTypeNameList = JavaExpressionInfo.addTypeArgProperties(map, typeMethodReference.typeArguments());
 				nodeId = createNode(inserter, map);
 				
-				JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, map, typeMethodReference.resolveMethodBinding());
+				for(ITypeBinding element : bindedTypeNameList)
+					JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, element);
+				JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, typeMethodReference.resolveMethodBinding());
 			}
 			else if(expression.getNodeType()==ASTNode.VARIABLE_DECLARATION_EXPRESSION)
 			{
@@ -670,7 +679,7 @@ public abstract class JavaExpressionInfo {
 				
 //				IBinding binding = simpleName.resolveBinding();
 //				if(binding != null)
-//					JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, map, binding.getClass().getName());			
+//					JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, binding);			
 			}
 			else if(expression.getNodeType()==ASTNode.NUMBER_LITERAL)
 			{
@@ -686,36 +695,39 @@ public abstract class JavaExpressionInfo {
 				System.out.println(expressionType);
 			}
 			if(expression.resolveTypeBinding() != null )
-				JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, map, expression.resolveTypeBinding().getQualifiedName());
+				JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, expression.resolveTypeBinding());
 			return nodeId;
 		}
 		else
 			return -1;
 	}
 	
-	private static void resolveMethodBinding(BatchInserter inserter, JavaProjectInfo javaProjectInfo, long nodeId, HashMap<String, Object> map, IMethodBinding methodBinding)
+	public static void resolveMethodBinding(BatchInserter inserter, JavaProjectInfo javaProjectInfo, long nodeId, IMethodBinding methodBinding)
 	{
 		if(javaProjectInfo.containsBindedMethod(methodBinding))
 			inserter.createRelationship(nodeId, javaProjectInfo.getBindedMethodId(methodBinding), JavaExtractor.BINDED_METHOD, new HashMap<>());
 		else;
 	}
 
-	public static void resolveTypeBinding(BatchInserter inserter, JavaProjectInfo javaProjectInfo, long nodeId, HashMap<String, Object> map, String typeName) {
+	public static void resolveTypeBinding(BatchInserter inserter, JavaProjectInfo javaProjectInfo, long nodeId, ITypeBinding typeBinding) {
+		String typeName = typeBinding.getQualifiedName();
+		
 		if(javaProjectInfo.containsBindedClass(typeName))
 			inserter.createRelationship(nodeId, javaProjectInfo.getBindedTypeId(typeName), JavaExtractor.BINDED_TYPE, new HashMap<>());
-		else
-			System.out.println("$$$: "+typeName);;
+		else if(!typeBinding.isPrimitive() && !typeBinding.isTopLevel())
+			System.out.println("non-exist:   "+typeBinding+"\n");
 	}
 
-	static void addTypeArgProperties(HashMap<String, Object> map, List<Type> typeArguments) {
+	static List<ITypeBinding> addTypeArgProperties(HashMap<String, Object> map, List<Type> typeArguments) {
 		// TODO Auto-generated method stub
 		String[] typeArgsDeclaredTypes = new String[typeArguments.size()];
 		String[] typeArgsTypes = new String[typeArguments.size()];
+		List<ITypeBinding> bindedTypeList = new LinkedList<>();
 		for(int i = 0; i<typeArguments.size(); i++)
 		{
 			Type element = typeArguments.get(i);
 			typeArgsTypes[i]=element.toString();
-			//element.resolveBinding();
+			bindedTypeList.add(element.resolveBinding());
 			if(element.isAnnotatable())
 				typeArgsDeclaredTypes[i]="Annotatable";
 			else if(element.isArrayType())
@@ -741,6 +753,7 @@ public abstract class JavaExpressionInfo {
 		}
 		map.put(JavaExtractor.TYPE_ARG_DECLARED_TYPE, typeArgsDeclaredTypes);
 		map.put(JavaExtractor.TYPE_ARG_TYPE_NAME, typeArgsTypes);
+		return bindedTypeList;
 	}
 
 	static void addModifierProperty(HashMap<String, Object> map, int modifier) {
