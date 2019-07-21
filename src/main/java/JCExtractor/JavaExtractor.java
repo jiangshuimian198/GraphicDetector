@@ -61,6 +61,7 @@ public class JavaExtractor extends KnowledgeExtractor {
     public static final RelationshipType HAVE_CLASS = RelationshipType.withName("haveClass");
     public static final RelationshipType HAVE_METHOD = RelationshipType.withName("haveMethod");
     public static final RelationshipType HAVE_STATEMENT = RelationshipType.withName("haveStatement");
+	public static final RelationshipType HAVE_ARG = RelationshipType.withName("haveArgument");
     public static final RelationshipType STATEMENT_BODY = RelationshipType.withName("statementBody");
     public static final RelationshipType IMPLEMENT = RelationshipType.withName("implement");
     public static final RelationshipType PARAM_TYPE = RelationshipType.withName("paramType");
@@ -95,7 +96,7 @@ public class JavaExtractor extends KnowledgeExtractor {
 	public static final RelationshipType LEFT_OPERAND = RelationshipType.withName("leftOperand");
 	public static final RelationshipType RIGHT_OPERAND = RelationshipType.withName("rightOperand");
 	public static final RelationshipType VAR_DECLARATION_FRAG = RelationshipType.withName("variableDeclarationFragment");
-	public static final RelationshipType INVOCATION = RelationshipType.withName("invocation");
+	public static final RelationshipType INVOCATED_BY = RelationshipType.withName("invocatedBy");
 	public static final RelationshipType NORMAL_ANNOTATION_VALUE = RelationshipType.withName("normalannotationValue");
 	public static final RelationshipType SINGLE_MEMBER_ANNOTATION_VALUE = RelationshipType.withName("singleMemberAnnotation");
 	public static final RelationshipType PREFIX_OPRD = RelationshipType.withName("prefixOprd");
@@ -112,9 +113,16 @@ public class JavaExtractor extends KnowledgeExtractor {
 	public static final RelationshipType PARENTHESIZE = RelationshipType.withName("parenthesize");
 	public static final RelationshipType CREATED_BY = RelationshipType.withName("createdBy");
 	public static final RelationshipType DOMAIN = RelationshipType.withName("domain");
-	public static final RelationshipType BINDED_TYPE = RelationshipType.withName("bindedType");
-	public static final RelationshipType BINDED_METHOD = RelationshipType.withName("bindedMethod");
 	public static final RelationshipType ANONYMOUS_CLASS_DECLARATION = RelationshipType.withName("anonymousClassDeclaration");
+	public static final RelationshipType TYPE_BINDING = RelationshipType.withName("typeBinding");
+	public static final RelationshipType METHOD_BINDING = RelationshipType.withName("methodBinding");
+	public static final RelationshipType CASTING_TYPE_BINDING = RelationshipType.withName("castingTypeBinding");
+	public static final RelationshipType TYPE_ARG_TYPE_BINDING = RelationshipType.withName("typeArgumentTypeBinding");
+	public static final RelationshipType FIELD_TYPE_BINDING = RelationshipType.withName("fieldTypeBinding");
+	public static final RelationshipType ARRAY_TYPE_BINDING = RelationshipType.withName("arrayTypeBinding");
+	public static final RelationshipType ARRAY_ELEMENT_TYPE_BINDING = RelationshipType.withName("arrayElementTypeBinding");
+	public static final RelationshipType INSTANCE_OF_TYPE_BINDING = RelationshipType.withName("instanceOfTypeBinding");
+	public static final RelationshipType TYPE_ARG = RelationshipType.withName("typeArgument");
 
     //属性类型
     public static final String NAME = "name";

@@ -29,7 +29,6 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.LambdaExpression;
-import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
@@ -51,6 +50,7 @@ import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 
 import main.java.JCExtractor.JavaASTVisitor;
@@ -59,13 +59,14 @@ import main.java.JCExtractor.JavaStatementVisitor;
 import main.java.JCExtractor.NameResolver;
 
 public abstract class JavaExpressionInfo {
+	private static long nodeId = 0;
+	private static String expressionType = "";
 	
 	@SuppressWarnings("unchecked")
 	public static long createJavaExpressionNode(BatchInserter inserter, Expression expression, String sourceContent, String methodName, JavaProjectInfo javaProjectInfo)
 	{
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		long nodeId = 0;
-		String expressionType;
+		
 		
 		if(expression!=null)
 		{	
@@ -76,646 +77,628 @@ public abstract class JavaExpressionInfo {
 
 //			expression.resolveBoxing();
 //			expression.resolveUnboxing();
-			if(expression.getNodeType()==ASTNode.ARRAY_ACCESS)
+			switch(expression.getNodeType())
 			{
-				expressionType = "ArrayAccess";
-				ArrayAccess arrayAccess = (ArrayAccess)expression;
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				nodeId = createNode(inserter, map);
-				
-				Expression array = arrayAccess.getArray();
-				Expression indexExpression = arrayAccess.getIndex();
-				long arrayId = JavaExpressionInfo.createJavaExpressionNode(inserter, array, sourceContent, methodName, javaProjectInfo);
-				if(arrayId!=-1)
-					inserter.createRelationship(nodeId, arrayId, JavaExtractor.ARRAY_ACCESS, new HashMap<>());
-				else;
-				long indexId = JavaExpressionInfo.createJavaExpressionNode(inserter, indexExpression,sourceContent, methodName, javaProjectInfo);
-				if(indexId!=-1)
-					inserter.createRelationship(nodeId, indexId, JavaExtractor.ARRAY_ACCESS_INDEX, new HashMap<>());
-				else;
-			}
-			else if(expression.getNodeType()==ASTNode.ARRAY_CREATION)
-			{
-				expressionType = "ArrayCreation";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				ArrayCreation arrayCreation = (ArrayCreation)expression;
-				Expression arrayInitializer = arrayCreation.getInitializer();
-				List<Expression> dimensions = arrayCreation.dimensions();
-				ArrayType arrayType = arrayCreation.getType();
-				Type elementType = arrayType.getElementType();
-				int dimension = arrayType.getDimensions();
-				String arrayTypeLiteral = arrayType.toString();
-				String elementTypeLiteral = elementType.toString();
-				map.put(JavaExtractor.DIMENSION_NUM, dimension);
-				map.put(JavaExtractor.ARRAY_TYPE, arrayTypeLiteral);
-				map.put(JavaExtractor.ELEMENT_TYPE, elementTypeLiteral);
-				nodeId = createNode(inserter, map);
-				
-				long initializerId = JavaExpressionInfo.createJavaExpressionNode(inserter, arrayInitializer, sourceContent, methodName, javaProjectInfo);
-				if(initializerId!=-1)
-					inserter.createRelationship(nodeId, initializerId, JavaExtractor.ARRAY_INITIALIZER, new HashMap<>());
-				else;
-				
-				for(int i = 0; i< dimensions.size();i++)
+				case ASTNode.ARRAY_ACCESS:
 				{
-					long dimensionId = JavaExpressionInfo.createJavaExpressionNode(inserter, dimensions.get(i), sourceContent, methodName, javaProjectInfo);
-					if(dimensionId!=-1)
-						inserter.createRelationship(nodeId, dimensionId, JavaExtractor.DIMENSIONS, new HashMap<>());
-					else;
-				}
-
-			}
-			else if(expression.getNodeType()==ASTNode.ARRAY_INITIALIZER)
-			{
-				expressionType = "ArrayInitializer";
-				ArrayInitializer arrayInitializer = (ArrayInitializer)expression;
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				nodeId = createNode(inserter, map);
-				
-				List<Expression> initializerExpressions = arrayInitializer.expressions();
-				for(int i = 0; i< initializerExpressions.size();i++)
+					expressionType = "ArrayAccess";
+					ArrayAccess arrayAccess = (ArrayAccess)expression;
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					nodeId = createNode(inserter, map);
+					
+					Expression array = arrayAccess.getArray();
+					Expression index = arrayAccess.getIndex();
+					JavaExpressionInfo.createRelationship(inserter, array, nodeId, JavaExtractor.ARRAY_ACCESS, sourceContent, methodName, javaProjectInfo);
+					JavaExpressionInfo.createRelationship(inserter, index, nodeId, JavaExtractor.ARRAY_ACCESS_INDEX, sourceContent, methodName, javaProjectInfo);
+				}break;
+					
+				case ASTNode.ARRAY_CREATION:
 				{
-					long initializerExpressionId = JavaExpressionInfo.createJavaExpressionNode(inserter, initializerExpressions.get(i), sourceContent, methodName, javaProjectInfo);
-					if(initializerExpressionId!=-1)
-						inserter.createRelationship(nodeId, initializerExpressionId, JavaExtractor.SUB_ARRAY_INITIALIZER, new HashMap<>());
-					else;
-				}
-			}
-			else if(expression.getNodeType()==ASTNode.ASSIGNMENT)
-			{
-				expressionType = "Assignment";
-				Assignment assignment = (Assignment)expression;
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				nodeId = createNode(inserter, map);
-				
-				Expression leftHandSide = assignment.getLeftHandSide();
-				Expression rightHandSide = assignment.getRightHandSide();
-				Operator operator = assignment.getOperator();
-				long oprtId = JavaExpressionInfo.createJavaAssignmentOperatorNode(inserter, operator);
-				if(oprtId!=-1)
-					inserter.createRelationship(nodeId, oprtId, JavaExtractor.ASSIGNMENT, new HashMap<>());
-				else;
-				long leftId = JavaExpressionInfo.createJavaExpressionNode(inserter, leftHandSide, sourceContent, methodName, javaProjectInfo);
-				long rightId = JavaExpressionInfo.createJavaExpressionNode(inserter, rightHandSide, sourceContent, methodName, javaProjectInfo);
-				if(leftId!=-1)
-					inserter.createRelationship(oprtId, leftId, JavaExtractor.LEFT_OPERAND, new HashMap<>());
-				else;
-				if(rightId!=-1)
-					inserter.createRelationship(oprtId, rightId, JavaExtractor.RIGHT_OPERAND, new HashMap<>());
-				else;
-			}
-			else if(expression.getNodeType()==ASTNode.BOOLEAN_LITERAL)
-			{
-				expressionType = "BooleanLiteral";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				nodeId = createNode(inserter, map);
-			}
-			else if(expression.getNodeType()==ASTNode.CAST_EXPRESSION)
-			{
-				expressionType = "CastExpression";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				CastExpression castExpression = (CastExpression)expression;
-				JavaExpressionInfo.addDeclaredTypeProperty(map, castExpression.getType());
-				if(castExpression.getType().resolveBinding() != null)
-					JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, castExpression.getType().resolveBinding());
-				nodeId = createNode(inserter, map);
-				
-				Expression castedExpression = castExpression.getExpression();
-				long castedExpressionId = JavaExpressionInfo.createJavaExpressionNode(inserter, castedExpression, sourceContent, methodName, javaProjectInfo);
-				if(castedExpressionId!=-1)
-					inserter.createRelationship(nodeId, castedExpressionId, JavaExtractor.CAST, new HashMap<>());
-				else;
-			}
-			else if(expression.getNodeType()==ASTNode.CHARACTER_LITERAL)
-			{
-				expressionType = "CharacterLiteral";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				nodeId = createNode(inserter, map);
-			}
-			else if(expression.getNodeType()==ASTNode.CLASS_INSTANCE_CREATION)
-			{
-				expressionType = "ClassInstanceCreation";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation)expression;
-				map.put(JavaExtractor.TYPE_NAME, classInstanceCreation.getType().toString());
-				JavaExpressionInfo.addDeclaredTypeProperty(map, classInstanceCreation.getType());
-				List<ITypeBinding> bindedTypeList = JavaExpressionInfo.addTypeArgProperties(map,classInstanceCreation.typeArguments());
-				nodeId = createNode(inserter, map);
-				
-				List<Expression> argsList = classInstanceCreation.arguments();
-				for(Expression element : argsList)
-				{
-					long argId = JavaExpressionInfo.createJavaExpressionNode(inserter, element, sourceContent, methodName, javaProjectInfo);
-					if(argId != -1)
-						inserter.createRelationship(nodeId, argId, JavaExtractor.HAVE_PARAM, new HashMap<>());
-					else;
-				}
-				
-				for(ITypeBinding element : bindedTypeList)
-					JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, element);
-				
-				AnonymousClassDeclaration anonymousClassDeclaration = classInstanceCreation.getAnonymousClassDeclaration();
-				if(anonymousClassDeclaration != null)
-				{
-					HashMap<String, Object> innerMap = new HashMap<>();
-					innerMap.put(JavaExtractor.SUPER_CLASS, anonymousClassDeclaration.resolveBinding().getSuperclass().getQualifiedName());
-					ITypeBinding[] typeBindings = anonymousClassDeclaration.resolveBinding().getInterfaces();
-					for(ITypeBinding binding : typeBindings)
-						JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, binding);
-					innerMap.put(JavaExtractor.METHOD_NAME,methodName);
-					innerMap.put(JavaExtractor.CONTENT, sourceContent.substring(expression.getStartPosition(), expression.getStartPosition()+expression.getLength()));
-					innerMap.put(JavaExtractor.ROW_NO, sourceContent.substring(0, expression.getStartPosition()).split("\n").length);					
-					long anonymousClassId = inserter.createNode(innerMap, JavaExtractor.ANONYMOUS_CLASS);
-					inserter.createRelationship(nodeId, anonymousClassId, JavaExtractor.ANONYMOUS_CLASS_DECLARATION, new HashMap<>());
-					List<BodyDeclaration> bodyList = anonymousClassDeclaration.bodyDeclarations();
-					for(BodyDeclaration element : bodyList)
+					expressionType = "ArrayCreation";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					ArrayCreation arrayCreation = (ArrayCreation)expression;
+					ArrayType arrayType = arrayCreation.getType();
+					Type elementType = arrayType.getElementType();
+					int dimension = arrayType.getDimensions();
+					map.put(JavaExtractor.DIMENSION_NUM, dimension);
+					map.put(JavaExtractor.ARRAY_TYPE, arrayType.toString());
+					map.put(JavaExtractor.ELEMENT_TYPE, elementType.toString());
+					nodeId = createNode(inserter, map);
+					
+					Expression arrayInitializer = arrayCreation.getInitializer();
+					List<Expression> dimensions = arrayCreation.dimensions();
+					JavaExpressionInfo.createRelationship(inserter, arrayInitializer, nodeId, JavaExtractor.ARRAY_INITIALIZER, sourceContent, methodName, javaProjectInfo);
+					for(Expression element : dimensions)
 					{
-						if(element.getNodeType() == ASTNode.FIELD_DECLARATION)
+						JavaExpressionInfo.createRelationship(inserter, element, nodeId, JavaExtractor.DIMENSIONS, sourceContent, methodName, javaProjectInfo);
+					}
+					JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, arrayType.resolveBinding(), JavaExtractor.ARRAY_TYPE_BINDING);
+					JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, elementType.resolveBinding(), JavaExtractor.ARRAY_ELEMENT_TYPE_BINDING);
+				}break;
+				
+				case ASTNode.ARRAY_INITIALIZER:
+				{
+					expressionType = "ArrayInitializer";
+					ArrayInitializer arrayInitializer = (ArrayInitializer)expression;
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					nodeId = createNode(inserter, map);
+					
+					List<Expression> initializerExpressions = arrayInitializer.expressions();
+					for(Expression element : initializerExpressions)
+					{				
+						JavaExpressionInfo.createRelationship(inserter, element, nodeId, JavaExtractor.SUB_ARRAY_INITIALIZER, sourceContent, methodName, javaProjectInfo);
+					}
+				}break;
+				
+				case ASTNode.ASSIGNMENT:
+				{
+					expressionType = "Assignment";
+					Assignment assignment = (Assignment)expression;
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					nodeId = createNode(inserter, map);
+					
+					Expression leftHandSide = assignment.getLeftHandSide();
+					Expression rightHandSide = assignment.getRightHandSide();
+					Operator operator = assignment.getOperator();
+					long oprtId = JavaExpressionInfo.createJavaAssignmentOperatorNode(inserter, operator);
+					if(oprtId!=-1)
+						inserter.createRelationship(nodeId, oprtId, JavaExtractor.ASSIGNMENT, new HashMap<>());
+					else;
+					JavaExpressionInfo.createRelationship(inserter, leftHandSide, nodeId, JavaExtractor.LEFT_OPERAND, sourceContent, methodName, javaProjectInfo);
+					JavaExpressionInfo.createRelationship(inserter, rightHandSide, nodeId, JavaExtractor.RIGHT_OPERAND, sourceContent, methodName, javaProjectInfo);
+				}break;
+				
+				case ASTNode.BOOLEAN_LITERAL:
+				{
+					expressionType = "BooleanLiteral";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					nodeId = createNode(inserter, map);
+				}break;
+				
+				case ASTNode.CAST_EXPRESSION:
+				{
+					expressionType = "CastExpression";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					CastExpression castExpression = (CastExpression)expression;
+					JavaExpressionInfo.addDeclaredTypeProperty(map, castExpression.getType());
+					ITypeBinding typeCastedToBinding = castExpression.getType().resolveBinding();
+					if(typeCastedToBinding != null)
+						JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, typeCastedToBinding, JavaExtractor.CASTING_TYPE_BINDING);
+					nodeId = createNode(inserter, map);
+					
+					Expression castedExpression = castExpression.getExpression();
+					JavaExpressionInfo.createRelationship(inserter, castedExpression, nodeId, JavaExtractor.CAST, sourceContent, methodName, javaProjectInfo);
+				}break;
+				
+				case ASTNode.CHARACTER_LITERAL:
+				{
+					expressionType = "CharacterLiteral";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					nodeId = createNode(inserter, map);
+				}break;
+				
+				case ASTNode.CLASS_INSTANCE_CREATION:
+				{
+					expressionType = "ClassInstanceCreation";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation)expression;
+					map.put(JavaExtractor.TYPE_NAME, classInstanceCreation.getType().toString());
+					JavaExpressionInfo.addDeclaredTypeProperty(map, classInstanceCreation.getType());
+					List<ITypeBinding> bindedTypeList = JavaExpressionInfo.addTypeArgProperties(map,classInstanceCreation.typeArguments());
+					nodeId = createNode(inserter, map);
+					
+					List<Expression> argsList = classInstanceCreation.arguments();
+					for(Expression element : argsList)
+					{
+						JavaExpressionInfo.createRelationship(inserter, element, nodeId, JavaExtractor.TYPE_ARG, sourceContent, methodName, javaProjectInfo);
+					}
+					
+					for(ITypeBinding element : bindedTypeList)
+						JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, element, JavaExtractor.TYPE_ARG_TYPE_BINDING);
+					
+					AnonymousClassDeclaration anonymousClassDeclaration = classInstanceCreation.getAnonymousClassDeclaration();
+					if(anonymousClassDeclaration != null)
+					{
+						HashMap<String, Object> innerMap = new HashMap<>();
+						innerMap.put(JavaExtractor.SUPER_CLASS, anonymousClassDeclaration.resolveBinding().getSuperclass().getQualifiedName());
+						ITypeBinding[] typeBindings = anonymousClassDeclaration.resolveBinding().getTypeArguments();
+						for(ITypeBinding element : typeBindings)
+							JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, element, JavaExtractor.TYPE_ARG_TYPE_BINDING);
+						innerMap.put(JavaExtractor.METHOD_NAME,methodName);
+						innerMap.put(JavaExtractor.CONTENT, sourceContent.substring(expression.getStartPosition(), expression.getStartPosition()+expression.getLength()));
+						innerMap.put(JavaExtractor.ROW_NO, sourceContent.substring(0, expression.getStartPosition()).split("\n").length);					
+						long anonymousClassId = inserter.createNode(innerMap, JavaExtractor.ANONYMOUS_CLASS);
+						inserter.createRelationship(nodeId, anonymousClassId, JavaExtractor.ANONYMOUS_CLASS_DECLARATION, new HashMap<>());
+						List<BodyDeclaration> bodyList = anonymousClassDeclaration.bodyDeclarations();
+						for(BodyDeclaration element : bodyList)
 						{
-							FieldDeclaration fieldDeclaration = (FieldDeclaration)element;
-							String type = fieldDeclaration.getType().toString();
-					        String fullType = NameResolver.getFullName(fieldDeclaration.getType());
-					        String visibility = JavaASTVisitor.getVisibility(fieldDeclaration.getModifiers());
-					        boolean isStatic = Modifier.isStatic(element.getModifiers());
-					        boolean isFinal = Modifier.isFinal(fieldDeclaration.getModifiers());
-					        String comment = fieldDeclaration.getJavadoc() == null ? "" : sourceContent.substring(fieldDeclaration.getJavadoc().getStartPosition(), fieldDeclaration.getJavadoc().getStartPosition() + fieldDeclaration.getJavadoc().getLength());
-					        fieldDeclaration.fragments().forEach(n -> {
-					            VariableDeclarationFragment fragment = (VariableDeclarationFragment) n;
-					            String name = fragment.getName().getFullyQualifiedName();
-					            String fullName = methodName + classInstanceCreation.getType().toString() + "." + name;
-					            JavaFieldInfo fieldInfo = new JavaFieldInfo(inserter, name, fullName, type, visibility, isStatic, isFinal, comment, methodName, fullType);
-					            inserter.createRelationship(anonymousClassId, fieldInfo.getNodeId(), JavaExtractor.HAVE_FIELD, new HashMap<>());
-					        });
-						}
-						else if(element.getNodeType() == ASTNode.METHOD_DECLARATION)
-						{
-							MethodDeclaration methodDeclaration = (MethodDeclaration)element;
-							JavaMethodInfo methodInfo = JavaStatementVisitor.createJavaMethodInfo(methodDeclaration, methodName);
-							inserter.createRelationship(anonymousClassId, methodInfo.getNodeId(), JavaExtractor.HAVE_METHOD, new HashMap<>());
-							List<Statement> statementList = methodDeclaration.getBody().statements();
-							for(Statement statement : statementList)
+							if(element.getNodeType() == ASTNode.FIELD_DECLARATION)
 							{
-								long statementId = JavaStatementInfo.createJavaStatementNode(inserter, javaProjectInfo, methodName, sourceContent, statement);
-								if(statementId != -1)
-									inserter.createRelationship(methodInfo.getNodeId(), statementId, JavaExtractor.HAVE_STATEMENT, new HashMap<>());
+								FieldDeclaration fieldDeclaration = (FieldDeclaration)element;
+								String type = fieldDeclaration.getType().toString();
+						        String fullType = NameResolver.getFullName(fieldDeclaration.getType());
+						        String visibility = JavaASTVisitor.getVisibility(fieldDeclaration.getModifiers());
+						        boolean isStatic = Modifier.isStatic(element.getModifiers());
+						        boolean isFinal = Modifier.isFinal(fieldDeclaration.getModifiers());
+						        String comment = fieldDeclaration.getJavadoc() == null ? "" : sourceContent.substring(fieldDeclaration.getJavadoc().getStartPosition(), fieldDeclaration.getJavadoc().getStartPosition() + fieldDeclaration.getJavadoc().getLength());
+						        fieldDeclaration.fragments().forEach(n -> {
+						            VariableDeclarationFragment fragment = (VariableDeclarationFragment) n;
+						            String name = fragment.getName().getFullyQualifiedName();
+						            String fullName = methodName + classInstanceCreation.getType().toString() + "." + name;
+						            JavaFieldInfo fieldInfo = new JavaFieldInfo(inserter, name, fullName, type, visibility, isStatic, isFinal, comment, methodName, fullType);
+						            inserter.createRelationship(anonymousClassId, fieldInfo.getNodeId(), JavaExtractor.HAVE_FIELD, new HashMap<>());
+						        });
+							}
+							else if(element.getNodeType() == ASTNode.METHOD_DECLARATION)
+							{
+								MethodDeclaration methodDeclaration = (MethodDeclaration)element;
+								JavaMethodInfo methodInfo = JavaStatementVisitor.createJavaMethodInfo(methodDeclaration, methodName);
+								inserter.createRelationship(anonymousClassId, methodInfo.getNodeId(), JavaExtractor.HAVE_METHOD, new HashMap<>());
+								List<Statement> statementList = methodDeclaration.getBody().statements();
+								for(Statement statement : statementList)
+								{
+									long statementId = JavaStatementInfo.createJavaStatementNode(inserter, javaProjectInfo, methodName, sourceContent, statement);
+									if(statementId != -1)
+										inserter.createRelationship(methodInfo.getNodeId(), statementId, JavaExtractor.HAVE_STATEMENT, new HashMap<>());
+									else;
+								}
+							}
+							else if(element.getNodeType() == ASTNode.INITIALIZER)
+							{
+								Initializer initializer = (Initializer)element;
+								long iniId = JavaStatementInfo.createJavaStatementNode(inserter, javaProjectInfo, methodName, sourceContent, initializer.getBody());
+								if(iniId != -1)
+									inserter.createRelationship(anonymousClassId, iniId, JavaExtractor.INITIALIZER, new HashMap<>());
 								else;
 							}
+							else
+								System.out.println(element.toString());
 						}
-						else if(element.getNodeType() == ASTNode.INITIALIZER)
+					}
+					Expression instanceCreation = classInstanceCreation.getExpression();
+					JavaExpressionInfo.createRelationship(inserter, instanceCreation, nodeId, JavaExtractor.CREATED_BY, sourceContent, methodName, javaProjectInfo);
+					
+					JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, classInstanceCreation.resolveConstructorBinding());
+				}break;
+				
+				case ASTNode.CONDITIONAL_EXPRESSION:
+				{
+					expressionType = "ConditionalExpression";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					nodeId = createNode(inserter, map);
+					
+					ConditionalExpression conditionalExpression = (ConditionalExpression)expression;
+					JavaExpressionInfo.createRelationship(inserter, conditionalExpression.getExpression(), nodeId, JavaExtractor.ENTER_CONDITION, sourceContent, methodName, javaProjectInfo);
+					JavaExpressionInfo.createRelationship(inserter, conditionalExpression.getThenExpression(), nodeId, JavaExtractor.THEN, sourceContent, methodName, javaProjectInfo);
+					JavaExpressionInfo.createRelationship(inserter, conditionalExpression.getElseExpression(), nodeId, JavaExtractor.ELSE, sourceContent, methodName, javaProjectInfo);
+				}break;
+				
+				case ASTNode.CREATION_REFERENCE:
+				{
+					expressionType = "CreationReference";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					CreationReference creationReference = (CreationReference)expression;
+					JavaExpressionInfo.addDeclaredTypeProperty(map, creationReference.getType());
+					List<ITypeBinding> bindedTypeList = JavaExpressionInfo.addTypeArgProperties(map, creationReference.typeArguments());
+					nodeId = createNode(inserter, map);
+					
+					for(ITypeBinding element : bindedTypeList)
+						JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, element, JavaExtractor.TYPE_ARG_TYPE_BINDING);
+					JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, creationReference.resolveMethodBinding());
+				}break;
+				
+				case ASTNode.EXPRESSION_METHOD_REFERENCE:
+				{
+					expressionType = "ExpressionMethodReference";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					ExpressionMethodReference expressionMethodReference = (ExpressionMethodReference)expression;
+					map.put(JavaExtractor.IDENTIFIER, expressionMethodReference.getName().getIdentifier());
+					List<ITypeBinding> bindedTypeList = JavaExpressionInfo.addTypeArgProperties(map, expressionMethodReference.typeArguments());
+					nodeId = createNode(inserter, map);
+					
+					Expression ref = expressionMethodReference.getExpression();
+					JavaExpressionInfo.createRelationship(inserter, ref, nodeId, JavaExtractor.DOMAIN, sourceContent, methodName, javaProjectInfo);
+					
+					for(ITypeBinding element : bindedTypeList)
+						JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, element, JavaExtractor.TYPE_ARG_TYPE_BINDING);
+					JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, expressionMethodReference.resolveMethodBinding());
+				}break;
+				
+				case ASTNode.FIELD_ACCESS:
+				{
+					expressionType = "FieldAccess";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					FieldAccess fieldAccess = (FieldAccess)expression;
+					map.put(JavaExtractor.IDENTIFIER, fieldAccess.getName().getIdentifier());
+					nodeId = createNode(inserter, map);
+					
+					Expression access = fieldAccess.getExpression();
+					JavaExpressionInfo.createRelationship(inserter, access, nodeId, JavaExtractor.FIELD_ACCESS, sourceContent, methodName, javaProjectInfo);
+					
+//					IVariableBinding fieldBinding = fieldAccess.resolveFieldBinding();
+//					if(fieldBinding != null)
+//						JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, fieldBinding.getType().getQualifiedName());
+				}break;
+				
+				case ASTNode.INFIX_EXPRESSION:
+				{
+					expressionType = "InfixExpression";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					nodeId = createNode(inserter, map);
+					
+					InfixExpression prefixExpression = (InfixExpression)expression;
+					Expression leftOperand = prefixExpression.getLeftOperand();
+					Expression rightOperand = prefixExpression.getRightOperand();
+					InfixExpression.Operator operator = prefixExpression.getOperator();
+					long oprtId = JavaExpressionInfo.createJavaInfixOperatorNode(inserter, operator);
+					inserter.createRelationship(nodeId, oprtId, JavaExtractor.INFIX, new HashMap<>());
+					JavaExpressionInfo.createRelationship(inserter, leftOperand, nodeId, JavaExtractor.LEFT_OPERAND, sourceContent, methodName, javaProjectInfo);
+					JavaExpressionInfo.createRelationship(inserter, rightOperand, nodeId, JavaExtractor.RIGHT_OPERAND, sourceContent, methodName, javaProjectInfo);
+				}break;
+				
+				case ASTNode.INSTANCEOF_EXPRESSION:
+				{
+					expressionType = "InstanceofExpression";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					InstanceofExpression instanceofExpression = (InstanceofExpression)expression;
+					JavaExpressionInfo.addDeclaredTypeProperty(map,instanceofExpression.getRightOperand());
+					map.put(JavaExtractor.TYPE_NAME, instanceofExpression.getRightOperand().toString());
+					Type type = instanceofExpression.getRightOperand();
+					nodeId = createNode(inserter, map);
+					
+					Expression left = instanceofExpression.getLeftOperand();
+					JavaExpressionInfo.createRelationship(inserter, left, nodeId, JavaExtractor.LEFT_OPERAND, sourceContent, methodName, javaProjectInfo);
+					
+					JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, type.resolveBinding(), JavaExtractor.INSTANCE_OF_TYPE_BINDING);
+				}break;
+				
+				case ASTNode.LAMBDA_EXPRESSION:
+				{
+					expressionType = "LambdaExpression";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					nodeId = createNode(inserter, map);
+					
+					LambdaExpression lambdaExpression = (LambdaExpression)expression;
+					List<VariableDeclaration> paramList = lambdaExpression.parameters();
+					for(VariableDeclaration element : paramList)
+					{
+						if(element.getNodeType()==ASTNode.VARIABLE_DECLARATION_FRAGMENT)
 						{
-							Initializer initializer = (Initializer)element;
-							long iniId = JavaStatementInfo.createJavaStatementNode(inserter, javaProjectInfo, methodName, sourceContent, initializer.getBody());
-							if(iniId != -1)
-								inserter.createRelationship(anonymousClassId, iniId, JavaExtractor.INITIALIZER, new HashMap<>());
+							long fragmentId = JavaStatementInfo.createVariableDeclarationFragmentNode(inserter, javaProjectInfo, methodName, (VariableDeclarationFragment) element, sourceContent);
+							if(fragmentId!=-1)
+								inserter.createRelationship(nodeId, fragmentId, JavaExtractor.LAMBDA_PARAMETER, new HashMap<>());
 							else;
 						}
 						else
-							System.out.println(element.toString());
+						{
+							long singleVarId = JavaStatementInfo.createSingleVarDeclarationNode(inserter, javaProjectInfo, methodName, sourceContent, (SingleVariableDeclaration) element);
+							if(singleVarId!=-1)
+								inserter.createRelationship(nodeId, singleVarId, JavaExtractor.LAMBDA_PARAMETER, new HashMap<>());
+							else;
+						}
 					}
-				}
-				Expression instanceCreation = classInstanceCreation.getExpression();
-				long creationId = JavaExpressionInfo.createJavaExpressionNode(inserter, instanceCreation, sourceContent, methodName, javaProjectInfo);
-				if(creationId!=-1)
-					inserter.createRelationship(nodeId, creationId, JavaExtractor.CREATED_BY, new HashMap<>());
-				else;
-				
-				JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, classInstanceCreation.resolveConstructorBinding());
-			}
-			else if(expression.getNodeType()==ASTNode.CONDITIONAL_EXPRESSION)
-			{
-				expressionType = "ConditionalExpression";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				nodeId = createNode(inserter, map);
-				
-				ConditionalExpression conditionalExpression = (ConditionalExpression)expression;
-				long expressionId = JavaExpressionInfo.createJavaExpressionNode(inserter, conditionalExpression.getExpression(), sourceContent, methodName, javaProjectInfo);
-				if(expressionId != -1)
-					inserter.createRelationship(nodeId, expressionId, JavaExtractor.ENTER_CONDITION, new HashMap<>());
-				else;
-				long thenId = JavaExpressionInfo.createJavaExpressionNode(inserter, conditionalExpression.getThenExpression(), sourceContent, methodName, javaProjectInfo);
-				if(thenId != -1)
-					inserter.createRelationship(nodeId, thenId, JavaExtractor.THEN, new HashMap<>());
-				else;
-				long elseId = JavaExpressionInfo.createJavaExpressionNode(inserter, conditionalExpression.getElseExpression(), sourceContent, methodName, javaProjectInfo);
-				if(elseId != -1)
-				inserter.createRelationship(nodeId, elseId, JavaExtractor.ELSE, new HashMap<>());
-				else;
-			}
-			else if(expression.getNodeType()==ASTNode.CREATION_REFERENCE)
-			{
-				expressionType = "CreationReference";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				CreationReference creationReference = (CreationReference)expression;
-				JavaExpressionInfo.addDeclaredTypeProperty(map, creationReference.getType());
-				List<ITypeBinding> bindedTypeList = JavaExpressionInfo.addTypeArgProperties(map, creationReference.typeArguments());
-				nodeId = createNode(inserter, map);
-				
-				for(ITypeBinding element : bindedTypeList)
-					JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, element);
-				JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, creationReference.resolveMethodBinding());
-			}
-			else if(expression.getNodeType()==ASTNode.EXPRESSION_METHOD_REFERENCE)
-			{
-				expressionType = "ExpressionMethodReference";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				ExpressionMethodReference expressionMethodReference = (ExpressionMethodReference)expression;
-				map.put(JavaExtractor.IDENTIFIER, expressionMethodReference.getName().getIdentifier());
-				List<ITypeBinding> bindedTypeList = JavaExpressionInfo.addTypeArgProperties(map, expressionMethodReference.typeArguments());
-				nodeId = createNode(inserter, map);
-				
-				Expression ref = expressionMethodReference.getExpression();
-				long refId = JavaExpressionInfo.createJavaExpressionNode(inserter, ref, sourceContent, methodName, javaProjectInfo);
-				if(refId != -1)
-					inserter.createRelationship(nodeId, refId, JavaExtractor.DOMAIN, new HashMap<>());
-				else;
-				
-				for(ITypeBinding element : bindedTypeList)
-					JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, element);
-				JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, expressionMethodReference.resolveMethodBinding());
-			}
-			else if(expression.getNodeType()==ASTNode.FIELD_ACCESS)
-			{
-				expressionType = "FieldAccess";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				FieldAccess fieldAccess = (FieldAccess)expression;
-				map.put(JavaExtractor.IDENTIFIER, fieldAccess.getName().getIdentifier());
-				nodeId = createNode(inserter, map);
-				
-				Expression access = fieldAccess.getExpression();
-				long accessId = JavaExpressionInfo.createJavaExpressionNode(inserter, access, sourceContent, methodName, javaProjectInfo);
-				if(accessId != -1)
-					inserter.createRelationship(accessId, nodeId, JavaExtractor.FIELD_ACCESS, new HashMap<>());
-				else;
-				
-//				IVariableBinding fieldBinding = fieldAccess.resolveFieldBinding();
-//				if(fieldBinding != null)
-//					JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, fieldBinding.getType().getQualifiedName());
-			}
-			else if(expression.getNodeType()==ASTNode.INFIX_EXPRESSION)
-			{
-				expressionType = "InfixExpression";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				nodeId = createNode(inserter, map);
-				
-				InfixExpression prefixExpression = (InfixExpression)expression;
-				Expression leftOperand = prefixExpression.getLeftOperand();
-				Expression rightOperand = prefixExpression.getRightOperand();
-				InfixExpression.Operator operator = prefixExpression.getOperator();
-				long oprtId = JavaExpressionInfo.createJavaInfixOperatorNode(inserter, operator);
-				inserter.createRelationship(nodeId, oprtId, JavaExtractor.INFIX, new HashMap<>());
-				long leftOprdId = JavaExpressionInfo.createJavaExpressionNode(inserter, leftOperand, sourceContent, methodName, javaProjectInfo);
-				long rightOprdId = JavaExpressionInfo.createJavaExpressionNode(inserter, rightOperand, sourceContent, methodName, javaProjectInfo);
-				inserter.createRelationship(oprtId, leftOprdId, JavaExtractor.LEFT_OPERAND, new HashMap<>());
-				inserter.createRelationship(oprtId, rightOprdId, JavaExtractor.RIGHT_OPERAND, new HashMap<>());
-			}
-			else if(expression.getNodeType()==ASTNode.INSTANCEOF_EXPRESSION)
-			{
-				expressionType = "InstanceofExpression";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				InstanceofExpression instanceofExpression = (InstanceofExpression)expression;
-				JavaExpressionInfo.addDeclaredTypeProperty(map,instanceofExpression.getRightOperand());
-				map.put(JavaExtractor.TYPE_NAME, instanceofExpression.getRightOperand().toString());
-				nodeId = createNode(inserter, map);
-				
-				Expression left = instanceofExpression.getLeftOperand();
-				long leftId = JavaExpressionInfo.createJavaExpressionNode(inserter, left, sourceContent, methodName, javaProjectInfo);
-				if(leftId!=-1)
-					inserter.createRelationship(nodeId, leftId, JavaExtractor.LEFT_OPERAND, new HashMap<>());
-				else;
-			}
-			else if(expression.getNodeType()==ASTNode.LAMBDA_EXPRESSION)
-			{
-				expressionType = "LambdaExpression";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				nodeId = createNode(inserter, map);
-				
-				LambdaExpression lambdaExpression = (LambdaExpression)expression;
-				List<VariableDeclaration> paramList = lambdaExpression.parameters();
-				for(VariableDeclaration element : paramList)
-				{
-					if(element.getNodeType()==ASTNode.VARIABLE_DECLARATION_FRAGMENT)
+					ASTNode body = lambdaExpression.getBody();
+					if(body.getNodeType()==ASTNode.BLOCK)
 					{
-						long fragmentId = JavaStatementInfo.createVariableDeclarationFragmentNode(inserter, javaProjectInfo, methodName, (VariableDeclarationFragment) element, sourceContent);
-						if(fragmentId!=-1)
-							inserter.createRelationship(nodeId, fragmentId, JavaExtractor.LAMBDA_PARAMETER, new HashMap<>());
+						long blockId = JavaStatementInfo.createJavaStatementNode(inserter, javaProjectInfo, methodName, sourceContent, (Statement) body);
+						if(blockId!=-1)
+							inserter.createRelationship(nodeId, blockId, JavaExtractor.LAMBDA_BODY, new HashMap<>());
 						else;
 					}
 					else
 					{
-						long singleVarId = JavaStatementInfo.createSingleVarDeclarationNode(inserter, javaProjectInfo, methodName, sourceContent, (SingleVariableDeclaration) element);
-						if(singleVarId!=-1)
-							inserter.createRelationship(nodeId, singleVarId, JavaExtractor.LAMBDA_PARAMETER, new HashMap<>());
+						long blockId = JavaExpressionInfo.createJavaExpressionNode(inserter, (Expression) body, sourceContent, methodName, javaProjectInfo);
+						if(blockId!=-1)
+							inserter.createRelationship(nodeId, blockId, JavaExtractor.LAMBDA_BODY, new HashMap<>());
 						else;
 					}
-				}
-				ASTNode body = lambdaExpression.getBody();
-				if(body.getNodeType()==ASTNode.BLOCK)
+					
+					JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, lambdaExpression.resolveMethodBinding());
+				}break;
+				
+				case ASTNode.MARKER_ANNOTATION:
 				{
-					long blockId = JavaStatementInfo.createJavaStatementNode(inserter, javaProjectInfo, methodName, sourceContent, (Statement) body);
-					if(blockId!=-1)
-						inserter.createRelationship(nodeId, blockId, JavaExtractor.LAMBDA_BODY, new HashMap<>());
-					else;
-				}
-				else
+					expressionType = "MarkerAnnotation";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					nodeId = createNode(inserter, map);
+				}break;
+				
+				case ASTNode.METHOD_INVOCATION:
 				{
-					long blockId = JavaExpressionInfo.createJavaExpressionNode(inserter, (Expression) body, sourceContent, methodName, javaProjectInfo);
-					if(blockId!=-1)
-						inserter.createRelationship(nodeId, blockId, JavaExtractor.LAMBDA_BODY, new HashMap<>());
-					else;
-				}
+					expressionType = "MethodInvocation";
+					MethodInvocation methodInvocation = (MethodInvocation)expression;
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					map.put(JavaExtractor.NAME, methodInvocation.getName().getFullyQualifiedName());
+					map.put(JavaExtractor.IS_RESOLVED_TYPE_INFERRED_FROM_EXPECTED_TYPE, methodInvocation.isResolvedTypeInferredFromExpectedType());
+					nodeId = createNode(inserter, map);
+					
+					List<Expression> argsList = methodInvocation.arguments();
+					for(Expression element : argsList)
+					{
+						JavaExpressionInfo.createRelationship(inserter, element, nodeId, JavaExtractor.HAVE_ARG, sourceContent, methodName, javaProjectInfo);
+					}
+					Expression invok = methodInvocation.getExpression();
+					JavaExpressionInfo.createRelationship(inserter, invok, nodeId, JavaExtractor.INVOCATED_BY, sourceContent, methodName, javaProjectInfo);
+
+					JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, methodInvocation.resolveMethodBinding());
+				}break;
 				
-				JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, lambdaExpression.resolveMethodBinding());
-			}
-			else if(expression.getNodeType()==ASTNode.MARKER_ANNOTATION)
-			{
-				expressionType = "MarkerAnnotation";
-				MarkerAnnotation markerAnnotation = (MarkerAnnotation)expression;
-				String typeName = markerAnnotation.getTypeName().getFullyQualifiedName();
-				map.put(JavaExtractor.TYPE_NAME, typeName);
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				nodeId = createNode(inserter, map);
-			}
-			else if(expression.getNodeType()==ASTNode.METHOD_INVOCATION)
-			{
-				expressionType = "MethodInvocation";
-				MethodInvocation methodInvocation = (MethodInvocation)expression;
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				map.put(JavaExtractor.NAME, methodInvocation.getName().getFullyQualifiedName());
-				map.put(JavaExtractor.IS_RESOLVED_TYPE_INFERRED_FROM_EXPECTED_TYPE, methodInvocation.isResolvedTypeInferredFromExpectedType());
-				nodeId = createNode(inserter, map);
-				
-				List<Expression> argsList = methodInvocation.arguments();
-				for(Expression element : argsList)
+				case ASTNode.METHOD_REF:
 				{
-					long argId = JavaExpressionInfo.createJavaExpressionNode(inserter, element, sourceContent, methodName, javaProjectInfo);
-					if(argId != -1)
-						inserter.createRelationship(nodeId, argId, JavaExtractor.HAVE_PARAM, new HashMap<>());
-					else;
-				}
-				Expression invok = methodInvocation.getExpression();
-				long invokId = JavaExpressionInfo.createJavaExpressionNode(inserter, invok, sourceContent, methodName, javaProjectInfo);
-				if(invokId!=-1)
-					inserter.createRelationship(nodeId, invokId, JavaExtractor.INVOCATION, new HashMap<>());
-				else;
+					expressionType = "MethodRef";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					nodeId = createNode(inserter, map);
+				}break;
 				
-				JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, methodInvocation.resolveMethodBinding());
-			}
-			else if(expression.getNodeType()==ASTNode.METHOD_REF)
-			{
-				expressionType = "MethodRef";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				nodeId = createNode(inserter, map);
-			}
-			else if(expression.getNodeType()==ASTNode.NAME_QUALIFIED_TYPE)
-			{
-				expressionType = "NameQualifiedType";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				nodeId = createNode(inserter, map);
-			}
-			else if(expression.getNodeType()==ASTNode.NORMAL_ANNOTATION)
-			{
-				expressionType = "NormalAnnotation";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				NormalAnnotation normalAnnotation = (NormalAnnotation)expression;
-				map.put(JavaExtractor.FULLNAME, normalAnnotation.getTypeName().getFullyQualifiedName());
-				nodeId = createNode(inserter, map);
-				List<Expression> values = normalAnnotation.values();
-				for(Expression value:values)
+				case ASTNode.NAME_QUALIFIED_TYPE:
 				{
-					long id = JavaExpressionInfo.createJavaExpressionNode(inserter, value, sourceContent, methodName, javaProjectInfo);
-					if(id!=-1)
-						inserter.createRelationship(nodeId, id, JavaExtractor.NORMAL_ANNOTATION_VALUE, new HashMap<>());
-					else;
-				}	
-			}
-			else if(expression.getNodeType()==ASTNode.NULL_LITERAL)
-			{
-				expressionType = "NullLiteral";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				nodeId = createNode(inserter, map);
-			}
-			else if(expression.getNodeType()==ASTNode.PARENTHESIZED_EXPRESSION)
-			{
-				expressionType = "ParenthesizedExpression";
-				ParenthesizedExpression parenthesizedExpression = (ParenthesizedExpression)expression;
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				nodeId = createNode(inserter, map);
+					expressionType = "NameQualifiedType";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					nodeId = createNode(inserter, map);
+				}break;
 				
-				Expression parent = parenthesizedExpression.getExpression();
-				long parentId = JavaExpressionInfo.createJavaExpressionNode(inserter, parent, sourceContent, methodName, javaProjectInfo);
-				if(parentId != -1)
-					inserter.createRelationship(nodeId, parentId, JavaExtractor.PARENTHESIZE, new HashMap<>());
-				else;
-			}
-			else if(expression.getNodeType()==ASTNode.POSTFIX_EXPRESSION)
-			{
-				expressionType = "PostfixExpression";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				nodeId = createNode(inserter, map);
-				
-				PostfixExpression postfixExpression = (PostfixExpression)expression;
-				Expression operand = postfixExpression.getOperand();
-				PostfixExpression.Operator operator = postfixExpression.getOperator();
-				long oprdId = JavaExpressionInfo.createJavaExpressionNode(inserter, operand, sourceContent, methodName, javaProjectInfo);
-				long oprtId = JavaExpressionInfo.createJavaPostfixOperatorNode(inserter, operator);
-				inserter.createRelationship(nodeId, oprtId, JavaExtractor.POSTFIX, new HashMap<>());
-				inserter.createRelationship(oprtId, oprdId, JavaExtractor.POSTFIX_OPRD, new HashMap<>());
-			}
-			else if(expression.getNodeType()==ASTNode.PREFIX_EXPRESSION)
-			{
-				expressionType = "PrefixExpression";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				nodeId = createNode(inserter, map);
-				
-				PrefixExpression prefixExpression = (PrefixExpression)expression;
-				Expression operand = prefixExpression.getOperand();
-				PrefixExpression.Operator operator = prefixExpression.getOperator();
-				long oprdId = JavaExpressionInfo.createJavaExpressionNode(inserter, operand, sourceContent, methodName, javaProjectInfo);
-				long oprtId = JavaExpressionInfo.createJavaPrefixOperatorNode(inserter, operator);
-				inserter.createRelationship(nodeId, oprtId, JavaExtractor.PREFIX, new HashMap<>());
-				inserter.createRelationship(oprtId, oprdId, JavaExtractor.PREFIX_OPRD, new HashMap<>());
-			}
-			else if(expression.getNodeType()==ASTNode.SINGLE_MEMBER_ANNOTATION)
-			{
-				expressionType = "SingleMemberAnnotation";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				SingleMemberAnnotation singleMemberAnnotation = (SingleMemberAnnotation)expression;
-				String typeName = singleMemberAnnotation.getTypeName().getFullyQualifiedName();
-				map.put(JavaExtractor.FULLNAME, typeName);
-				nodeId = createNode(inserter, map);
-				
-				Expression value = singleMemberAnnotation.getValue();
-				long valueId = JavaExpressionInfo.createJavaExpressionNode(inserter, value, sourceContent, methodName, javaProjectInfo);
-				if(valueId!=-1)
-					inserter.createRelationship(nodeId, valueId, JavaExtractor.SINGLE_MEMBER_ANNOTATION_VALUE, new HashMap<>());
-				else;
-			}
-			else if(expression.getNodeType()==ASTNode.STRING_LITERAL)
-			{
-				expressionType = "StringLiteral";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				nodeId = createNode(inserter, map);
-			}
-			else if(expression.getNodeType()==ASTNode.SUPER_FIELD_ACCESS)
-			{
-				expressionType = "SuperFieldAccess";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				SuperFieldAccess superFieldAccess = (SuperFieldAccess)expression;
-				Name fieldName = superFieldAccess.getQualifier();
-				if(fieldName!=null)
-					map.put(JavaExtractor.FULLNAME, fieldName.getFullyQualifiedName());
-				else				
-					map.put(JavaExtractor.FULLNAME, "null");
-				nodeId = createNode(inserter, map);
-				
-				IVariableBinding fieldBinding = superFieldAccess.resolveFieldBinding();
-				if(fieldBinding != null)
-					JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, fieldBinding.getType());
-			}
-			else if(expression.getNodeType()==ASTNode.SUPER_METHOD_INVOCATION)
-			{
-				expressionType = "SuperMethodInvocation";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				SuperMethodInvocation superMethodInvocation = (SuperMethodInvocation)expression;
-				List<ITypeBinding> bindedTypeList = JavaExpressionInfo.addTypeArgProperties(map, superMethodInvocation.typeArguments());
-				Name superMethodName = superMethodInvocation.getQualifier();
-				if(superMethodName!=null)
-					map.put(JavaExtractor.FULLNAME, superMethodName.getFullyQualifiedName());
-				else
-					map.put(JavaExtractor.FULLNAME, "null");
-				nodeId = createNode(inserter, map);
-				
-				List<Expression> args = superMethodInvocation.arguments();
-				for(Expression arg:args)
+				case ASTNode.NORMAL_ANNOTATION:
 				{
-					long id = JavaExpressionInfo.createJavaExpressionNode(inserter, arg, sourceContent, methodName, javaProjectInfo);
-					if(id!=-1)
-						inserter.createRelationship(nodeId, id, JavaExtractor.HAVE_PARAM, new HashMap<>());
-					else;
-				}
+					expressionType = "NormalAnnotation";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					NormalAnnotation normalAnnotation = (NormalAnnotation)expression;
+					map.put(JavaExtractor.FULLNAME, normalAnnotation.getTypeName().getFullyQualifiedName());
+					nodeId = createNode(inserter, map);
+					List<Expression> values = normalAnnotation.values();
+					for(Expression element : values)
+					{
+						JavaExpressionInfo.createRelationship(inserter, element, nodeId, JavaExtractor.NORMAL_ANNOTATION_VALUE, sourceContent, methodName, javaProjectInfo);
+					}	
+				}break;
 				
-				for(ITypeBinding element : bindedTypeList)
-					JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, element);
-				JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, superMethodInvocation.resolveMethodBinding());
-			}
-			else if(expression.getNodeType()==ASTNode.THIS_EXPRESSION)
-			{
-				expressionType = "ThisExpression";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				ThisExpression thisExpression = (ThisExpression)expression;
-				Name thisName = thisExpression.getQualifier();
-				if(thisName!=null)
-					map.put(JavaExtractor.FULLNAME, thisName.getFullyQualifiedName());
-				else
-					map.put(JavaExtractor.FULLNAME, "null");
-				nodeId = createNode(inserter, map);			
-			}
-			else if(expression.getNodeType()==ASTNode.TYPE_LITERAL)
-			{
-				expressionType = "TypeLiteral";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				TypeLiteral typeLiteral = (TypeLiteral)expression;
-				JavaExpressionInfo.addDeclaredTypeProperty(map, typeLiteral.getType());
-				map.put(JavaExtractor.TYPE_NAME, typeLiteral.getType().toString());
-				nodeId = createNode(inserter, map);
-				
-				JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, typeLiteral.getType().resolveBinding());
-			}
-			else if(expression.getNodeType()==ASTNode.TYPE_METHOD_REFERENCE)
-			{
-				expressionType = "TypeMethodReference";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				TypeMethodReference typeMethodReference = (TypeMethodReference)expression;
-				map.put(JavaExtractor.IDENTIFIER, typeMethodReference.getName().getIdentifier());
-				typeMethodReference.getType().resolveBinding();
-				map.put(JavaExtractor.METHOD_TYPE, typeMethodReference.getType().toString());
-				List<ITypeBinding> bindedTypeNameList = JavaExpressionInfo.addTypeArgProperties(map, typeMethodReference.typeArguments());
-				nodeId = createNode(inserter, map);
-				
-				for(ITypeBinding element : bindedTypeNameList)
-					JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, element);
-				JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, typeMethodReference.resolveMethodBinding());
-			}
-			else if(expression.getNodeType()==ASTNode.VARIABLE_DECLARATION_EXPRESSION)
-			{
-				expressionType = "VariableDeclarationExpression";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				VariableDeclarationExpression variableDeclarationExpression = (VariableDeclarationExpression)expression;
-				JavaExpressionInfo.addModifierProperty(map,variableDeclarationExpression.getModifiers());
-				JavaExpressionInfo.addDeclaredTypeProperty(map, variableDeclarationExpression.getType());
-				map.put(JavaExtractor.VAR_TYPE_STR, variableDeclarationExpression.getType().toString());
-				nodeId = createNode(inserter, map);
-				
-				List<VariableDeclarationFragment> fragments = variableDeclarationExpression.fragments();
-				for(VariableDeclarationFragment element : fragments)
+				case ASTNode.NULL_LITERAL:
 				{
-					long id = JavaStatementInfo.createVariableDeclarationFragmentNode(inserter, javaProjectInfo, methodName, element, sourceContent);
-					if(id!=-1)
-						inserter.createRelationship(nodeId, id, JavaExtractor.VAR_DECLARATION_FRAG, new HashMap<>());
-					else;
+					expressionType = "NullLiteral";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					nodeId = createNode(inserter, map);
+				}break;
+				
+				case ASTNode.PARENTHESIZED_EXPRESSION:
+				{
+					expressionType = "ParenthesizedExpression";
+					ParenthesizedExpression parenthesizedExpression = (ParenthesizedExpression)expression;
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					nodeId = createNode(inserter, map);
+					
+					Expression innerExpression = parenthesizedExpression.getExpression();
+					JavaExpressionInfo.createRelationship(inserter, innerExpression, nodeId, JavaExtractor.PARENTHESIZE, sourceContent, methodName, javaProjectInfo);
+				}break;
+				
+				case ASTNode.POSTFIX_EXPRESSION:
+				{
+					expressionType = "PostfixExpression";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					nodeId = createNode(inserter, map);
+					
+					PostfixExpression postfixExpression = (PostfixExpression)expression;
+					Expression operand = postfixExpression.getOperand();
+					JavaExpressionInfo.createRelationship(inserter, operand, nodeId, JavaExtractor.POSTFIX_OPRD, sourceContent, methodName, javaProjectInfo);
+
+					PostfixExpression.Operator operator = postfixExpression.getOperator();
+					long oprtId = JavaExpressionInfo.createJavaPostfixOperatorNode(inserter, operator);
+					inserter.createRelationship(nodeId, oprtId, JavaExtractor.POSTFIX, new HashMap<>());
+				}break;
+				
+				case ASTNode.PREFIX_EXPRESSION:
+				{
+					expressionType = "PrefixExpression";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					nodeId = createNode(inserter, map);
+					
+					PrefixExpression prefixExpression = (PrefixExpression)expression;
+					Expression operand = prefixExpression.getOperand();
+					JavaExpressionInfo.createRelationship(inserter, operand, nodeId, JavaExtractor.PREFIX_OPRD, sourceContent, methodName, javaProjectInfo);
+
+					PrefixExpression.Operator operator = prefixExpression.getOperator();
+					long oprtId = JavaExpressionInfo.createJavaPrefixOperatorNode(inserter, operator);
+					inserter.createRelationship(nodeId, oprtId, JavaExtractor.PREFIX, new HashMap<>());
+				}break;
+				
+				case ASTNode.SINGLE_MEMBER_ANNOTATION:
+				{
+					expressionType = "SingleMemberAnnotation";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					SingleMemberAnnotation singleMemberAnnotation = (SingleMemberAnnotation)expression;
+					String typeName = singleMemberAnnotation.getTypeName().getFullyQualifiedName();
+					map.put(JavaExtractor.FULLNAME, typeName);
+					nodeId = createNode(inserter, map);
+					
+					Expression value = singleMemberAnnotation.getValue();
+					JavaExpressionInfo.createRelationship(inserter, value, nodeId, JavaExtractor.SINGLE_MEMBER_ANNOTATION_VALUE, sourceContent, methodName, javaProjectInfo);
+				}break;
+				
+				case ASTNode.STRING_LITERAL:
+				{
+					expressionType = "StringLiteral";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					nodeId = createNode(inserter, map);
+				}break;
+				
+				case ASTNode.SUPER_FIELD_ACCESS:
+				{
+					expressionType = "SuperFieldAccess";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					SuperFieldAccess superFieldAccess = (SuperFieldAccess)expression;
+					Name fieldName = superFieldAccess.getQualifier();
+					if(fieldName!=null)
+						map.put(JavaExtractor.FULLNAME, fieldName.getFullyQualifiedName());
+					else				
+						map.put(JavaExtractor.FULLNAME, "null");
+					nodeId = createNode(inserter, map);
+					
+					IVariableBinding fieldBinding = superFieldAccess.resolveFieldBinding();
+					if(fieldBinding != null)
+						JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, fieldBinding.getType(), JavaExtractor.FIELD_TYPE_BINDING);
+				}break;
+				
+				case ASTNode.SUPER_METHOD_INVOCATION:
+				{
+					expressionType = "SuperMethodInvocation";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					SuperMethodInvocation superMethodInvocation = (SuperMethodInvocation)expression;
+					List<ITypeBinding> bindedTypeList = JavaExpressionInfo.addTypeArgProperties(map, superMethodInvocation.typeArguments());
+					Name superMethodName = superMethodInvocation.getQualifier();
+					if(superMethodName!=null)
+						map.put(JavaExtractor.FULLNAME, superMethodName.getFullyQualifiedName());
+					else
+						map.put(JavaExtractor.FULLNAME, "null");
+					nodeId = createNode(inserter, map);
+					
+					List<Expression> args = superMethodInvocation.arguments();
+					for(Expression element : args)
+					{
+						JavaExpressionInfo.createRelationship(inserter, element, nodeId, JavaExtractor.HAVE_ARG, sourceContent, methodName, javaProjectInfo);
+					}
+					
+					for(ITypeBinding element : bindedTypeList)
+						JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, element, JavaExtractor.TYPE_ARG_TYPE_BINDING);
+					JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, superMethodInvocation.resolveMethodBinding());
+				}break;
+				
+				case ASTNode.THIS_EXPRESSION:
+				{
+					expressionType = "ThisExpression";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					ThisExpression thisExpression = (ThisExpression)expression;
+					Name thisName = thisExpression.getQualifier();
+					if(thisName!=null)
+						map.put(JavaExtractor.FULLNAME, thisName.getFullyQualifiedName());
+					else
+						map.put(JavaExtractor.FULLNAME, "null");
+					nodeId = createNode(inserter, map);			
+				}break;
+				
+				case ASTNode.TYPE_LITERAL:
+				{
+					expressionType = "TypeLiteral";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					TypeLiteral typeLiteral = (TypeLiteral)expression;
+					JavaExpressionInfo.addDeclaredTypeProperty(map, typeLiteral.getType());
+					map.put(JavaExtractor.TYPE_NAME, typeLiteral.getType().toString());
+					nodeId = createNode(inserter, map);
+					
+					JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, typeLiteral.getType().resolveBinding(), JavaExtractor.TYPE_BINDING);
+				}break;
+				
+				case ASTNode.TYPE_METHOD_REFERENCE:
+				{
+					expressionType = "TypeMethodReference";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					TypeMethodReference typeMethodReference = (TypeMethodReference)expression;
+					map.put(JavaExtractor.IDENTIFIER, typeMethodReference.getName().getIdentifier());
+					ITypeBinding typeMethodReferenceTypeBinding = typeMethodReference.getType().resolveBinding();
+					if(typeMethodReferenceTypeBinding != null)
+						JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, typeMethodReferenceTypeBinding, JavaExtractor.TYPE_BINDING);
+					map.put(JavaExtractor.METHOD_TYPE, typeMethodReference.getType().toString());
+					List<ITypeBinding> bindedTypeNameList = JavaExpressionInfo.addTypeArgProperties(map, typeMethodReference.typeArguments());
+					nodeId = createNode(inserter, map);
+					
+					for(ITypeBinding element : bindedTypeNameList)
+						JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, element,JavaExtractor.TYPE_ARG_TYPE_BINDING);
+					JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, typeMethodReference.resolveMethodBinding());
+				}break;
+				
+				case ASTNode.VARIABLE_DECLARATION_EXPRESSION:
+				{
+					expressionType = "VariableDeclarationExpression";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					VariableDeclarationExpression variableDeclarationExpression = (VariableDeclarationExpression)expression;
+					JavaExpressionInfo.addModifierProperty(map,variableDeclarationExpression.getModifiers());
+					JavaExpressionInfo.addDeclaredTypeProperty(map, variableDeclarationExpression.getType());
+					map.put(JavaExtractor.VAR_TYPE_STR, variableDeclarationExpression.getType().toString());
+					nodeId = createNode(inserter, map);
+					
+					List<VariableDeclarationFragment> fragments = variableDeclarationExpression.fragments();
+					for(VariableDeclarationFragment element : fragments)
+					{
+						long id = JavaStatementInfo.createVariableDeclarationFragmentNode(inserter, javaProjectInfo, methodName, element, sourceContent);
+						if(id!=-1)
+							inserter.createRelationship(nodeId, id, JavaExtractor.VAR_DECLARATION_FRAG, new HashMap<>());
+						else;
+					}
+				}break;
+				
+				case ASTNode.QUALIFIED_NAME:
+				{
+					expressionType = "QualifiedName";
+					QualifiedName qualifiedName = (QualifiedName)expression;
+					map.put(JavaExtractor.IDENTIFIER, qualifiedName.getName().getIdentifier());
+					map.put(JavaExtractor.QUALIFIER, qualifiedName.getQualifier().toString());
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					nodeId = createNode(inserter, map);
+					
+					//IBinding binding = qualifiedName.resolveBinding();
+					//if(binding != null)
+						//JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, map, binding.getClass().getName());
+				}break;
+				
+				case ASTNode.SIMPLE_NAME:
+				{
+					expressionType = "SimpleName";
+					SimpleName simpleName = (SimpleName)expression;
+					String identifier = simpleName.getIdentifier();
+					map.put(JavaExtractor.IDENTIFIER, identifier);
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					nodeId = createNode(inserter, map);
+					
+//					IBinding binding = simpleName.resolveBinding();
+//					if(binding != null)
+//						JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, binding);			
+				}break;
+				
+				case ASTNode.NUMBER_LITERAL:
+				{
+					expressionType = "NumberLiteral";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					nodeId = createNode(inserter, map);
+				}break;
+				
+				default:
+				{
+					expressionType = "OtherExpressionType";
+					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
+					nodeId = createNode(inserter, map);
+					System.out.println(expressionType);
 				}
 			}
-			else if(expression.getNodeType()==ASTNode.QUALIFIED_NAME)
-			{
-				expressionType = "QualifiedName";
-				QualifiedName qualifiedName = (QualifiedName)expression;
-				map.put(JavaExtractor.IDENTIFIER, qualifiedName.getName().getIdentifier());
-				map.put(JavaExtractor.QUALIFIER, qualifiedName.getQualifier().toString());
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				nodeId = createNode(inserter, map);
-				
-				//IBinding binding = qualifiedName.resolveBinding();
-				//if(binding != null)
-					//JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, map, binding.getClass().getName());
-			}
-			else if(expression.getNodeType()==ASTNode.SIMPLE_NAME)
-			{
-				expressionType = "SimpleName";
-				SimpleName simpleName = (SimpleName)expression;
-				String identifier = simpleName.getIdentifier();
-				map.put(JavaExtractor.IDENTIFIER, identifier);
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				nodeId = createNode(inserter, map);
-				
-//				IBinding binding = simpleName.resolveBinding();
-//				if(binding != null)
-//					JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, binding);			
-			}
-			else if(expression.getNodeType()==ASTNode.NUMBER_LITERAL)
-			{
-				expressionType = "NumberLiteral";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				nodeId = createNode(inserter, map);
-			}
-			else
-			{
-				expressionType = "OtherExpressionType";
-				addCommonProperties(map, expression, expressionType, methodName, sourceContent);
-				nodeId = createNode(inserter, map);
-				System.out.println(expressionType);
-			}
+			
 			if(expression.resolveTypeBinding() != null )
-				JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, expression.resolveTypeBinding());
+				JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, expression.resolveTypeBinding(),JavaExtractor.TYPE_BINDING);
 			return nodeId;
 		}
 		else
 			return -1;
 	}
 	
-	public static void resolveMethodBinding(BatchInserter inserter, JavaProjectInfo javaProjectInfo, long nodeId, IMethodBinding methodBinding)
+	static void createRelationship(BatchInserter inserter, Expression expression, long originalNodeId, RelationshipType relationship, String sourceContent, String methodName, JavaProjectInfo javaProjectInfo) 
+	{
+		long terminalNodeId = JavaExpressionInfo.createJavaExpressionNode(inserter, expression, sourceContent, methodName, javaProjectInfo);
+		if(terminalNodeId != -1)
+			inserter.createRelationship(originalNodeId, terminalNodeId, relationship, new HashMap<>());
+		else;
+	}
+	
+	static void resolveMethodBinding(BatchInserter inserter, JavaProjectInfo javaProjectInfo, long nodeId, IMethodBinding methodBinding)
 	{
 		if(javaProjectInfo.containsBindedMethod(methodBinding))
-			inserter.createRelationship(nodeId, javaProjectInfo.getBindedMethodId(methodBinding), JavaExtractor.BINDED_METHOD, new HashMap<>());
+			inserter.createRelationship(nodeId, javaProjectInfo.getBindedMethodId(methodBinding), JavaExtractor.METHOD_BINDING, new HashMap<>());
 		else;
 	}
 
-	public static void resolveTypeBinding(BatchInserter inserter, JavaProjectInfo javaProjectInfo, long nodeId, ITypeBinding typeBinding) {
+	static void resolveTypeBinding(BatchInserter inserter, JavaProjectInfo javaProjectInfo, long nodeId, ITypeBinding typeBinding, RelationshipType relationship) {
 		String typeName = typeBinding.getQualifiedName();
-		
 		if(javaProjectInfo.containsBindedClass(typeName))
-			inserter.createRelationship(nodeId, javaProjectInfo.getBindedTypeId(typeName), JavaExtractor.BINDED_TYPE, new HashMap<>());
-		else if(!typeBinding.isPrimitive() && !typeBinding.isTopLevel())
-			System.out.println("non-exist:   "+typeBinding+"\n");
+			inserter.createRelationship(nodeId, javaProjectInfo.getBindedTypeId(typeName), relationship, new HashMap<>());
+		else 
+//			if(!typeBinding.isPrimitive() && !typeBinding.isTopLevel() && !typeBinding.isNullType() 
+//				&& !typeBinding.isArray() && !typeBinding.isParameterizedType())
+//			System.out.println("non-exist:   "+typeBinding+"\n");
+			;
 	}
 
 	static List<ITypeBinding> addTypeArgProperties(HashMap<String, Object> map, List<Type> typeArguments) {
