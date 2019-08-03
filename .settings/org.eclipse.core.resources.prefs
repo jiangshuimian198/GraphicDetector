@@ -1,8 +1,8 @@
 eclipse.preferences.version=1
 encoding//src/main/java=UTF-8
-encoding//src/main/java/Extractor/ExtractorConfig.java=UTF-8
-encoding//src/main/java/Extractor/KnowledgeExtractor.java=UTF-8
-encoding//src/main/java/JCExtractor/JavaASTVisitor.java=UTF-8
-encoding//src/main/java/JCExtractor/JavaExtractor.java=UTF-8
-encoding//src/main/java/JCExtractor/NameResolver.java=UTF-8
+encoding//src/main/java/extractor/ExtractorConfig.java=UTF-8
+encoding//src/main/java/extractor/KnowledgeExtractor.java=UTF-8
+encoding//src/main/java/javaextractor/JavaASTVisitor.java=UTF-8
+encoding//src/main/java/javaextractor/JavaExtractor.java=UTF-8
+encoding//src/main/java/javaextractor/NameResolver.java=UTF-8
 encoding/<project>=UTF-8

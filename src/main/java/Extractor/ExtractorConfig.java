@@ -1,4 +1,4 @@
-package main.java.Extractor;
+package main.java.extractor;
 
 import lombok.Getter;
 
