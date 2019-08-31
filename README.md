@@ -1,2 +1,2 @@
-# CodeExtraction
+# GraphicDetector
 2018年东南大学计算机科学与工程学院、软件学院校级SRTP项目《基于程序知识图谱的java程序缺陷检测和定位和实现》项目代码
