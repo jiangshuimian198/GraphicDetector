@@ -69,7 +69,7 @@ public class ExtractionWindow {
 		projectDirectory.setBounds(219, 94, 334, 27);
 		frmv.getContentPane().add(projectDirectory);
 		projectDirectory.setColumns(10);
-		projectDirectory.setText("D:\\java-pitfalls-master");
+		projectDirectory.setText("D:\\intellide-graph-master");
 		
 		JButton browseProject = new JButton("浏览");
 		browseProject.setFont(new Font("宋体", Font.PLAIN, 22));
@@ -167,9 +167,9 @@ public class ExtractionWindow {
 					try {
 						Process process = Runtime.getRuntime().exec("cmd.exe /c neo4j start");
 						process.waitFor();
-						frmv.setVisible(false);
-						DetectionWindow detectionWindow = new DetectionWindow();
-						detectionWindow.setVisible(true);
+//						frmv.setVisible(false);
+//						DetectionWindow detectionWindow = new DetectionWindow();
+//						detectionWindow.setVisible(true);
 					} catch (IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();

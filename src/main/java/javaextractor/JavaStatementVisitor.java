@@ -54,6 +54,7 @@ public class JavaStatementVisitor extends ASTVisitor{
 	private JavaProjectInfo javaProjectInfo;
     private static BatchInserter inserter;
     private static String sourceContent;
+    private static JavaStatementInfo m_JavaStatementInfo = new JavaStatementInfo();
 
 	public JavaStatementVisitor(JavaProjectInfo javaProjectInfo, String sourceContent, BatchInserter inserter) {
 		// TODO Auto-generated constructor stub
@@ -140,7 +141,7 @@ public class JavaStatementVisitor extends ASTVisitor{
 		if(statements!=null) {
 			for(Statement statement : statements)
 			{
-				infos.add(JavaStatementInfo.createJavaStatementNode(inserter, javaProjectInfo, name, sourceContent, statement));
+				infos.add(m_JavaStatementInfo.createJavaStatementNode(inserter, javaProjectInfo, name, sourceContent, statement));
 			}
 			return infos;
 		}

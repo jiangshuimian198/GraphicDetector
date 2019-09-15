@@ -85,19 +85,17 @@ public class JavaExtractor extends KnowledgeExtractor {
 	public static final RelationshipType CATCH = RelationshipType.withName("catch");
 	public static final RelationshipType TRY_RESOURCE = RelationshipType.withName("tryResource");
 	public static final RelationshipType EXCEPTION_CAUGHT = RelationshipType.withName("exceptionCaught");
-	public static final RelationshipType HAVE_PARAM = RelationshipType.withName("haveParament");
 	public static final RelationshipType SYNCHRONIZED = RelationshipType.withName("synchronized");
 	public static final RelationshipType ARRAY_ACCESS = RelationshipType.withName("arrayAccess");
 	public static final RelationshipType ARRAY_ACCESS_INDEX = RelationshipType.withName("arrayAccessIndex");
 	public static final RelationshipType ARRAY_INITIALIZER = RelationshipType.withName("arrayInitializer");
 	public static final RelationshipType SUB_ARRAY_INITIALIZER = RelationshipType.withName("subArrayInitializer");
 	public static final RelationshipType DIMENSIONS = RelationshipType.withName("dimensions");
-	public static final RelationshipType ASSIGNMENT = RelationshipType.withName("assignment");
 	public static final RelationshipType LEFT_OPERAND = RelationshipType.withName("leftOperand");
 	public static final RelationshipType RIGHT_OPERAND = RelationshipType.withName("rightOperand");
 	public static final RelationshipType VAR_DECLARATION_FRAG = RelationshipType.withName("variableDeclarationFragment");
 	public static final RelationshipType INVOCATED_BY = RelationshipType.withName("invocatedBy");
-	public static final RelationshipType NORMAL_ANNOTATION_VALUE = RelationshipType.withName("normalannotationValue");
+	public static final RelationshipType NORMAL_ANNOTATION_VALUE = RelationshipType.withName("normalAnnotationValue");
 	public static final RelationshipType SINGLE_MEMBER_ANNOTATION_VALUE = RelationshipType.withName("singleMemberAnnotation");
 	public static final RelationshipType PREFIX_OPRD = RelationshipType.withName("prefixOprd");
 	public static final RelationshipType PREFIX = RelationshipType.withName("prefix");
@@ -122,7 +120,6 @@ public class JavaExtractor extends KnowledgeExtractor {
 	public static final RelationshipType ARRAY_TYPE_BINDING = RelationshipType.withName("arrayTypeBinding");
 	public static final RelationshipType ARRAY_ELEMENT_TYPE_BINDING = RelationshipType.withName("arrayElementTypeBinding");
 	public static final RelationshipType INSTANCE_OF_TYPE_BINDING = RelationshipType.withName("instanceOfTypeBinding");
-	public static final RelationshipType TYPE_ARG = RelationshipType.withName("typeArgument");
 
     //属性类型
     public static final String NAME = "name";
@@ -167,7 +164,7 @@ public class JavaExtractor extends KnowledgeExtractor {
 	public static final String IS_RESOLVED_TYPE_INFERRED_FROM_EXPECTED_TYPE = "isResolvedTypeInferredFromExpectedType";
 	public static final String TYPE_ARG_DECLARED_TYPE = "typeArgDeclaredType";
 	public static final String EXTRA_DIMENSION_NUM = "extraDimensionNum";
-	public static final String CONST_EXPR_VALUE = "contantExpressionValue";
+	public static final String CONST_EXPR_VALUE = "constantExpressionValue";
 	public static final String SUPER_CLASS = "superClass";
 	
     @Override
