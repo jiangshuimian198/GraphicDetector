@@ -15,7 +15,6 @@ import java.io.IOException;
 
 import javax.swing.JList;
 import javax.swing.JTextArea;
-import java.awt.EventQueue;
 import java.awt.Font;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -30,18 +29,18 @@ public class DetectionWindow extends JFrame {
 	private JPanel contentPane;
 	private static JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 	
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					DetectionWindow window = new DetectionWindow();
-					window.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+//	public static void main(String[] args) {
+//		EventQueue.invokeLater(new Runnable() {
+//			public void run() {
+//				try {
+//					DetectionWindow window = new DetectionWindow();
+//					window.setVisible(true);
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		});
+//	}
 
 	/**
 	 * Create the frame.

@@ -170,6 +170,17 @@ public class ExtractionWindow {
 //						frmv.setVisible(false);
 //						DetectionWindow detectionWindow = new DetectionWindow();
 //						detectionWindow.setVisible(true);
+//						Neo4jDriver dbDriver = new Neo4jDriver(new File(graphDirectory.getText()));
+//						String query = "MATCH (n:Class) RETURN n.name, n.fullName LIMIT 25";
+//						HashMap<String, Object> parameters = new HashMap<>();
+//						Result results = dbDriver.query(query, parameters);
+//						while(results.hasNext()) {
+//							Map<String, Object> row = results.next();
+//					         for ( String key : results.columns() )
+//					         {
+//					             System.out.printf( "%s = %s%n", key, row.get( key ) );
+//					         }
+//						}
 					} catch (IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
