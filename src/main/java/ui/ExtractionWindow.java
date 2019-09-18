@@ -8,6 +8,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -17,6 +18,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import main.java.detector.Detector;
+import main.java.detector.UnsafeDateFormat;
 import main.java.extractor.KnowledgeExtractor;
 
 public class ExtractionWindow {
@@ -69,7 +72,7 @@ public class ExtractionWindow {
 		projectDirectory.setBounds(219, 94, 334, 27);
 		frmv.getContentPane().add(projectDirectory);
 		projectDirectory.setColumns(10);
-		projectDirectory.setText("D:\\intellide-graph-master");
+		projectDirectory.setText("D:\\java-pitfalls-master");
 		
 		JButton browseProject = new JButton("浏览");
 		browseProject.setFont(new Font("宋体", Font.PLAIN, 22));
@@ -170,21 +173,16 @@ public class ExtractionWindow {
 //						frmv.setVisible(false);
 //						DetectionWindow detectionWindow = new DetectionWindow();
 //						detectionWindow.setVisible(true);
-//						Neo4jDriver dbDriver = new Neo4jDriver(new File(graphDirectory.getText()));
-//						String query = "MATCH (n:Class) RETURN n.name, n.fullName LIMIT 25";
-//						HashMap<String, Object> parameters = new HashMap<>();
-//						Result results = dbDriver.query(query, parameters);
-//						while(results.hasNext()) {
-//							Map<String, Object> row = results.next();
-//					         for ( String key : results.columns() )
-//					         {
-//					             System.out.printf( "%s = %s%n", key, row.get( key ) );
-//					         }
-//						}
+
 					} catch (IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
+					
+					//Demo
+					Detector detector = new UnsafeDateFormat(graphDirectory.getText());
+					Map<String, Object> map = detector.detect();
+					System.out.println(map.values());
 				}
 			}
 		});

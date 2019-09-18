@@ -1,7 +1,7 @@
 package main.java.driver;
 
 import java.io.File;
-import java.util.HashMap;
+import java.util.Map;
 
 import org.neo4j.graphdb.*;
 import org.neo4j.graphdb.factory.*;
@@ -13,7 +13,7 @@ public class Neo4jDriver {
 		graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(dataBaseFile);
 	}
 	
-	public Result query(String query, HashMap<String, Object> parameters) {
+	public Result query(String query, Map<String, Object> parameters) {
 		Result result = graphDb.execute(query, parameters);
 		return result;
 	}
