@@ -33,10 +33,10 @@ public class UnsafeDateFormat extends Detector{
 		Map<String, Object> map = new HashMap<>();
 		Result result = dbDriver.query(query, map);
 		while(result.hasNext()) {
-		Map<String, Object> row = result.next();
-		for ( String key : result.columns() ){
-			putDefectLocation(map, row.get(key));
-		}
+			Map<String, Object> row = result.next();
+			for ( String key : result.columns() ){
+				putDefectLocation(map, row.get(key));
+			}
 		}
 		putDefectType(map, type);
 		return map;
