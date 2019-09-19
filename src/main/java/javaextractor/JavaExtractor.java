@@ -166,6 +166,9 @@ public class JavaExtractor extends KnowledgeExtractor {
 	public static final String EXTRA_DIMENSION_NUM = "extraDimensionNum";
 	public static final String CONST_EXPR_VALUE = "constantExpressionValue";
 	public static final String SUPER_CLASS = "superClass";
+	public static final String IS_DECLARATION = "isDeclaration";
+	public static final String IS_VAR = "isVar";
+	public static final String HAVE_DEFAULT_CASE = "haveDefaultCase";
 	
     @Override
     public boolean isBatchInsert() {

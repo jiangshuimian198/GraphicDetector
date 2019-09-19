@@ -365,7 +365,7 @@ public class JavaExpressionInfo {
 					{
 						if(element.getNodeType()==ASTNode.VARIABLE_DECLARATION_FRAGMENT)
 						{
-							long fragmentId = m_JavaStatementInfo.createVariableDeclarationFragmentNode(inserter, nodeId, javaProjectInfo, methodName, (VariableDeclarationFragment) element, sourceContent);
+							long fragmentId = m_JavaStatementInfo.createVariableDeclarationFragmentNode(inserter, javaProjectInfo, methodName, (VariableDeclarationFragment) element, sourceContent);
 							if(fragmentId!=-1)
 								inserter.createRelationship(nodeId, fragmentId, JavaExtractor.LAMBDA_PARAMETER, new HashMap<>());
 							else;
@@ -619,8 +619,8 @@ public class JavaExpressionInfo {
 					List<VariableDeclarationFragment> fragments = variableDeclarationExpression.fragments();
 					for(VariableDeclarationFragment element : fragments)
 					{
-						long id = m_JavaStatementInfo.createVariableDeclarationFragmentNode(inserter, nodeId, javaProjectInfo, methodName, element, sourceContent);
-						if(id!=-1)
+						long id = m_JavaStatementInfo.createVariableDeclarationFragmentNode(inserter, javaProjectInfo, methodName, element, sourceContent);
+						if(id != -1)
 							inserter.createRelationship(nodeId, id, JavaExtractor.VAR_DECLARATION_FRAG, new HashMap<>());
 						else;
 					}
@@ -645,6 +645,8 @@ public class JavaExpressionInfo {
 					expressionType = "SimpleName";
 					addCommonProperties(map, expression, expressionType, methodName, sourceContent);
 					SimpleName simpleName = (SimpleName)expression;
+					map.put(JavaExtractor.IS_DECLARATION, simpleName.isDeclaration());
+					map.put(JavaExtractor.IS_VAR, simpleName.isVar());
 					String identifier = simpleName.getIdentifier();
 					map.put(JavaExtractor.IDENTIFIER, identifier);
 					nodeId = createNode(inserter, map);
