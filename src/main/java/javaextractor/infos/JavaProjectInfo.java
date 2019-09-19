@@ -12,6 +12,7 @@ import org.neo4j.unsafe.batchinsert.BatchInserter;
 import main.java.javaextractor.JavaExtractor;
 
 public class JavaProjectInfo {
+	private static int statementNo = 0;
 
     private Map<String, JavaClassInfo> classInfoMap = new HashMap<>();
     private Map<String, JavaMethodInfo> methodInfoMap = new HashMap<>();
@@ -76,7 +77,13 @@ public class JavaProjectInfo {
                 if (methodBindingMap.containsKey(call))
                     inserter.createRelationship(methodInfo.getNodeId(), methodBindingMap.get(call).getNodeId(), JavaExtractor.METHOD_CALL, new HashMap<>());
             });
-            methodInfo.getStatements().forEach(statement -> inserter.createRelationship(methodInfo.getNodeId(), statement, JavaExtractor.HAVE_STATEMENT, new HashMap<>()));
+            methodInfo.getStatements().forEach(statement -> {
+            	Map<String, Object> map = new HashMap<>();
+                map.put(JavaExtractor.STATEMENT_NO, statementNo);
+            	inserter.createRelationship(methodInfo.getNodeId(), statement, JavaExtractor.HAVE_STATEMENT, map);
+            	statementNo++;
+            });
+            statementNo = 0;
             findJavaFieldInfo(methodInfo.getFieldAccesses()).forEach(access -> inserter.createRelationship(methodInfo.getNodeId(), access.getNodeId(), JavaExtractor.FIELD_ACCESS, new HashMap<>()));
     	});
         fieldInfoMap.values().forEach(fieldInfo -> {
