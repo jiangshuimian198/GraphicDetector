@@ -62,6 +62,7 @@ public class JavaExtractor extends KnowledgeExtractor {
     public static final RelationshipType HAVE_METHOD = RelationshipType.withName("haveMethod");
     public static final RelationshipType HAVE_STATEMENT = RelationshipType.withName("haveStatement");
 	public static final RelationshipType HAVE_ARG = RelationshipType.withName("haveArgument");
+	public static final RelationshipType HAVE_PARAM = RelationshipType.withName("haveParameter");;
     public static final RelationshipType STATEMENT_BODY = RelationshipType.withName("statementBody");
     public static final RelationshipType IMPLEMENT = RelationshipType.withName("implement");
     public static final RelationshipType PARAM_TYPE = RelationshipType.withName("paramType");

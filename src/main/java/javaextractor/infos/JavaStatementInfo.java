@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
@@ -66,7 +67,7 @@ public class JavaStatementInfo {
 					nodeId = createNode(inserter, map);
 					
 					Expression assertExpression = assertStatement.getExpression();
-		    		m_JavaExpressionInfo.createRelationship(inserter, assertExpression, nodeId, JavaExtractor.ASSERT, sourceContent, className, javaProjectInfo);
+		    		m_JavaExpressionInfo.createRelationship(inserter, assertExpression, nodeId, new HashMap<>(), JavaExtractor.ASSERT, sourceContent, className, javaProjectInfo);
 		        }break;
 		        
 				case ASTNode.BLOCK:
@@ -110,7 +111,7 @@ public class JavaStatementInfo {
 					List<Expression> constructorArgs = constructorInvocation.arguments();
 					for(Expression element : constructorArgs)
 					{
-			    		m_JavaExpressionInfo.createRelationship(inserter, element, nodeId, JavaExtractor.HAVE_ARG, sourceContent, className, javaProjectInfo);
+			    		m_JavaExpressionInfo.createRelationship(inserter, element, nodeId, new HashMap<>(), JavaExtractor.HAVE_ARG, sourceContent, className, javaProjectInfo);
 					}
 					
 					for(ITypeBinding element : bindedTypeList)
@@ -142,7 +143,7 @@ public class JavaStatementInfo {
 		        	DoStatement doStatement = (DoStatement)statement;
 		    		Statement doBody = doStatement.getBody();
 		    		Expression loopCondition = doStatement.getExpression();
-		    		m_JavaExpressionInfo.createRelationship(inserter, loopCondition, nodeId, JavaExtractor.LOOP_CONDITION, sourceContent, className, javaProjectInfo);
+		    		m_JavaExpressionInfo.createRelationship(inserter, loopCondition, nodeId, new HashMap<>(), JavaExtractor.LOOP_CONDITION, sourceContent, className, javaProjectInfo);
 		    		int statementNo = 0;
 					Map<String, Object> relProp = new HashMap<>();
 					relProp.put(JavaExtractor.STATEMENT_NO, statementNo);
@@ -165,7 +166,7 @@ public class JavaStatementInfo {
 		        	EnhancedForStatement enhancedForStatement = (EnhancedForStatement)statement;
 		    		Expression loopCondition = enhancedForStatement.getExpression();
 		    		Statement forBody = enhancedForStatement.getBody();
-		    		m_JavaExpressionInfo.createRelationship(inserter, loopCondition, nodeId, JavaExtractor.LOOP_CONDITION, sourceContent, className, javaProjectInfo);
+		    		m_JavaExpressionInfo.createRelationship(inserter, loopCondition, nodeId, new HashMap<>(), JavaExtractor.LOOP_CONDITION, sourceContent, className, javaProjectInfo);
 		    		int statementNo = 0;
 					Map<String, Object> relProp = new HashMap<>();
 					relProp.put(JavaExtractor.STATEMENT_NO, statementNo);
@@ -180,7 +181,10 @@ public class JavaStatementInfo {
 		        	
 		        	ExpressionStatement expressionStatement = (ExpressionStatement)statement;
 		    		Expression expression = expressionStatement.getExpression();
-		    		m_JavaExpressionInfo.createRelationship(inserter, expression, nodeId, JavaExtractor.STATEMENT_BODY, sourceContent, className, javaProjectInfo);
+		    		int statementNo = 0;
+					Map<String, Object> relProp = new HashMap<>();
+					relProp.put(JavaExtractor.STATEMENT_NO, statementNo);
+		    		m_JavaExpressionInfo.createRelationship(inserter, expression, nodeId, relProp, JavaExtractor.STATEMENT_BODY, sourceContent, className, javaProjectInfo);
 		        }break;
 		        
 				case ASTNode.FOR_STATEMENT:
@@ -196,12 +200,12 @@ public class JavaStatementInfo {
 		    		List<Expression> updaters = forStatement.updaters();
 		    		for(Expression element : initializers)
 		    		{
-			    		m_JavaExpressionInfo.createRelationship(inserter, element, nodeId, JavaExtractor.INITIALIZER, sourceContent, className, javaProjectInfo);
+			    		m_JavaExpressionInfo.createRelationship(inserter, element, nodeId, new HashMap<>(), JavaExtractor.INITIALIZER, sourceContent, className, javaProjectInfo);
 		    		}
-		    		m_JavaExpressionInfo.createRelationship(inserter, loopCondition, nodeId, JavaExtractor.LOOP_CONDITION, sourceContent, className, javaProjectInfo);
+		    		m_JavaExpressionInfo.createRelationship(inserter, loopCondition, nodeId, new HashMap<>(), JavaExtractor.LOOP_CONDITION, sourceContent, className, javaProjectInfo);
 		    		for(Expression element : updaters)
 		    		{
-			    		m_JavaExpressionInfo.createRelationship(inserter, element, nodeId, JavaExtractor.UPDATER, sourceContent, className, javaProjectInfo);
+			    		m_JavaExpressionInfo.createRelationship(inserter, element, nodeId, new HashMap<>(), JavaExtractor.UPDATER, sourceContent, className, javaProjectInfo);
 		    		}
 		    		int statementNo = 0;
 					Map<String, Object> relProp = new HashMap<>();
@@ -221,7 +225,7 @@ public class JavaStatementInfo {
 		    		Statement thenStatement = ifStatement.getThenStatement();
 		    		Statement elseStatement = ifStatement.getElseStatement();
 		    		Expression conditionalExpression = ifStatement.getExpression();
-		    		m_JavaExpressionInfo.createRelationship(inserter, conditionalExpression, nodeId, JavaExtractor.ENTER_CONDITION, sourceContent, className, javaProjectInfo);
+		    		m_JavaExpressionInfo.createRelationship(inserter, conditionalExpression, nodeId, new HashMap<>(), JavaExtractor.ENTER_CONDITION, sourceContent, className, javaProjectInfo);
 		    		int statementNo = 0;
 					Map<String, Object> relProp = new HashMap<>();
 					relProp.put(JavaExtractor.STATEMENT_NO, statementNo);
@@ -252,7 +256,7 @@ public class JavaStatementInfo {
 					
 					ReturnStatement returnStatement = (ReturnStatement)statement;
 					Expression returnExpression = returnStatement.getExpression();
-		    		m_JavaExpressionInfo.createRelationship(inserter, returnExpression, nodeId, JavaExtractor.RETURN, sourceContent, className, javaProjectInfo);
+		    		m_JavaExpressionInfo.createRelationship(inserter, returnExpression, nodeId, new HashMap<>(), JavaExtractor.RETURN, sourceContent, className, javaProjectInfo);
 		        }break;
 		        
 				case ASTNode.SUPER_CONSTRUCTOR_INVOCATION:
@@ -266,10 +270,10 @@ public class JavaStatementInfo {
 		        	List<Expression> constructorArgs = superConstructorInvocation.arguments();
 					for(Expression element : constructorArgs)
 					{
-			    		m_JavaExpressionInfo.createRelationship(inserter, element, nodeId, JavaExtractor.HAVE_ARG, sourceContent, className, javaProjectInfo);
+			    		m_JavaExpressionInfo.createRelationship(inserter, element, nodeId, new HashMap<>(), JavaExtractor.HAVE_ARG, sourceContent, className, javaProjectInfo);
 					}
 					Expression expression = superConstructorInvocation.getExpression();
-		    		m_JavaExpressionInfo.createRelationship(inserter, expression, nodeId, JavaExtractor.INVOCATED_BY, sourceContent, className, javaProjectInfo);
+		    		m_JavaExpressionInfo.createRelationship(inserter, expression, nodeId, new HashMap<>(), JavaExtractor.INVOCATED_BY, sourceContent, className, javaProjectInfo);
 
 		    		for(ITypeBinding element : bindedTypeList)
 						m_JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, element, JavaExtractor.TYPE_ARG_TYPE_BINDING);
@@ -288,7 +292,7 @@ public class JavaStatementInfo {
 					nodeId = createNode(inserter, map);
 					
 					Expression caseExpression = switchCase.getExpression();
-		    		m_JavaExpressionInfo.createRelationship(inserter, caseExpression, nodeId, JavaExtractor.ENTER_CONDITION, sourceContent, className, javaProjectInfo);
+		    		m_JavaExpressionInfo.createRelationship(inserter, caseExpression, nodeId, new HashMap<>(), JavaExtractor.ENTER_CONDITION, sourceContent, className, javaProjectInfo);
 		        }break;
 		        
 				case ASTNode.SWITCH_STATEMENT:
@@ -314,7 +318,7 @@ public class JavaStatementInfo {
 					nodeId = createNode(inserter, map);
 					
 					Expression enterCondition = switchStatement.getExpression();
-		    		m_JavaExpressionInfo.createRelationship(inserter, enterCondition, nodeId, JavaExtractor.SWITCH, sourceContent, className, javaProjectInfo);
+		    		m_JavaExpressionInfo.createRelationship(inserter, enterCondition, nodeId, new HashMap<>(), JavaExtractor.SWITCH, sourceContent, className, javaProjectInfo);
 
 					int statementNo = 0;
 					for(Statement element : statements)
@@ -338,7 +342,7 @@ public class JavaStatementInfo {
 					Map<String, Object> relProp = new HashMap<>();
 					relProp.put(JavaExtractor.STATEMENT_NO, statementNo);
 		    		createRelationship(inserter, synchronizedBody, statementType, nodeId, JavaExtractor.STATEMENT_BODY, relProp, sourceContent, className, javaProjectInfo);
-		    		m_JavaExpressionInfo.createRelationship(inserter, synchronizedExpression, nodeId, JavaExtractor.SYNCHRONIZED, sourceContent, className, javaProjectInfo);
+		    		m_JavaExpressionInfo.createRelationship(inserter, synchronizedExpression, nodeId, new HashMap<>(), JavaExtractor.SYNCHRONIZED, sourceContent, className, javaProjectInfo);
 		        }break;
 		        
 				case ASTNode.THROW_STATEMENT:
@@ -349,7 +353,7 @@ public class JavaStatementInfo {
 					
 					ThrowStatement throwStatement = (ThrowStatement)statement;
 					Expression throwExpression = throwStatement.getExpression();
-		    		m_JavaExpressionInfo.createRelationship(inserter, throwExpression, nodeId, JavaExtractor.THROW, sourceContent, className, javaProjectInfo);
+		    		m_JavaExpressionInfo.createRelationship(inserter, throwExpression, nodeId, new HashMap<>(), JavaExtractor.THROW, sourceContent, className, javaProjectInfo);
 				}break;
 				
 				case ASTNode.TRY_STATEMENT:
@@ -376,7 +380,7 @@ public class JavaStatementInfo {
 					}
 					for(Expression element : resources)
 					{
-			    		m_JavaExpressionInfo.createRelationship(inserter, element, nodeId, JavaExtractor.TRY_RESOURCE, sourceContent, className, javaProjectInfo);
+			    		m_JavaExpressionInfo.createRelationship(inserter, element, nodeId, new HashMap<>(), JavaExtractor.TRY_RESOURCE, sourceContent, className, javaProjectInfo);
 					}
 		        }break;
 		        
@@ -409,7 +413,7 @@ public class JavaStatementInfo {
 					WhileStatement whileStatement = (WhileStatement)statement;
 					Expression loopCondition = whileStatement.getExpression();
 					Statement whileBody = whileStatement.getBody();
-		    		m_JavaExpressionInfo.createRelationship(inserter, loopCondition, nodeId, JavaExtractor.LOOP_CONDITION, sourceContent, className, javaProjectInfo);
+		    		m_JavaExpressionInfo.createRelationship(inserter, loopCondition, nodeId, new HashMap<>(), JavaExtractor.LOOP_CONDITION, sourceContent, className, javaProjectInfo);
 		    		int statementNo = 0;
 					Map<String, Object> relProp = new HashMap<>();
 					relProp.put(JavaExtractor.STATEMENT_NO, statementNo);
@@ -433,7 +437,7 @@ public class JavaStatementInfo {
 		long terminalNodeId = createJavaStatementNode(inserter, javaProjectInfo, methodName, sourceContent, statement);
 		if(terminalNodeId != -1)
 		{
-			inserter.createRelationship(originalNodeId, terminalNodeId, relationship, new HashMap<>());
+			inserter.createRelationship(originalNodeId, terminalNodeId, relationship, relProp);
 			if(statementType.equals("IfStatement"))
 				conditionNo++;
 		}
@@ -452,14 +456,14 @@ public class JavaStatementInfo {
 		map.put(JavaExtractor.EXTRA_DIMENSION_NUM, variableDeclarationFragment.getExtraDimensions());
 		map.put(JavaExtractor.IDENTIFIER, variableDeclarationFragment.getName().getIdentifier());
 		long nodeId = inserter.createNode(map, JavaExtractor.VARIABLE_DECLARATION_FRAGMENT);
-		m_JavaExpressionInfo.createRelationship(inserter, initializer, nodeId, JavaExtractor.INITIALIZER, sourceContent, methodName, javaProjectInfo);
+		m_JavaExpressionInfo.createRelationship(inserter, initializer, nodeId, new HashMap<>(), JavaExtractor.INITIALIZER, sourceContent, methodName, javaProjectInfo);
 		return nodeId;
 	}
 
-	private long createCatchClauseNode(BatchInserter inserter, JavaProjectInfo javaProjectInfo, String methodName, String sourceContent,
+	private long createCatchClauseNode(BatchInserter inserter, JavaProjectInfo javaProjectInfo, String className, String sourceContent,
 			CatchClause catchClause) {
 		HashMap<String, Object> map = new  HashMap<>();
-		map.put(JavaExtractor.BELONG_TO, methodName);
+		map.put(JavaExtractor.BELONG_TO, className);
 		map.put(JavaExtractor.CONTENT, sourceContent.substring(catchClause.getStartPosition(),catchClause.getStartPosition()+catchClause.getLength()));
 		map.put(JavaExtractor.ROW_NO, sourceContent.substring(0, catchClause.getStartPosition()).split("\n").length);
 		long nodeId = inserter.createNode(map, JavaExtractor.CATCH_CLAUSE);
@@ -468,8 +472,8 @@ public class JavaStatementInfo {
 		int statementNo = 0;
 		Map<String, Object> relProp = new HashMap<>();
 		relProp.put(JavaExtractor.STATEMENT_NO, statementNo);
-		createRelationship(inserter, catchBody, "CatchClause", nodeId, JavaExtractor.STATEMENT_BODY, relProp, sourceContent, methodName, javaProjectInfo);
-		long exceptionId = createSingleVarDeclarationNode(inserter, javaProjectInfo, methodName, sourceContent, exception);
+		createRelationship(inserter, catchBody, "CatchClause", nodeId, JavaExtractor.STATEMENT_BODY, relProp, sourceContent, className, javaProjectInfo);
+		long exceptionId = createSingleVarDeclarationNode(inserter, javaProjectInfo, className, sourceContent, exception);
 		if(exceptionId!=-1)
 		{
 			inserter.createRelationship(nodeId, exceptionId, JavaExtractor.EXCEPTION_CAUGHT, new HashMap<>());
@@ -477,17 +481,21 @@ public class JavaStatementInfo {
 		return nodeId;
 	}
 
-	long createSingleVarDeclarationNode(BatchInserter inserter, JavaProjectInfo javaProjectInfo, String methodName, String sourceContent, SingleVariableDeclaration singleVarDec) {
+	public long createSingleVarDeclarationNode(BatchInserter inserter, JavaProjectInfo javaProjectInfo, String className, String sourceContent, SingleVariableDeclaration singleVarDec) {
 		HashMap<String, Object> map = new HashMap<>();
-		map.put(JavaExtractor.BELONG_TO, methodName);
+		map.put(JavaExtractor.BELONG_TO, className);
 		map.put(JavaExtractor.CONTENT, sourceContent.substring(singleVarDec.getStartPosition(),singleVarDec.getStartPosition()+singleVarDec.getLength()));
 		map.put(JavaExtractor.ROW_NO, sourceContent.substring(0, singleVarDec.getStartPosition()).split("\n").length);
 		map.put(JavaExtractor.IDENTIFIER, singleVarDec.getName().getIdentifier());
 		m_JavaExpressionInfo.addModifierProperty(map, singleVarDec.getModifiers());
 		map.put(JavaExtractor.IS_VARIABLE_ARITY_METHOD_ARG, Boolean.toString(singleVarDec.isVarargs()));
+//		singleVarDec.varargsAnnotations();
+		Type varType = singleVarDec.getType();
+		map.put(JavaExtractor.VAR_TYPE_STR, varType.toString());
 		long nodeId = inserter.createNode(map, JavaExtractor.SINGLE_VARIABLE_DECLARATION);
+		m_JavaExpressionInfo.resolveTypeBinding(inserter, javaProjectInfo, nodeId, varType.resolveBinding(), JavaExtractor.TYPE_BINDING);
 		Expression initializer = singleVarDec.getInitializer();
-		m_JavaExpressionInfo.createRelationship(inserter, initializer, nodeId, JavaExtractor.INITIALIZER, sourceContent, methodName, javaProjectInfo);
+		m_JavaExpressionInfo.createRelationship(inserter, initializer, nodeId, map, JavaExtractor.INITIALIZER, sourceContent, className, javaProjectInfo);
 		IVariableBinding binding = singleVarDec.resolveBinding();
 		m_JavaExpressionInfo.resolveMethodBinding(inserter, javaProjectInfo, nodeId, binding.getDeclaringMethod());
 		@SuppressWarnings("unchecked")
@@ -496,7 +504,7 @@ public class JavaStatementInfo {
 			for(Dimension element : list)
 			{
 				HashMap<String, Object> dmap = new HashMap<>();
-				dmap.put(JavaExtractor.BELONG_TO, methodName);
+				dmap.put(JavaExtractor.BELONG_TO, className);
 		    	dmap.put(JavaExtractor.CONTENT, sourceContent.substring(element.getStartPosition(),element.getStartPosition()+element.getLength()));
 				dmap.put(JavaExtractor.ROW_NO, sourceContent.substring(0, element.getStartPosition()).split("\n").length);
 				long dimensionId = inserter.createNode(dmap, JavaExtractor.DIMENSION);
@@ -505,7 +513,7 @@ public class JavaStatementInfo {
 				List<Annotation> annoList = element.annotations();
 				for(Annotation anno : annoList) 
 				{
-					long annoId = m_JavaExpressionInfo.createJavaExpressionNode(inserter, anno, sourceContent, methodName, javaProjectInfo);
+					long annoId = m_JavaExpressionInfo.createJavaExpressionNode(inserter, anno, sourceContent, className, javaProjectInfo);
 					if(annoId!=-1)
 						inserter.createRelationship(nodeId, annoId, JavaExtractor.HAVE_ANNOTATION, new HashMap<>());
 					else;
