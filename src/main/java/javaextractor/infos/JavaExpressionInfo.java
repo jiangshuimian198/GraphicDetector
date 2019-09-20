@@ -205,7 +205,7 @@ public class JavaExpressionInfo {
 						ITypeBinding[] typeBindings = anonymousClassDeclaration.resolveBinding().getTypeArguments();
 						for(ITypeBinding element : typeBindings)
 							resolveTypeBinding(inserter, javaProjectInfo, nodeId, element, JavaExtractor.TYPE_ARG_TYPE_BINDING);
-						innerMap.put(JavaExtractor.METHOD_NAME,methodName);
+						innerMap.put(JavaExtractor.BELONG_TO,methodName);
 						innerMap.put(JavaExtractor.CONTENT, sourceContent.substring(expression.getStartPosition(), expression.getStartPosition()+expression.getLength()));
 						innerMap.put(JavaExtractor.ROW_NO, sourceContent.substring(0, expression.getStartPosition()).split("\n").length);					
 						long anonymousClassId = inserter.createNode(innerMap, JavaExtractor.ANONYMOUS_CLASS);
@@ -222,11 +222,12 @@ public class JavaExpressionInfo {
 						        boolean isStatic = Modifier.isStatic(element.getModifiers());
 						        boolean isFinal = Modifier.isFinal(fieldDeclaration.getModifiers());
 						        String comment = fieldDeclaration.getJavadoc() == null ? "" : sourceContent.substring(fieldDeclaration.getJavadoc().getStartPosition(), fieldDeclaration.getJavadoc().getStartPosition() + fieldDeclaration.getJavadoc().getLength());
+						        int rowNo = sourceContent.substring(0, fieldDeclaration.getStartPosition()).split("\n").length;
 						        fieldDeclaration.fragments().forEach(n -> {
 						            VariableDeclarationFragment fragment = (VariableDeclarationFragment) n;
 						            String name = fragment.getName().getFullyQualifiedName();
 						            String fullName = methodName + classInstanceCreation.getType().toString() + "." + name;
-						            JavaFieldInfo fieldInfo = new JavaFieldInfo(inserter, name, fullName, type, visibility, isStatic, isFinal, comment, methodName, fullType);
+						            JavaFieldInfo fieldInfo = new JavaFieldInfo(inserter, name, fullName, type, visibility, isStatic, isFinal, comment, rowNo, methodName, fullType);
 						            inserter.createRelationship(anonymousClassId, fieldInfo.getNodeId(), JavaExtractor.HAVE_FIELD, new HashMap<>());
 						        });
 							}
@@ -650,7 +651,7 @@ public class JavaExpressionInfo {
 					String identifier = simpleName.getIdentifier();
 					map.put(JavaExtractor.IDENTIFIER, identifier);
 					nodeId = createNode(inserter, map);
-					
+										
 //					IBinding binding = simpleName.resolveBinding();
 //					if(binding != null)
 //						resolveTypeBinding(inserter, javaProjectInfo, nodeId, binding);			
@@ -829,7 +830,7 @@ public class JavaExpressionInfo {
 	private static void addCommonProperties(HashMap<String, Object> map, Expression expression, String expressionType, String methodName, String codeContent) {
 		// TODO Auto-generated method stub
 		map.put(JavaExtractor.EXPRESSION_TYPE, expressionType);
-		map.put(JavaExtractor.METHOD_NAME,methodName);
+		map.put(JavaExtractor.BELONG_TO,methodName);
 		map.put(JavaExtractor.CONTENT, codeContent.substring(expression.getStartPosition(), expression.getStartPosition()+expression.getLength()));
 		map.put(JavaExtractor.ROW_NO, codeContent.substring(0, expression.getStartPosition()).split("\n").length);
 	}

@@ -18,12 +18,7 @@ public class Neo4jDriver {
 		return result;
 	}
 	
-	public void registerShutdownHook(){
-        Runtime.getRuntime().addShutdownHook(new Thread(){
-            @Override
-            public void run(){
-                graphDb.shutdown();
-            }
-        });
+	public void shutdown(){
+        graphDb.shutdown();
     }
 }

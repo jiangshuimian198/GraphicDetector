@@ -80,7 +80,7 @@ public class JavaStatementVisitor extends ASTVisitor{
         for (MethodDeclaration methodDeclaration : methodDeclarations) {
             JavaMethodInfo javaMethodInfo = createJavaMethodInfo(methodDeclaration, NameResolver.getFullName(node));
             if (javaMethodInfo != null) {
-		        List<Long> infos = createJavaStatementInfos(methodDeclaration,javaMethodInfo.getFullName());
+		        List<Long> infos = createJavaStatementInfos(methodDeclaration,javaMethodInfo.getBelongTo());
 		    	if(infos != null) {
 		            for(Long info : infos)
 		        	{
@@ -111,6 +111,7 @@ public class JavaStatementVisitor extends ASTVisitor{
         boolean isSynchronized = Modifier.isSynchronized(node.getModifiers());
         String content = sourceContent.substring(node.getStartPosition(), node.getStartPosition() + node.getLength());
         String comment = node.getJavadoc() == null ? "" : sourceContent.substring(node.getJavadoc().getStartPosition(), node.getJavadoc().getStartPosition() + node.getJavadoc().getLength());
+        int rowNo = sourceContent.substring(0, node.getStartPosition()).split("\n").length;
         String params = String.join(", ", (List<String>) node.parameters().stream().map(n -> {
             SingleVariableDeclaration param = (SingleVariableDeclaration) n;
             return (Modifier.isFinal(param.getModifiers()) ? "final " : "") + param.getType().toString() + " " + param.getName().getFullyQualifiedName();
@@ -125,7 +126,7 @@ public class JavaStatementVisitor extends ASTVisitor{
         StringBuilder fullVariables = new StringBuilder();
         StringBuilder fieldAccesses = new StringBuilder();
         JavaMethodInfo info = new JavaMethodInfo(inserter, name, identifier, fullName, returnType, visibility, isConstruct, isAbstract,
-                isFinal, isStatic, isSynchronized, content, comment, params, methodBinding,
+                isFinal, isStatic, isSynchronized, content, comment, rowNo, params, methodBinding,
                 fullReturnType, belongTo, fullParams, fullVariables.toString(), methodCalls, fieldAccesses.toString(), throwTypes);
         parseMethodBody(methodCalls, fullVariables, fieldAccesses, node.getBody());
         return info;

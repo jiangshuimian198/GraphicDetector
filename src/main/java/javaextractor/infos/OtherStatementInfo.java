@@ -43,7 +43,7 @@ public class OtherStatementInfo {
 	
 	protected void addProperties() {
         map.put(JavaExtractor.STATEMENT_TYPE, statementType);
-        map.put(JavaExtractor.METHOD_NAME, belongTo);
+        map.put(JavaExtractor.BELONG_TO, belongTo);
     }
 	
 }

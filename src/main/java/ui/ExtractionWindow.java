@@ -8,8 +8,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Map;
-
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -19,7 +17,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import main.java.detector.Detector;
-import main.java.detector.UnsafeDateFormat;
 import main.java.extractor.KnowledgeExtractor;
 
 public class ExtractionWindow {
@@ -178,11 +175,7 @@ public class ExtractionWindow {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-					
-					//Demo
-					Detector detector = new UnsafeDateFormat(graphDirectory.getText());
-					Map<String, Object> map = detector.detect();
-					System.out.println(map.values());
+					Detector.exec(graphDirectory.getText());
 				}
 			}
 		});
