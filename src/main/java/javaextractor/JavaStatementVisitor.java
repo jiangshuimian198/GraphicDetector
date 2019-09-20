@@ -1,6 +1,7 @@
 package main.java.javaextractor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -78,7 +79,7 @@ public class JavaStatementVisitor extends ASTVisitor{
 	{
 		MethodDeclaration[] methodDeclarations = node.getMethods();
         for (MethodDeclaration methodDeclaration : methodDeclarations) {
-            JavaMethodInfo javaMethodInfo = createJavaMethodInfo(methodDeclaration, NameResolver.getFullName(node));
+            JavaMethodInfo javaMethodInfo = createJavaMethodInfo(methodDeclaration, NameResolver.getFullName(node), javaProjectInfo);
             if (javaMethodInfo != null) {
 		        List<Long> infos = createJavaStatementInfos(methodDeclaration,javaMethodInfo.getBelongTo());
 		    	if(infos != null) {
@@ -94,7 +95,7 @@ public class JavaStatementVisitor extends ASTVisitor{
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static JavaMethodInfo createJavaMethodInfo(MethodDeclaration node, String belongTo) {
+	public static JavaMethodInfo createJavaMethodInfo(MethodDeclaration node, String belongTo, JavaProjectInfo javaProjectInfo2) {
         IMethodBinding methodBinding = node.resolveBinding();
         if (methodBinding == null)
             return null;
@@ -128,6 +129,11 @@ public class JavaStatementVisitor extends ASTVisitor{
         JavaMethodInfo info = new JavaMethodInfo(inserter, name, identifier, fullName, returnType, visibility, isConstruct, isAbstract,
                 isFinal, isStatic, isSynchronized, content, comment, rowNo, params, methodBinding,
                 fullReturnType, belongTo, fullParams, fullVariables.toString(), methodCalls, fieldAccesses.toString(), throwTypes);
+        List<SingleVariableDeclaration> paramDecs = node.parameters();
+        for(SingleVariableDeclaration param : paramDecs) {
+        	long paramId = m_JavaStatementInfo.createSingleVarDeclarationNode(inserter, javaProjectInfo2, belongTo, sourceContent, param);
+        	inserter.createRelationship(info.getNodeId(), paramId, JavaExtractor.HAVE_PARAM, new HashMap<>());
+        }
         parseMethodBody(methodCalls, fullVariables, fieldAccesses, node.getBody());
         return info;
     }
