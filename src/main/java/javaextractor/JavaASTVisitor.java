@@ -114,11 +114,12 @@ public class JavaASTVisitor extends ASTVisitor {
         boolean isStatic = Modifier.isStatic(node.getModifiers());
         boolean isFinal = Modifier.isFinal(node.getModifiers());
         String comment = node.getJavadoc() == null ? "" : sourceContent.substring(node.getJavadoc().getStartPosition(), node.getJavadoc().getStartPosition() + node.getJavadoc().getLength());
+        int rowNo = sourceContent.substring(0, node.getStartPosition()).split("\n").length;
         node.fragments().forEach(n -> {
             VariableDeclarationFragment fragment = (VariableDeclarationFragment) n;
             String name = fragment.getName().getFullyQualifiedName();
             String fullName = belongTo + "." + name;
-            r.add(new JavaFieldInfo(inserter, name, fullName, type, visibility, isStatic, isFinal, comment, belongTo, fullType));
+            r.add(new JavaFieldInfo(inserter, name, fullName, type, visibility, isStatic, isFinal, comment, rowNo, belongTo, fullType));
         });
         return r;
     }

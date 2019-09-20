@@ -7,28 +7,23 @@ import org.neo4j.graphdb.Result;
 
 import main.java.driver.Neo4jDriver;
 
-public class UnsafeDateFormat extends Detector{
+public class UnhandledCase extends Detector{
 	private Neo4jDriver dbDriver;
-	private static final String type = "线程不安全的DateFormat成员声明：静态常量";
-	private static final String defectPattern = "MATCH (n:Field) "
-			+ "WHERE n.isStatic = true AND n.isFinal = true AND n.varialbleType = 'DateFormat' "
-			+ "RETURN n.belongTo, n.rowNo";
+	private static final String type = "不完整的switch语句：无default case";
+	private static final String defectPattern = "MATCH (n:Statement) "
+			+ "WHERE n.statementType=\"SwitchStatement\" AND n.haveDefaultCase=false "
+			+ "return n.belongTo, n.rowNo";
 
-	public UnsafeDateFormat() {
+	public UnhandledCase() {
 		dbDriver = super.getDbDriver();
 	}
-		
-	/**检测不安全的DateFormat成员声明
+	
+	/**检测不含default的switch语句
 	 * @author 柳沿河
 	 * @return 含有缺陷信息的Map对象
 	 */
 	@Override
 	public Map<String, Object> detect(){
-		//执行流程：
-		//1.调用dbDriver对象query方法执行cypher语句并获得结果
-		//2.调用父类putDefectxxx方法向Map对象中添加缺陷信息
-		//3.关闭数据库连接
-		//4.返回Map对象
 		Map<String, Object> map = new HashMap<>();
 		Result result = dbDriver.query(defectPattern, map);
 		if(result != null && result.hasNext()) {
@@ -41,8 +36,9 @@ public class UnsafeDateFormat extends Detector{
 			}
 		}
 		shutdown();
-		
+
 		return map;
 	}
+
 
 }

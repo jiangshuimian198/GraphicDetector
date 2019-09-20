@@ -141,7 +141,7 @@ public class JavaExtractor extends KnowledgeExtractor {
     public static final String IS_SYNCHRONIZED = "isSynchronized";
     public static final String SIMPLENAME_TYPE = "simpleNameType";
     public static final String STATEMENT_TYPE = "statementType";
-    public static final String METHOD_NAME = "mehtodName";
+    public static final String BELONG_TO = "belongTo";
     public static final String STATEMENT_NO = "statementNo";
     public static final String IF_CONDITION_NO = "ifConditionNo";
     public static final String EXPRESSION_TYPE = "expressionType";

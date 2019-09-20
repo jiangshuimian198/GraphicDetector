@@ -39,6 +39,8 @@ public class JavaMethodInfo {
     @Getter
     private String comment;
     @Getter
+    private int rowNo;
+    @Getter
     private String params;
 
     @Getter
@@ -63,7 +65,7 @@ public class JavaMethodInfo {
     private long nodeId;
 
     public JavaMethodInfo(BatchInserter inserter, String name, String identifier, String fullName, String returnType, String visibility, boolean isConstruct, boolean isAbstract,
-                          boolean isFinal, boolean isStatic, boolean isSynchronized, String content, String comment, String params, IMethodBinding methodBinding,
+                          boolean isFinal, boolean isStatic, boolean isSynchronized, String content, String comment, int rowNo, String params, IMethodBinding methodBinding,
                           String fullReturnType, String belongTo, String fullParams, String fullVariables, Set<IMethodBinding> methodCalls, String fieldAccesses, String throwTypes) {
         Preconditions.checkArgument(name != null);
         this.name = name;
@@ -82,6 +84,7 @@ public class JavaMethodInfo {
         this.content = content;
         Preconditions.checkArgument(comment != null);
         this.comment = comment;
+        this.rowNo = rowNo;
         Preconditions.checkArgument(params != null);
         this.params = params;
         Preconditions.checkArgument(methodBinding != null);
@@ -109,6 +112,7 @@ public class JavaMethodInfo {
         Map<String, Object> map = new HashMap<>();
         map.put(JavaExtractor.NAME, name);
         map.put(JavaExtractor.FULLNAME, fullName);
+        map.put(JavaExtractor.BELONG_TO, belongTo);
         map.put(JavaExtractor.RETURN_TYPE_STR, returnType);
         map.put(JavaExtractor.VISIBILITY, visibility);
         map.put(JavaExtractor.IS_CONSTRUCTOR, isConstruct);
@@ -118,6 +122,7 @@ public class JavaMethodInfo {
         map.put(JavaExtractor.IS_SYNCHRONIZED, isSynchronized);
         map.put(JavaExtractor.CONTENT, content);
         map.put(JavaExtractor.COMMENT, comment);
+        map.put(JavaExtractor.ROW_NO, rowNo);
         map.put(JavaExtractor.PARAM_TYPE_STR, params);
         return inserter.createNode(map, JavaExtractor.METHOD);
     }
