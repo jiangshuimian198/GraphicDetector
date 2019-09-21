@@ -1,6 +1,7 @@
 package main.java.detector;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.Map;
 
 import lombok.Getter;
@@ -25,13 +26,13 @@ public class Detector {
 	 */
 	public static void exec(String dbFilePath) {
 		//Demo
+		Map<String, Object> map = new HashMap<>();
 		Detector detector = new Detector(dbFilePath);
 		detector = new UnsafeDateFormat();
-		Map<String, Object> map = detector.detect();
-		for(String key : map.keySet())
-			System.out.println(key+":"+map.get(key));
+		detector.detect(map);
+		
 		detector = new UnhandledCase();
-		map = detector.detect();
+		detector.detect(map);
 		for(String key : map.keySet())
 			System.out.println(key+":"+map.get(key));
 	}
@@ -45,8 +46,7 @@ public class Detector {
 	 * @author 柳沿河
 	 * @return 含有缺陷信息的Map对象
 	 */
-	public Map<String, Object> detect(){
-		return null;
+	public void detect(Map<String, Object> map){
 	}
 	
 	/**

@@ -170,6 +170,7 @@ public class JavaExtractor extends KnowledgeExtractor {
 	public static final String IS_DECLARATION = "isDeclaration";
 	public static final String IS_VAR = "isVar";
 	public static final String HAVE_DEFAULT_CASE = "haveDefaultCase";
+	public static final String METHOD_NAME = "methodName";
 	
     @Override
     public boolean isBatchInsert() {
