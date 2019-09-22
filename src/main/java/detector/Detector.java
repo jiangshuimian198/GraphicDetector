@@ -1,7 +1,9 @@
 package main.java.detector;
 
 import java.io.File;
-import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import lombok.Getter;
@@ -26,15 +28,23 @@ public class Detector {
 	 */
 	public static void exec(String dbFilePath) {
 		//Demo
-		Map<String, Object> map = new HashMap<>();
+		List<Map<String, Object>> mapList = new LinkedList<>();
 		Detector detector = new Detector(dbFilePath);
 		detector = new UnsafeDateFormat();
-		detector.detect(map);
+		mapList.add(detector.detect());
 		
 		detector = new UnhandledCase();
-		detector.detect(map);
-		for(String key : map.keySet())
-			System.out.println(key+":"+map.get(key));
+		mapList.add(detector.detect());
+		
+		detector = new UnreliableEquivalentComparison();
+		mapList.add(detector.detect());
+		
+		Iterator<Map<String, Object>> map = mapList.iterator();
+		while(map.hasNext()) {
+			if(!map.next().isEmpty())
+				for(String key : map.next().keySet())
+					System.out.println(key+":"+map.next().get(key));
+		}
 	}
 	
 	protected void shutdown()
@@ -46,7 +56,8 @@ public class Detector {
 	 * @author 柳沿河
 	 * @return 含有缺陷信息的Map对象
 	 */
-	public void detect(Map<String, Object> map){
+	public Map<String, Object> detect(){
+		return null;
 	}
 	
 	/**

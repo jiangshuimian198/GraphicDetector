@@ -1,5 +1,6 @@
 package main.java.detector;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.neo4j.graphdb.Result;
@@ -22,8 +23,9 @@ public class UnhandledCase extends Detector{
 	 * @return 含有缺陷信息的Map对象
 	 */
 	@Override
-	public void detect(Map<String, Object> map){
-		Result result = dbDriver.query(defectPattern, map);
+	public Map<String, Object> detect(){
+		Map<String, Object> map = new HashMap<>();
+		Result result = dbDriver.query(defectPattern, new HashMap<>());
 		if(result != null && result.hasNext()) {
 			putDefectType(map, type);
 			while(result.hasNext()) {
@@ -34,5 +36,6 @@ public class UnhandledCase extends Detector{
 			}
 		}
 		shutdown();
+		return map;
 	}
 }

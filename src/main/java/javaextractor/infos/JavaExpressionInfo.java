@@ -327,12 +327,19 @@ public class JavaExpressionInfo {
 				{
 					expressionType = "InfixExpression";
 					addCommonProperties(map, expression, expressionType, className, sourceContent);
+					InfixExpression infixExpression = (InfixExpression)expression;
+					map.put(JavaExtractor.HAVE_EXTENDED_OPRDS, infixExpression.hasExtendedOperands());
 					nodeId = createNode(inserter, map);
 					
-					InfixExpression prefixExpression = (InfixExpression)expression;
-					Expression leftOperand = prefixExpression.getLeftOperand();
-					Expression rightOperand = prefixExpression.getRightOperand();
-					InfixExpression.Operator operator = prefixExpression.getOperator();
+					if(infixExpression.hasExtendedOperands()) {
+						List<Expression> extendedOprds = infixExpression.extendedOperands();
+						for(Expression element : extendedOprds)
+	//						System.out.println(element.toString());
+							createRelationship(inserter, element, nodeId, new HashMap<>(), JavaExtractor.EXTENDED_OPERAND, sourceContent, className, javaProjectInfo);
+					}
+					Expression leftOperand = infixExpression.getLeftOperand();
+					Expression rightOperand = infixExpression.getRightOperand();
+					InfixExpression.Operator operator = infixExpression.getOperator();
 					long oprtId = createJavaInfixOperatorNode(inserter, operator);
 					inserter.createRelationship(nodeId, oprtId, JavaExtractor.INFIX, new HashMap<>());
 					createRelationship(inserter, leftOperand, nodeId, new HashMap<>(), JavaExtractor.LEFT_OPERAND, sourceContent, className, javaProjectInfo);
@@ -633,6 +640,7 @@ public class JavaExpressionInfo {
 					expressionType = "QualifiedName";
 					addCommonProperties(map, expression, expressionType, className, sourceContent);
 					QualifiedName qualifiedName = (QualifiedName)expression;
+					map.put(JavaExtractor.DECLARED_TYPE, qualifiedName.resolveTypeBinding().getName());
 					map.put(JavaExtractor.IDENTIFIER, qualifiedName.getName().getIdentifier());
 					map.put(JavaExtractor.QUALIFIER, qualifiedName.getQualifier().toString());
 					nodeId = createNode(inserter, map);
@@ -647,6 +655,7 @@ public class JavaExpressionInfo {
 					expressionType = "SimpleName";
 					addCommonProperties(map, expression, expressionType, className, sourceContent);
 					SimpleName simpleName = (SimpleName)expression;
+					map.put(JavaExtractor.DECLARED_TYPE, simpleName.resolveTypeBinding().getName());
 					map.put(JavaExtractor.IS_DECLARATION, simpleName.isDeclaration());
 					map.put(JavaExtractor.IS_VAR, simpleName.isVar());
 					String identifier = simpleName.getIdentifier();
