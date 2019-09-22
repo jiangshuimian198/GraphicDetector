@@ -121,6 +121,8 @@ public class JavaExtractor extends KnowledgeExtractor {
 	public static final RelationshipType ARRAY_TYPE_BINDING = RelationshipType.withName("arrayTypeBinding");
 	public static final RelationshipType ARRAY_ELEMENT_TYPE_BINDING = RelationshipType.withName("arrayElementTypeBinding");
 	public static final RelationshipType INSTANCE_OF_TYPE_BINDING = RelationshipType.withName("instanceOfTypeBinding");
+	public static final RelationshipType EXTENDED_OPERAND = RelationshipType.withName("extendedOprd");
+
 
     //属性类型
     public static final String NAME = "name";
@@ -171,6 +173,7 @@ public class JavaExtractor extends KnowledgeExtractor {
 	public static final String IS_VAR = "isVar";
 	public static final String HAVE_DEFAULT_CASE = "haveDefaultCase";
 	public static final String METHOD_NAME = "methodName";
+	public static final String HAVE_EXTENDED_OPRDS = "haveExtendedOprds";
 	
     @Override
     public boolean isBatchInsert() {

@@ -55,6 +55,7 @@ public class JavaASTVisitor extends ASTVisitor {
         
         FieldDeclaration[] fieldDeclarations = node.getFields();
         for (FieldDeclaration fieldDeclaration : fieldDeclarations) {
+//        	fieldDeclaration.
             List<JavaFieldInfo> javaFieldInfos = createJavaFieldInfos(fieldDeclaration, javaClassInfo.getFullName());
             for (JavaFieldInfo javaFieldInfo : javaFieldInfos)
                 {

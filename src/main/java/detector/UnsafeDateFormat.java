@@ -1,5 +1,6 @@
 package main.java.detector;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.neo4j.graphdb.Result;
@@ -22,11 +23,13 @@ public class UnsafeDateFormat extends Detector{
 	 * @return 含有缺陷信息的Map对象
 	 */
 	@Override
-	public void detect(Map<String, Object> map){
+	public Map<String, Object> detect(){
 		//执行流程：
 		//1.调用dbDriver对象query方法执行cypher语句并获得结果
 		//2.调用父类putDefectxxx方法向Map对象中添加缺陷信息
 		//3.关闭数据库连接
+		//4.返回map对象
+		Map<String, Object> map = new HashMap<>();
 		Result result = dbDriver.query(defectPattern, map);
 		if(result != null && result.hasNext()) {
 			putDefectType(map, type);
@@ -38,7 +41,7 @@ public class UnsafeDateFormat extends Detector{
 			}
 		}
 		shutdown();
-		
+		return map;
 	}
 
 }
