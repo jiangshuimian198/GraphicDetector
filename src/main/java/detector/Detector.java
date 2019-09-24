@@ -1,7 +1,6 @@
 package main.java.detector;
 
 import java.io.File;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -28,23 +27,24 @@ public class Detector {
 	 */
 	public static void exec(String dbFilePath) {
 		//Demo
-		List<Map<String, Object>> mapList = new LinkedList<>();
+		List<List<Map<String, Object>>> mapListList = new LinkedList<>();
 		Detector detector = new Detector(dbFilePath);
 		detector = new UnsafeDateFormat();
-		mapList.add(detector.detect());
+		mapListList.add(detector.detect());
 		
 		detector = new UnhandledCase();
-		mapList.add(detector.detect());
+		mapListList.add(detector.detect());
 		
 		detector = new UnreliableEquivalentComparison();
-		mapList.add(detector.detect());
+		mapListList.add(detector.detect());
 		
-		Iterator<Map<String, Object>> map = mapList.iterator();
-		while(map.hasNext()) {
-			if(!map.next().isEmpty())
-				for(String key : map.next().keySet())
-					System.out.println(key+":"+map.next().get(key));
-		}
+		detector = new UnsafeResourceReallocation();
+		mapListList.add(detector.detect());
+		
+		for(List<Map<String, Object>> list : mapListList)
+			for(Map<String, Object> map : list) 
+				for(String key : map.keySet())
+					System.out.println(key+":"+map.get(key));
 	}
 	
 	protected void shutdown()
@@ -56,7 +56,7 @@ public class Detector {
 	 * @author 柳沿河
 	 * @return 含有缺陷信息的Map对象
 	 */
-	public Map<String, Object> detect(){
+	public List<Map<String, Object>> detect(){
 		return null;
 	}
 	
