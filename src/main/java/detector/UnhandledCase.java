@@ -10,8 +10,9 @@ import main.java.driver.Neo4jDriver;
 public class UnhandledCase extends Detector{
 	private Neo4jDriver dbDriver;
 	private static final String type = "不完整的switch语句：无default case";
-	private static final String defectPattern = "MATCH (n:Statement{statementType:'SwitchStatement', haveDefaultCase:false}) "
-			+ "RETURN n.belongTo, n.rowNo";
+	private static final String defectPattern = "MATCH (n:Statement) "
+			+ "WHERE n.statementType=\"SwitchStatement\" AND n.haveDefaultCase=false "
+			+ "return n.belongTo, n.rowNo";
 
 	public UnhandledCase() {
 		dbDriver = super.getDbDriver();

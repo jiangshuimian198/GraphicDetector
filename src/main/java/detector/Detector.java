@@ -39,16 +39,11 @@ public class Detector {
 		detector = new UnreliableEquivalentComparison();
 		mapList.add(detector.detect());
 		
-		detector = new UnsafeResourceReallocation();
-		mapList.add(detector.detect());
-		
-		Iterator<Map<String, Object>> it = mapList.iterator();
-		while(it.hasNext()) {
-			Map<String, Object> curMap = it.next();
-			if(!curMap.isEmpty()) {
-				for(String key : curMap.keySet())
-					System.out.println(key+":"+curMap.get(key));
-			}
+		Iterator<Map<String, Object>> map = mapList.iterator();
+		while(map.hasNext()) {
+			if(!map.next().isEmpty())
+				for(String key : map.next().keySet())
+					System.out.println(key+":"+map.next().get(key));
 		}
 	}
 	
