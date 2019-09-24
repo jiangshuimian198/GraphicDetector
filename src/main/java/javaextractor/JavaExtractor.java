@@ -137,7 +137,7 @@ public class JavaExtractor extends KnowledgeExtractor {
     public static final String COMMENT = "comment";
     public static final String CONTENT = "content";
     public static final String RETURN_TYPE_STR = "returnType";
-    public static final String VAR_TYPE_STR = "variableType";
+    public static final String VAR_TYPE_STR = "varialbleType";
     public static final String PARAM_TYPE_STR = "paramentType";
     public static final String IS_CONSTRUCTOR = "isConstructor";
     public static final String IS_STATIC = "isStatic";
