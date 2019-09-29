@@ -204,6 +204,7 @@ public class JavaExpressionInfo {
 						HashMap<String, Object> innerMap = new HashMap<>();
 						innerMap.put(JavaExtractor.SUPER_CLASS, anonymousClassDeclaration.resolveBinding().getSuperclass().getQualifiedName());
 						ITypeBinding[] typeBindings = anonymousClassDeclaration.resolveBinding().getTypeArguments();
+//						System.out.println(anonymousClassDeclaration.resolveBinding());
 						for(ITypeBinding element : typeBindings)
 							resolveTypeBinding(inserter, javaProjectInfo, nodeId, element, JavaExtractor.TYPE_ARG_TYPE_BINDING);
 						innerMap.put(JavaExtractor.BELONG_TO,className);
@@ -228,14 +229,17 @@ public class JavaExpressionInfo {
 						            VariableDeclarationFragment fragment = (VariableDeclarationFragment) n;
 						            String name = fragment.getName().getFullyQualifiedName();
 						            String fullName = className + classInstanceCreation.getType().toString() + "." + name;
-						            JavaFieldInfo fieldInfo = new JavaFieldInfo(inserter, name, fullName, type, visibility, isStatic, isFinal, comment, rowNo, className, fullType);
+						            Expression fieldFrag = fragment.getInitializer();
+						            JavaFieldInfo fieldInfo = new JavaFieldInfo(inserter, name, fullName, type, visibility, isStatic, isFinal, comment, rowNo, className + classInstanceCreation.getType().toString(), fullType);
+						            long fragId = createJavaExpressionNode(inserter, fieldFrag, sourceContent, className, javaProjectInfo);
 						            inserter.createRelationship(anonymousClassId, fieldInfo.getNodeId(), JavaExtractor.HAVE_FIELD, new HashMap<>());
+						            inserter.createRelationship(fieldInfo.getNodeId(), fragId, JavaExtractor.INITIALIZER, new HashMap<>());
 						        });
 							}
 							else if(element.getNodeType() == ASTNode.METHOD_DECLARATION)
 							{
 								MethodDeclaration methodDeclaration = (MethodDeclaration)element;
-								JavaMethodInfo methodInfo = JavaStatementVisitor.createJavaMethodInfo(methodDeclaration, className, javaProjectInfo);
+								JavaMethodInfo methodInfo = JavaStatementVisitor.createJavaMethodInfo(inserter, methodDeclaration, className, javaProjectInfo, sourceContent);
 								inserter.createRelationship(anonymousClassId, methodInfo.getNodeId(), JavaExtractor.HAVE_METHOD, new HashMap<>());
 								List<Statement> statementList = methodDeclaration.getBody().statements();
 								for(Statement statement : statementList)
