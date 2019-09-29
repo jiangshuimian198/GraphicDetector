@@ -12,6 +12,7 @@ public class JavaUnsafeNullEqualsSinceJava7 extends JavaDetector{
 	private static final String type = "[提示] 版本问题：“Objects.equals()”方法仅适用于Java7及之后的版本";
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 	private static final String defectPattern = "MATCH(exp:Expression{expressionType:\"MethodInvocation\", methodName:\"equals\"})-[:invocatedBy]->(obj:Expression{content:\"Objects\"}) "
 =======
 	private static final String defectPattern = "MATCH(exp:Expression{expressionType:'MethodInvocation', methodName:'equals'})-[:invocatedBy]->(obj:Expression{content:'Objects'}) "
@@ -19,6 +20,9 @@ public class JavaUnsafeNullEqualsSinceJava7 extends JavaDetector{
 =======
 	private static final String defectPattern = "MATCH(exp:Expression{expressionType:'MethodInvocation', methodName:'equals'})-[:invocatedBy]->(obj:Expression{content:'Objects'}) "
 >>>>>>> parent of 2903fac... Revert "v1.0"
+=======
+	private static final String defectPattern = "MATCH(exp:Expression{expressionType:\"MethodInvocation\", methodName:\"equals\"})-[:invocatedBy]->(obj:Expression{content:\"Objects\"}) "
+>>>>>>> parent of cdf4fe8... ...
 			+ "RETURN exp.belongTo, exp.rowNo";
 	
 	public JavaUnsafeNullEqualsSinceJava7() {

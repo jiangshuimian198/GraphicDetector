@@ -14,6 +14,7 @@ public class JavaUnnecessaryBoxingOfNumber extends JavaDetector{
 	private static final String type = "不必要的拆箱：建议使用XXX.parseXXX()方法，如Integer.parseInt()";
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 	private static final String defectPattern = "MATCH (exp:Expression)-[:invocatedBy]->(exp2:Expression{methodName:\"valueOf\"})-[:invocatedBy]->(exp3:Expression)"
 =======
 	private static final String defectPattern = "MATCH (exp:Expression)-[:invocatedBy]->(exp2:Expression{methodName:'valueOf'})-[:invocatedBy]->(exp3:Expression)"
@@ -21,6 +22,9 @@ public class JavaUnnecessaryBoxingOfNumber extends JavaDetector{
 =======
 	private static final String defectPattern = "MATCH (exp:Expression)-[:invocatedBy]->(exp2:Expression{methodName:'valueOf'})-[:invocatedBy]->(exp3:Expression)"
 >>>>>>> parent of 2903fac... Revert "v1.0"
+=======
+	private static final String defectPattern = "MATCH (exp:Expression)-[:invocatedBy]->(exp2:Expression{methodName:\"valueOf\"})-[:invocatedBy]->(exp3:Expression)"
+>>>>>>> parent of cdf4fe8... ...
 			+ " WHERE exp.methodName IN ['longValue','byteValue','doubleValue','floatValue','intValue','shortValue']"
 			+ " AND exp3.content IN ['Long','Byte','Double','Float','Integer','Short']"
 			+ " RETURN exp.belongTo,exp.rowNo";

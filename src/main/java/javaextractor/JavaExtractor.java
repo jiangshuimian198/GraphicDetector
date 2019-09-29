@@ -174,7 +174,6 @@ public class JavaExtractor extends KnowledgeExtractor {
 	public static final String HAVE_DEFAULT_CASE = "haveDefaultCase";
 	public static final String METHOD_NAME = "methodName";
 	public static final String HAVE_EXTENDED_OPRDS = "haveExtendedOprds";
-	public static final String TYPE_PARAMS = "typeParameters";
 	
     @Override
     public boolean isBatchInsert() {

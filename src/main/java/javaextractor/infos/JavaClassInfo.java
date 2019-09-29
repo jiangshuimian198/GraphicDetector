@@ -34,10 +34,8 @@ public class JavaClassInfo {
     private String superInterfaceTypes;
     @Getter
     private long nodeId;
-    @Getter
-	private String[] typeParameters;
 
-    public JavaClassInfo(BatchInserter inserter, String name, String fullName, boolean isInterface, String visibility, boolean isAbstract, boolean isFinal, String comment, String content, String superClassType, String superInterfaceTypes, String[] typeParameters) {
+    public JavaClassInfo(BatchInserter inserter, String name, String fullName, boolean isInterface, String visibility, boolean isAbstract, boolean isFinal, String comment, String content, String superClassType, String superInterfaceTypes) {
         Preconditions.checkArgument(name != null);
         this.name = name;
         Preconditions.checkArgument(fullName != null);
@@ -58,7 +56,6 @@ public class JavaClassInfo {
         nodeId = createNode(inserter);
         this.content = null;
         this.comment = null;
-        this.typeParameters = typeParameters;
     }
 
     private long createNode(BatchInserter inserter) {
@@ -71,7 +68,6 @@ public class JavaClassInfo {
         map.put(JavaExtractor.IS_FINAL, isFinal);
         map.put(JavaExtractor.COMMENT, comment);
         map.put(JavaExtractor.CONTENT, content);
-        map.put(JavaExtractor.TYPE_PARAMS, typeParameters);
         return inserter.createNode(map, JavaExtractor.CLASS);
     }
 
