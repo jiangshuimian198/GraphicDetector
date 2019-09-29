@@ -16,8 +16,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import main.java.detector.Detector;
 import main.java.extractor.KnowledgeExtractor;
-import main.java.javadetector.JavaDetector;
 
 public class ExtractionWindow {
 
@@ -175,7 +175,7 @@ public class ExtractionWindow {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-					JavaDetector.exec(graphDirectory.getText());
+					Detector.exec(graphDirectory.getText());
 				}
 			}
 		});

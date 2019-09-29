@@ -4,11 +4,10 @@ import org.eclipse.jdt.core.dom.*;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 
 import main.java.javaextractor.infos.JavaClassInfo;
-import main.java.javaextractor.infos.JavaExpressionInfo;
 import main.java.javaextractor.infos.JavaFieldInfo;
-import main.java.javaextractor.infos.JavaMethodInfo;
 import main.java.javaextractor.infos.JavaPackageInfo;
 import main.java.javaextractor.infos.JavaProjectInfo;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +19,6 @@ public class JavaASTVisitor extends ASTVisitor {
     private String sourceContent;
     private BatchInserter inserter;
     private static ArrayList<String> visitedClassNodeList = new ArrayList<>();
-    private static JavaExpressionInfo m_JavaExpressionInfo = new JavaExpressionInfo();
 
     public JavaASTVisitor(JavaProjectInfo javaProjectInfo, String sourceContent, BatchInserter inserter) {
         this.javaProjectInfo = javaProjectInfo;
@@ -52,11 +50,12 @@ public class JavaASTVisitor extends ASTVisitor {
     
     @Override
     public boolean visit(TypeDeclaration node) {
-        JavaClassInfo javaClassInfo = createJavaClassInfo(node, false);
+        JavaClassInfo javaClassInfo = createJavaClassInfo(node);
         javaProjectInfo.addClassInfo(javaClassInfo);
         
         FieldDeclaration[] fieldDeclarations = node.getFields();
         for (FieldDeclaration fieldDeclaration : fieldDeclarations) {
+//        	fieldDeclaration.
             List<JavaFieldInfo> javaFieldInfos = createJavaFieldInfos(fieldDeclaration, javaClassInfo.getFullName());
             for (JavaFieldInfo javaFieldInfo : javaFieldInfos)
                 {
@@ -67,17 +66,22 @@ public class JavaASTVisitor extends ASTVisitor {
         return false;
     }
 
-	private JavaClassInfo createJavaClassInfo(TypeDeclaration node, boolean isInner) {
+	private JavaClassInfo createJavaClassInfo(TypeDeclaration node) {
         String name = node.getName().getFullyQualifiedName();
-        String fullName = NameResolver.getFullName(node);
+        String fullName;
         @SuppressWarnings("unchecked")
 		List<TypeParameter> typeParameterList = node.typeParameters();
-        String[] typeParameters = new String[typeParameterList.size()];
-        if(!typeParameterList .isEmpty()) 
-	        for(int i = 0; i<typeParameterList.size(); i++)
-	        	typeParameters[i] = typeParameterList.get(i).toString();
-//        else
-//        	fullName = NameResolver.getFullName(node);
+        if(!typeParameterList .isEmpty()) {
+	        String typeParameters = "<";
+	        for(TypeParameter element : typeParameterList)
+	        {
+	        	typeParameters+=element.toString()+",";
+	        }
+	        typeParameters = typeParameters.substring(0, typeParameters.length()-1)+">";
+	        fullName = NameResolver.getFullName(node) + typeParameters;
+        }
+        else
+        	fullName = NameResolver.getFullName(node);
         boolean isInterface = node.isInterface();
         String visibility = JavaASTVisitor.getVisibility(node.getModifiers());
         boolean isAbstract = Modifier.isAbstract(node.getModifiers());
@@ -87,7 +91,7 @@ public class JavaASTVisitor extends ASTVisitor {
         String superClassType = node.getSuperclassType() == null ? "java.lang.Object" : NameResolver.getFullName(node.getSuperclassType());
         @SuppressWarnings("unchecked")
 		String superInterfaceTypes = String.join(", ", (List<String>) node.superInterfaceTypes().stream().map(n -> NameResolver.getFullName((Type) n)).collect(Collectors.toList()));
-        JavaClassInfo classInfo = new JavaClassInfo(inserter, name, fullName, isInterface, visibility, isAbstract, isFinal, comment, content, superClassType, superInterfaceTypes, typeParameters);
+        JavaClassInfo classInfo = new JavaClassInfo(inserter, name, fullName, isInterface, visibility, isAbstract, isFinal, comment, content, superClassType, superInterfaceTypes);
         @SuppressWarnings("unchecked")
 		List<BodyDeclaration> bodyDeclarationList = node.bodyDeclarations();
         for(BodyDeclaration element : bodyDeclarationList)
@@ -95,20 +99,8 @@ public class JavaASTVisitor extends ASTVisitor {
         	if(element.getNodeType() == ASTNode.TYPE_DECLARATION)
         	{
         		TypeDeclaration innerClassDeclaration = (TypeDeclaration)element;
-        		JavaClassInfo innerClassInfo = createJavaClassInfo(innerClassDeclaration, true);
-        		javaProjectInfo.addClassInfo(innerClassInfo);
+        		JavaClassInfo innerClassInfo = createJavaClassInfo(innerClassDeclaration);
         		inserter.createRelationship(classInfo.getNodeId(), innerClassInfo.getNodeId(), JavaExtractor.HAVE_CLASS, new HashMap<>());
-        	}
-        	else if(element.getNodeType() == ASTNode.METHOD_DECLARATION && isInner)
-        	{
-        		JavaMethodInfo methodInfo = JavaStatementVisitor.createJavaMethodInfo(inserter, (MethodDeclaration)element, fullName, javaProjectInfo, sourceContent);
-        		javaProjectInfo.addMethodInfo(methodInfo);
-        	}
-        	else if(element.getNodeType() == ASTNode.FIELD_DECLARATION && isInner) {
-        		List<JavaFieldInfo> fieldInfos = createJavaFieldInfos((FieldDeclaration)element, fullName);
-        		for(JavaFieldInfo info : fieldInfos) {
-        			javaProjectInfo.addFieldInfo(info);
-        		}
         	}
         }
         return classInfo;
@@ -128,11 +120,7 @@ public class JavaASTVisitor extends ASTVisitor {
             VariableDeclarationFragment fragment = (VariableDeclarationFragment) n;
             String name = fragment.getName().getFullyQualifiedName();
             String fullName = belongTo + "." + name;
-            Expression fieldFragInit = fragment.getInitializer();
-            JavaFieldInfo fieldInfo = new JavaFieldInfo(inserter, name, fullName, type, visibility, isStatic, isFinal, comment, rowNo, belongTo, fullType);
-            long fragId = m_JavaExpressionInfo.createJavaExpressionNode(inserter, fieldFragInit, sourceContent, belongTo, javaProjectInfo);
-            inserter.createRelationship(fieldInfo.getNodeId(), fragId, JavaExtractor.INITIALIZER, new HashMap<>());
-            r.add(fieldInfo);
+            r.add(new JavaFieldInfo(inserter, name, fullName, type, visibility, isStatic, isFinal, comment, rowNo, belongTo, fullType));
         });
         return r;
     }
