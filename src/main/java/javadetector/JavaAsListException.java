@@ -15,7 +15,11 @@ public class JavaAsListException extends JavaDetector{
 	private Neo4jDriver dbDriver;
 	private static final String type = "可能出现空指针异常，原因是：\"Arrays.asList(null)\"会导致一个空指针异常。建议改为\"Arrays.toString()\"，这样将安全地返回null";
 <<<<<<< HEAD
+<<<<<<< HEAD
 	private static final String defectPattern = "MATCH(throwCode:Statement{statementType:\"ThrowStatement\"})-[*]->(asListCode:Expression{methodName:\"asList\"})-[:invocatedBy]->(arraysCode:Expression{content:\"Arrays\"}) "
+=======
+	private static final String defectPattern = "MATCH(throwCode:Statement{statementType:'ThrowStatement'})-[*]->(asListCode:Expression{methodName:'asList'})-[:invocatedBy]->(arraysCode:Expression{content:'Arrays'}) "
+>>>>>>> parent of 2903fac... Revert "v1.0"
 =======
 	private static final String defectPattern = "MATCH(throwCode:Statement{statementType:'ThrowStatement'})-[*]->(asListCode:Expression{methodName:'asList'})-[:invocatedBy]->(arraysCode:Expression{content:'Arrays'}) "
 >>>>>>> parent of 2903fac... Revert "v1.0"

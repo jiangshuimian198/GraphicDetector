@@ -11,7 +11,11 @@ public class JavaUnsafeNullCompare extends JavaDetector{
 	// 由于主要采取匹配错误模式的方法，因此这里仅提示有可能是缺陷
 	private static final String type = "[提示] 可能出现空指针异常：请检查compareTo方法的调用对象和参数是否为空";
 <<<<<<< HEAD
+<<<<<<< HEAD
 	private static final String defectPattern = "MATCH(e:Expression{methodName:\"compareTo\"}) "
+=======
+	private static final String defectPattern = "MATCH(e:Expression{methodName:'compareTo'}) "
+>>>>>>> parent of 2903fac... Revert "v1.0"
 =======
 	private static final String defectPattern = "MATCH(e:Expression{methodName:'compareTo'}) "
 >>>>>>> parent of 2903fac... Revert "v1.0"

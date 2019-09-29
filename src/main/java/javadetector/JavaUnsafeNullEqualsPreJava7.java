@@ -12,8 +12,13 @@ public class JavaUnsafeNullEqualsPreJava7 extends JavaDetector{
 	// 由于主要采取匹配错误模式的方法，因此这里仅提示有可能是缺陷
 	private static final String type = "[提示] 可能出现空指针异常：使用“a.equals(b)”方法请确认之前有对“a==null || b==null”的检查。此方法多适用于Java7之前的版本，Java之后的版本建议改为“Objects.equals()”";
 <<<<<<< HEAD
+<<<<<<< HEAD
 	private static final String defectPattern = "MATCH(e:Expression{methodName:\"equals\"})-[:invocatedBy]->(n:Expression) "
 			+ "WHERE n.content <> \"Objects\" "
+=======
+	private static final String defectPattern = "MATCH(e:Expression{methodName:'equals'})-[:invocatedBy]->(n:Expression) "
+			+ "WHERE n.content <> 'Objects' "
+>>>>>>> parent of 2903fac... Revert "v1.0"
 =======
 	private static final String defectPattern = "MATCH(e:Expression{methodName:'equals'})-[:invocatedBy]->(n:Expression) "
 			+ "WHERE n.content <> 'Objects' "
