@@ -137,7 +137,7 @@ public class JavaExtractor extends KnowledgeExtractor {
     public static final String COMMENT = "comment";
     public static final String CONTENT = "content";
     public static final String RETURN_TYPE_STR = "returnType";
-    public static final String VAR_TYPE_STR = "varialbleType";
+    public static final String VAR_TYPE_STR = "variableType";
     public static final String PARAM_TYPE_STR = "paramentType";
     public static final String IS_CONSTRUCTOR = "isConstructor";
     public static final String IS_STATIC = "isStatic";
@@ -174,6 +174,7 @@ public class JavaExtractor extends KnowledgeExtractor {
 	public static final String HAVE_DEFAULT_CASE = "haveDefaultCase";
 	public static final String METHOD_NAME = "methodName";
 	public static final String HAVE_EXTENDED_OPRDS = "haveExtendedOprds";
+	public static final String TYPE_PARAMS = "typeParameters";
 	
     @Override
     public boolean isBatchInsert() {

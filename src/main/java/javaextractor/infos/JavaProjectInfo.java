@@ -68,6 +68,7 @@ public class JavaProjectInfo {
             findJavaClassInfo(classInfo.getSuperInterfaceTypes()).forEach(superInterfaceInfo -> inserter.createRelationship(classInfo.getNodeId(), superInterfaceInfo.getNodeId(), JavaExtractor.IMPLEMENT, new HashMap<>()));
         });
         methodInfoMap.values().forEach(methodInfo -> {
+        	System.out.println("method:"+methodInfo.getFullName());
             findJavaClassInfo(methodInfo.getBelongTo()).forEach(owner -> inserter.createRelationship(owner.getNodeId(), methodInfo.getNodeId(), JavaExtractor.HAVE_METHOD, new HashMap<>()));
             findJavaClassInfo(methodInfo.getFullParams()).forEach(param -> inserter.createRelationship(methodInfo.getNodeId(), param.getNodeId(), JavaExtractor.PARAM_TYPE, new HashMap<>()));
             findJavaClassInfo(methodInfo.getFullReturnType()).forEach(rt -> inserter.createRelationship(methodInfo.getNodeId(), rt.getNodeId(), JavaExtractor.RETURN_TYPE, new HashMap<>()));
