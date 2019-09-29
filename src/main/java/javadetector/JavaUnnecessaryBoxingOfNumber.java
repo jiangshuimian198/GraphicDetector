@@ -12,7 +12,11 @@ public class JavaUnnecessaryBoxingOfNumber extends JavaDetector{
 	//不考虑调用a.valueOf().bValue()中a和b是否相等，直接推荐使用parseB方法
 	private Neo4jDriver dbDriver;
 	private static final String type = "不必要的拆箱：建议使用XXX.parseXXX()方法，如Integer.parseInt()";
+<<<<<<< HEAD
 	private static final String defectPattern = "MATCH (exp:Expression)-[:invocatedBy]->(exp2:Expression{methodName:\"valueOf\"})-[:invocatedBy]->(exp3:Expression)"
+=======
+	private static final String defectPattern = "MATCH (exp:Expression)-[:invocatedBy]->(exp2:Expression{methodName:'valueOf'})-[:invocatedBy]->(exp3:Expression)"
+>>>>>>> parent of 2903fac... Revert "v1.0"
 			+ " WHERE exp.methodName IN ['longValue','byteValue','doubleValue','floatValue','intValue','shortValue']"
 			+ " AND exp3.content IN ['Long','Byte','Double','Float','Integer','Short']"
 			+ " RETURN exp.belongTo,exp.rowNo";

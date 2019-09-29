@@ -1,31 +1,30 @@
 package main.java.javadetector;
-import java.util.ArrayList; 
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.neo4j.graphdb.Result;
+
 import main.java.driver.Neo4jDriver;
 
-public class JavaUnsafeNullCompare extends JavaDetector{
+public class JavaLackOverrideFunction extends JavaDetector{
 	private Neo4jDriver dbDriver;
-	// 由于主要采取匹配错误模式的方法，因此这里仅提示有可能是缺陷
-	private static final String type = "[提示] 可能出现空指针异常：请检查compareTo方法的调用对象和参数是否为空";
-<<<<<<< HEAD
-	private static final String defectPattern = "MATCH(e:Expression{methodName:\"compareTo\"}) "
-=======
-	private static final String defectPattern = "MATCH(e:Expression{methodName:'compareTo'}) "
->>>>>>> parent of 2903fac... Revert "v1.0"
-			+ "RETURN e.belongTo,e.rowNo"; 
-	
-	public JavaUnsafeNullCompare() {
+	private static final String type = "此类覆盖compareTo()但未覆盖equals()或未覆盖hashCode()";
+	private static final String defectPattern = "MATCH (n:Class),(m:Method{name:'compareTo'}),(w:Method{name:'equals'}),(x:Method{name:'hashCode'}) "
+			+"WHERE (n)-[:haveMethod]->(m) AND NOT (n)-[:haveMethod]->(w) AND NOT (n)-[:haveMethod]->(x)"
+			+ "RETURN n.belongTo, n.rowNo";
+
+	public JavaLackOverrideFunction() {
 		dbDriver = super.getDbDriver();
 	}
 	
-	/**
-	 * 提示使用.conpareTo方法前检查其调用对象和参数是null的情况
-	 * @author 丁婧伊
+	/**检测覆盖compareTo()但未覆盖equals()或未覆盖hashCode()的类
+	 * @author 孙天琪
 	 * @return 含有缺陷信息的Map对象
 	 */
+	@Override
 	public List<Map<String, Object>> detect(){
 		List<Map<String, Object>> mapList = new ArrayList<>();
 		Result result = dbDriver.query(defectPattern, new HashMap<>());
@@ -44,5 +43,3 @@ public class JavaUnsafeNullCompare extends JavaDetector{
 		return mapList;
 	}
 }
-
-

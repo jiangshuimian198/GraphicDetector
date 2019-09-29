@@ -96,7 +96,7 @@ public class JavaStatementVisitor extends ASTVisitor{
 	
 	@SuppressWarnings("unchecked")
 	public static JavaMethodInfo createJavaMethodInfo(MethodDeclaration node, String belongTo, JavaProjectInfo javaProjectInfo2) {
-        IMethodBinding methodBinding = node.resolveBinding();
+		IMethodBinding methodBinding = node.resolveBinding();
         if (methodBinding == null)
             return null;
         String name = node.getName().getFullyQualifiedName();
@@ -133,6 +133,51 @@ public class JavaStatementVisitor extends ASTVisitor{
         for(SingleVariableDeclaration param : paramDecs) {
         	long paramId = m_JavaStatementInfo.createSingleVarDeclarationNode(inserter, javaProjectInfo2, belongTo, sourceContent, param);
         	inserter.createRelationship(info.getNodeId(), paramId, JavaExtractor.HAVE_PARAM, new HashMap<>());
+        }
+        parseMethodBody(methodCalls, fullVariables, fieldAccesses, node.getBody());
+        return info;
+    }
+	
+	@SuppressWarnings("unchecked")
+	public static JavaMethodInfo createJavaMethodInfo(BatchInserter _inserter, MethodDeclaration node, String belongTo, JavaProjectInfo javaProjectInfo2, String _sourceContent) 
+	{
+		IMethodBinding methodBinding = node.resolveBinding();
+        if (methodBinding == null)
+            return null;
+        String name = node.getName().getFullyQualifiedName();
+        String identifier = node.getName().getIdentifier();
+        Type type = node.getReturnType2();
+        String returnType = type == null ? "void" : type.toString();
+        String fullReturnType = NameResolver.getFullName(type);
+        String visibility = getVisibility(node.getModifiers());
+        boolean isConstruct = node.isConstructor();
+        boolean isAbstract = Modifier.isAbstract(node.getModifiers());
+        boolean isFinal = Modifier.isFinal(node.getModifiers());
+        boolean isStatic = Modifier.isStatic(node.getModifiers());
+        boolean isSynchronized = Modifier.isSynchronized(node.getModifiers());
+        String content = _sourceContent.substring(node.getStartPosition(), node.getStartPosition() + node.getLength());
+        String comment = node.getJavadoc() == null ? "" : _sourceContent.substring(node.getJavadoc().getStartPosition(), node.getJavadoc().getStartPosition() + node.getJavadoc().getLength());
+        int rowNo = _sourceContent.substring(0, node.getStartPosition()).split("\n").length;
+        String params = String.join(", ", (List<String>) node.parameters().stream().map(n -> {
+            SingleVariableDeclaration param = (SingleVariableDeclaration) n;
+            return (Modifier.isFinal(param.getModifiers()) ? "final " : "") + param.getType().toString() + " " + param.getName().getFullyQualifiedName();
+        }).collect(Collectors.toList()));
+        String fullName = belongTo + "." + name + "( " + params + " )";
+        String fullParams = String.join(", ", (List<String>) node.parameters().stream().map(n -> {
+            SingleVariableDeclaration param = (SingleVariableDeclaration) n;
+            return NameResolver.getFullName(param.getType());
+        }).collect(Collectors.toList()));
+        String throwTypes = String.join(", ", (List<String>) node.thrownExceptionTypes().stream().map(n -> NameResolver.getFullName((Type) n)).collect(Collectors.toList()));
+        Set<IMethodBinding> methodCalls = new HashSet<>();
+        StringBuilder fullVariables = new StringBuilder();
+        StringBuilder fieldAccesses = new StringBuilder();
+        JavaMethodInfo info = new JavaMethodInfo(_inserter, name, identifier, fullName, returnType, visibility, isConstruct, isAbstract,
+                isFinal, isStatic, isSynchronized, content, comment, rowNo, params, methodBinding,
+                fullReturnType, belongTo, fullParams, fullVariables.toString(), methodCalls, fieldAccesses.toString(), throwTypes);
+        List<SingleVariableDeclaration> paramDecs = node.parameters();
+        for(SingleVariableDeclaration param : paramDecs) {
+        	long paramId = m_JavaStatementInfo.createSingleVarDeclarationNode(_inserter, javaProjectInfo2, belongTo, _sourceContent, param);
+        	_inserter.createRelationship(info.getNodeId(), paramId, JavaExtractor.HAVE_PARAM, new HashMap<>());
         }
         parseMethodBody(methodCalls, fullVariables, fieldAccesses, node.getBody());
         return info;
