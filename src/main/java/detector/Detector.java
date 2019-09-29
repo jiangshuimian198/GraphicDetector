@@ -60,20 +60,20 @@ public class Detector {
 		return null;
 	}
 	
-	/**
+	/**添加缺陷类型信息
 	 * @author 柳沿河
 	 * @param map：存放缺陷信息的映射
-	 * @param type：缺陷类型描述
+	 * @param type：缺陷类型信息
 	 */
 	public void putDefectType(Map<String, Object> map, Object type)
 	{
 		map.put("type", type);
 	}
 	
-	/**
+	/**添加缺陷位置信息
 	 * @author 柳沿河
 	 * @param map：存放缺陷信息的映射
-	 * @param location：缺陷位置信息，精良精确到语句或表达式，格式为'所在方法全名'+':'+'代码行号'，语句块的缺陷填第一条语句所在行号
+	 * @param location：缺陷位置信息
 	 */
 	public void putDefectLocation(Map<String, Object> map, Object location)
 	{
@@ -83,7 +83,7 @@ public class Detector {
 			map.put("rowNo", location);
 	}
 	
-	/**
+	/**添加其他缺陷属性信息
 	 * @author 柳沿河
 	 * @param map：存放缺陷信息的映射
 	 * @param prop：其他缺陷的属性，如严重程度、优先级等，后续更新
