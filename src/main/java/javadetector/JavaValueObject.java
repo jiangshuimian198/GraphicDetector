@@ -1,4 +1,4 @@
-package main.java.detector;
+package main.java.javadetector;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,17 +9,20 @@ import org.neo4j.graphdb.Result;
 
 import main.java.driver.Neo4jDriver;
 
-public class UnsafeDateFormat extends Detector{
+public class JavaValueObject  extends JavaDetector{
 	private Neo4jDriver dbDriver;
-	private static final String type = "线程不安全的DateFormat成员声明：静态常量";
-	private static final String defectPattern = "MATCH (n:Field{isStatic:true, isFinal:true, variableType:'DateFormat'}) "
-			+ "RETURN n.belongTo, n.rowNo";
+	private static final String type = "compareTo() and equals() should be consistent此处无equals()的重构， hashCode() and equals() must always be consistent此处无hashCode重构";
+	private static final String defectPattern = "MATCH (n:Class)-[:haveMethod]-(m:Method{name:'compareTo'}) " + 
+			"MATCH (w:Method{name:'equals'}) WHERE NOT (n)-[:haveMethod]-(w)  "+
+			"MATCH (y:Method{name:'hashCode'}) WHERE NOT (n)-[:haveMethod]-(y)"+
+			" return m.belongTo, m.rowNo" ;
+			
 
-	public UnsafeDateFormat() {
+	public JavaValueObject() {
 		dbDriver = super.getDbDriver();
 	}
-		
-	/**检测不安全的DateFormat成员声明
+	
+	/**检测不含default的switch语句
 	 * @author 柳沿河
 	 * @return 含有缺陷信息的Map对象
 	 */
@@ -41,5 +44,5 @@ public class UnsafeDateFormat extends Detector{
 		shutdown();
 		return mapList;
 	}
-
+	
 }

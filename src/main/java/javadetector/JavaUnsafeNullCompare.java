@@ -1,29 +1,27 @@
-package main.java.detector;
-
-import java.util.ArrayList;
+package main.java.javadetector;
+import java.util.ArrayList; 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.neo4j.graphdb.Result;
-
 import main.java.driver.Neo4jDriver;
 
-public class UnsafeDateFormat extends Detector{
+public class JavaUnsafeNullCompare extends JavaDetector{
 	private Neo4jDriver dbDriver;
-	private static final String type = "线程不安全的DateFormat成员声明：静态常量";
-	private static final String defectPattern = "MATCH (n:Field{isStatic:true, isFinal:true, variableType:'DateFormat'}) "
-			+ "RETURN n.belongTo, n.rowNo";
-
-	public UnsafeDateFormat() {
+	// 由于主要采取匹配错误模式的方法，因此这里仅提示有可能是缺陷
+	private static final String type = "[提示] 可能出现空指针异常：请检查compareTo方法的调用对象和参数是否为空";
+	private static final String defectPattern = "MATCH(e:Expression{methodName:\"compareTo\"}) "
+			+ "RETURN e.belongTo,e.rowNo"; 
+	
+	public JavaUnsafeNullCompare() {
 		dbDriver = super.getDbDriver();
 	}
-		
-	/**检测不安全的DateFormat成员声明
-	 * @author 柳沿河
+	
+	/**
+	 * 提示使用.conpareTo方法前检查其调用对象和参数是null的情况
+	 * @author 丁婧伊
 	 * @return 含有缺陷信息的Map对象
 	 */
-	@Override
 	public List<Map<String, Object>> detect(){
 		List<Map<String, Object>> mapList = new ArrayList<>();
 		Result result = dbDriver.query(defectPattern, new HashMap<>());
@@ -41,5 +39,6 @@ public class UnsafeDateFormat extends Detector{
 		shutdown();
 		return mapList;
 	}
-
 }
+
+

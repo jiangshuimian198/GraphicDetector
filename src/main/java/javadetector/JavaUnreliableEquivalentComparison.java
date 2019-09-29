@@ -1,4 +1,4 @@
-package main.java.detector;
+package main.java.javadetector;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,17 +9,18 @@ import org.neo4j.graphdb.Result;
 
 import main.java.driver.Neo4jDriver;
 
-public class UnsafeDateFormat extends Detector{
+public class JavaUnreliableEquivalentComparison extends JavaDetector{
 	private Neo4jDriver dbDriver;
-	private static final String type = "线程不安全的DateFormat成员声明：静态常量";
-	private static final String defectPattern = "MATCH (n:Field{isStatic:true, isFinal:true, variableType:'DateFormat'}) "
-			+ "RETURN n.belongTo, n.rowNo";
+	private static final String type = "不可靠的等值判断：equals()参数可能非字符串对象，建议对参数String.valueOf()处理";
+	private static final String defectPattern = "MATCH p=(a)<-[:haveArgument]-(e:Expression{methodName:'equals'})-[:invocatedBy]->(s{declaredType:'String'}) "
+			+ "WHERE NOT a.content=~'String.valueof(.*)' "
+			+ "RETURN e.belongTo, e.rowNo";
 
-	public UnsafeDateFormat() {
+	public JavaUnreliableEquivalentComparison() {
 		dbDriver = super.getDbDriver();
 	}
-		
-	/**检测不安全的DateFormat成员声明
+	
+	/**检测含有不可靠字符串等值判断的表达式
 	 * @author 柳沿河
 	 * @return 含有缺陷信息的Map对象
 	 */

@@ -1,4 +1,4 @@
-package main.java.detector;
+package main.java.javadetector;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -8,17 +8,18 @@ import java.util.Map;
 import lombok.Getter;
 import main.java.driver.Neo4jDriver;
 
-public class Detector {
+public class JavaDetector {
 	@Getter
 	private Neo4jDriver dbDriver;
+	
 	private static String dbFilePath;
 	
-	public Detector() {
+	public JavaDetector() {
 		dbDriver = new Neo4jDriver(new File(dbFilePath));
 	}
 	
-	public Detector(String dbFilePath) {
-		Detector.dbFilePath = dbFilePath;
+	public JavaDetector(String dbFilePath) {
+		JavaDetector.dbFilePath = dbFilePath;
 	}
 	
 	/**执行各个检测
@@ -28,17 +29,17 @@ public class Detector {
 	public static void exec(String dbFilePath) {
 		//Demo
 		List<List<Map<String, Object>>> mapListList = new LinkedList<>();
-		Detector detector = new Detector(dbFilePath);
-		detector = new UnsafeDateFormat();
+		JavaDetector detector = new JavaDetector(dbFilePath);
+		detector = new JavaUnsafeDateFormat();
 		mapListList.add(detector.detect());
 		
-		detector = new UnhandledCase();
+		detector = new JavaUnhandledCase();
 		mapListList.add(detector.detect());
 		
-		detector = new UnreliableEquivalentComparison();
+		detector = new JavaUnreliableEquivalentComparison();
 		mapListList.add(detector.detect());
 		
-		detector = new UnsafeResourceReallocation();
+		detector = new JavaUnsafeResourceReallocation();
 		mapListList.add(detector.detect());
 		
 		for(List<Map<String, Object>> list : mapListList)

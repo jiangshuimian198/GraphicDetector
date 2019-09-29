@@ -1,4 +1,4 @@
-package main.java.detector;
+package main.java.javadetector;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,17 +9,17 @@ import org.neo4j.graphdb.Result;
 
 import main.java.driver.Neo4jDriver;
 
-public class UnsafeDateFormat extends Detector{
+public class JavaUnhandledCase extends JavaDetector{
 	private Neo4jDriver dbDriver;
-	private static final String type = "线程不安全的DateFormat成员声明：静态常量";
-	private static final String defectPattern = "MATCH (n:Field{isStatic:true, isFinal:true, variableType:'DateFormat'}) "
+	private static final String type = "不完整的switch语句：无default case";
+	private static final String defectPattern = "MATCH (n:Statement{statementType:'SwitchStatement', haveDefaultCase:false}) "
 			+ "RETURN n.belongTo, n.rowNo";
 
-	public UnsafeDateFormat() {
+	public JavaUnhandledCase() {
 		dbDriver = super.getDbDriver();
 	}
-		
-	/**检测不安全的DateFormat成员声明
+	
+	/**检测不含default的switch语句
 	 * @author 柳沿河
 	 * @return 含有缺陷信息的Map对象
 	 */
@@ -41,5 +41,4 @@ public class UnsafeDateFormat extends Detector{
 		shutdown();
 		return mapList;
 	}
-
 }

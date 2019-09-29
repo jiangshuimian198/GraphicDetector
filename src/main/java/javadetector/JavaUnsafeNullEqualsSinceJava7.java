@@ -1,29 +1,27 @@
-package main.java.detector;
-
-import java.util.ArrayList;
+package main.java.javadetector;
+import java.util.ArrayList; 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.neo4j.graphdb.Result;
-
 import main.java.driver.Neo4jDriver;
 
-public class UnsafeDateFormat extends Detector{
-	private Neo4jDriver dbDriver;
-	private static final String type = "线程不安全的DateFormat成员声明：静态常量";
-	private static final String defectPattern = "MATCH (n:Field{isStatic:true, isFinal:true, variableType:'DateFormat'}) "
-			+ "RETURN n.belongTo, n.rowNo";
+public class JavaUnsafeNullEqualsSinceJava7 extends JavaDetector{
 
-	public UnsafeDateFormat() {
+	private Neo4jDriver dbDriver;
+	private static final String type = "[提示] 版本问题：“Objects.equals()”方法仅适用于Java7及之后的版本";
+	private static final String defectPattern = "MATCH(exp:Expression{expressionType:\"MethodInvocation\", methodName:\"equals\"})-[:invocatedBy]->(obj:Expression{content:\"Objects\"}) "
+			+ "RETURN exp.belongTo, exp.rowNo";
+	
+	public JavaUnsafeNullEqualsSinceJava7() {
 		dbDriver = super.getDbDriver();
 	}
-		
-	/**检测不安全的DateFormat成员声明
-	 * @author 柳沿河
+	
+	/**
+	 * 提示Java7之后才能用Objects.equals(o1,o2)方法
+	 * @author 丁婧伊
 	 * @return 含有缺陷信息的Map对象
 	 */
-	@Override
 	public List<Map<String, Object>> detect(){
 		List<Map<String, Object>> mapList = new ArrayList<>();
 		Result result = dbDriver.query(defectPattern, new HashMap<>());
@@ -41,5 +39,6 @@ public class UnsafeDateFormat extends Detector{
 		shutdown();
 		return mapList;
 	}
-
 }
+
+

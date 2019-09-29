@@ -1,5 +1,7 @@
-package main.java.detector;
-
+/**
+ * 
+ */
+package main.java.javadetector;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,22 +10,22 @@ import java.util.Map;
 import org.neo4j.graphdb.Result;
 
 import main.java.driver.Neo4jDriver;
-
-public class UnsafeDateFormat extends Detector{
+ 
+public class JavaAsListException extends JavaDetector{
 	private Neo4jDriver dbDriver;
-	private static final String type = "线程不安全的DateFormat成员声明：静态常量";
-	private static final String defectPattern = "MATCH (n:Field{isStatic:true, isFinal:true, variableType:'DateFormat'}) "
-			+ "RETURN n.belongTo, n.rowNo";
+	private static final String type = "可能出现空指针异常，原因是：\"Arrays.asList(null)\"会导致一个空指针异常。建议改为\"Arrays.toString()\"，这样将安全地返回null";
+	private static final String defectPattern = "MATCH(throwCode:Statement{statementType:\"ThrowStatement\"})-[*]->(asListCode:Expression{methodName:\"asList\"})-[:invocatedBy]->(arraysCode:Expression{content:\"Arrays\"}) "
+			+ "RETURN throwCode.belongTo,throwCode.rowNo";
 
-	public UnsafeDateFormat() {
+	public JavaAsListException() {
 		dbDriver = super.getDbDriver();
 	}
-		
-	/**检测不安全的DateFormat成员声明
-	 * @author 柳沿河
+	
+	/**
+	 * 检测throw语句中Arrays.asList()的参数是null导致空指针异常的缺陷
+	 * @author 丁婧伊
 	 * @return 含有缺陷信息的Map对象
 	 */
-	@Override
 	public List<Map<String, Object>> detect(){
 		List<Map<String, Object>> mapList = new ArrayList<>();
 		Result result = dbDriver.query(defectPattern, new HashMap<>());
@@ -41,5 +43,5 @@ public class UnsafeDateFormat extends Detector{
 		shutdown();
 		return mapList;
 	}
-
 }
+

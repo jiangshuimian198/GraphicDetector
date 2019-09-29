@@ -1,4 +1,4 @@
-package main.java.detector;
+package main.java.javadetector;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,13 +9,13 @@ import org.neo4j.graphdb.Result;
 
 import main.java.driver.Neo4jDriver;
 
-public class UnsafeDateFormat extends Detector{
+public class JavaUnsafeDateFormat extends JavaDetector{
 	private Neo4jDriver dbDriver;
 	private static final String type = "线程不安全的DateFormat成员声明：静态常量";
 	private static final String defectPattern = "MATCH (n:Field{isStatic:true, isFinal:true, variableType:'DateFormat'}) "
 			+ "RETURN n.belongTo, n.rowNo";
 
-	public UnsafeDateFormat() {
+	public JavaUnsafeDateFormat() {
 		dbDriver = super.getDbDriver();
 	}
 		
